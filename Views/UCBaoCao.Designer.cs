@@ -1,4 +1,3 @@
-using System.Drawing;
 using System.Windows.Forms;
 using Sunny.UI;
 using System.Windows.Forms.DataVisualization.Charting;
@@ -10,11 +9,7 @@ namespace DemoPick
         private System.ComponentModel.IContainer components = null;
 
         // Date Range Filter
-        public Label lblFilterFrom;
-        public UIDatePicker dtFilterFrom;
-        public Label lblFilterTo;
-        public UIDatePicker dtFilterTo;
-        public UIButton btnApplyFilter;
+        public UCDateRangeFilter dateFilter;
 
         // Top Cards
         public UIPanel pnlCard1;
@@ -64,11 +59,7 @@ namespace DemoPick
             this.lblC1Title = new System.Windows.Forms.Label();
             this.lblC1Badge = new System.Windows.Forms.Label();
             this.lblC1Value = new System.Windows.Forms.Label();
-            this.lblFilterFrom = new System.Windows.Forms.Label();
-            this.dtFilterFrom = new Sunny.UI.UIDatePicker();
-            this.lblFilterTo = new System.Windows.Forms.Label();
-            this.dtFilterTo = new Sunny.UI.UIDatePicker();
-            this.btnApplyFilter = new Sunny.UI.UIButton();
+            this.dateFilter = new DemoPick.UCDateRangeFilter();
             this.pnlCard2 = new Sunny.UI.UIPanel();
             this.lblC2Title = new System.Windows.Forms.Label();
             this.lblC2Badge = new System.Windows.Forms.Label();
@@ -148,85 +139,14 @@ namespace DemoPick
             this.lblC1Value.TabIndex = 2;
             this.lblC1Value.Text = "0đ";
             // 
-            // lblFilterFrom
+            // dateFilter
             // 
-            this.lblFilterFrom.AutoSize = true;
-            this.lblFilterFrom.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.lblFilterFrom.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(107)))), ((int)(((byte)(114)))), ((int)(((byte)(128)))));
-            this.lblFilterFrom.Location = new System.Drawing.Point(20, 12);
-            this.lblFilterFrom.Name = "lblFilterFrom";
-            this.lblFilterFrom.Size = new System.Drawing.Size(28, 20);
-            this.lblFilterFrom.TabIndex = 100;
-            this.lblFilterFrom.Text = "Từ";
-            // 
-            // dtFilterFrom
-            // 
-            this.dtFilterFrom.DateCultureInfo = new System.Globalization.CultureInfo("");
-            this.dtFilterFrom.FillColor = System.Drawing.Color.White;
-            this.dtFilterFrom.Font = new System.Drawing.Font("Segoe UI", 11F);
-            this.dtFilterFrom.Location = new System.Drawing.Point(55, 5);
-            this.dtFilterFrom.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.dtFilterFrom.MaxLength = 10;
-            this.dtFilterFrom.MinimumSize = new System.Drawing.Size(63, 0);
-            this.dtFilterFrom.Name = "dtFilterFrom";
-            this.dtFilterFrom.Padding = new System.Windows.Forms.Padding(0, 0, 30, 2);
-            this.dtFilterFrom.Size = new System.Drawing.Size(150, 32);
-            this.dtFilterFrom.SymbolDropDown = 61555;
-            this.dtFilterFrom.SymbolNormal = 61555;
-            this.dtFilterFrom.SymbolSize = 24;
-            this.dtFilterFrom.TabIndex = 101;
-            this.dtFilterFrom.Text = "2026-03-01";
-            this.dtFilterFrom.TextAlignment = System.Drawing.ContentAlignment.MiddleLeft;
-            this.dtFilterFrom.Value = new System.DateTime(2026, 3, 1, 0, 0, 0, 0);
-            this.dtFilterFrom.Watermark = "";
-            // 
-            // lblFilterTo
-            // 
-            this.lblFilterTo.AutoSize = true;
-            this.lblFilterTo.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.lblFilterTo.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(107)))), ((int)(((byte)(114)))), ((int)(((byte)(128)))));
-            this.lblFilterTo.Location = new System.Drawing.Point(215, 12);
-            this.lblFilterTo.Name = "lblFilterTo";
-            this.lblFilterTo.Size = new System.Drawing.Size(37, 20);
-            this.lblFilterTo.TabIndex = 102;
-            this.lblFilterTo.Text = "Đến";
-            // 
-            // dtFilterTo
-            // 
-            this.dtFilterTo.DateCultureInfo = new System.Globalization.CultureInfo("");
-            this.dtFilterTo.FillColor = System.Drawing.Color.White;
-            this.dtFilterTo.Font = new System.Drawing.Font("Segoe UI", 11F);
-            this.dtFilterTo.Location = new System.Drawing.Point(260, 5);
-            this.dtFilterTo.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.dtFilterTo.MaxLength = 10;
-            this.dtFilterTo.MinimumSize = new System.Drawing.Size(63, 0);
-            this.dtFilterTo.Name = "dtFilterTo";
-            this.dtFilterTo.Padding = new System.Windows.Forms.Padding(0, 0, 30, 2);
-            this.dtFilterTo.Size = new System.Drawing.Size(150, 32);
-            this.dtFilterTo.SymbolDropDown = 61555;
-            this.dtFilterTo.SymbolNormal = 61555;
-            this.dtFilterTo.SymbolSize = 24;
-            this.dtFilterTo.TabIndex = 103;
-            this.dtFilterTo.Text = "2026-03-31";
-            this.dtFilterTo.TextAlignment = System.Drawing.ContentAlignment.MiddleLeft;
-            this.dtFilterTo.Value = new System.DateTime(2026, 3, 31, 10, 52, 37, 40);
-            this.dtFilterTo.Watermark = "";
-            // 
-            // btnApplyFilter
-            // 
-            this.btnApplyFilter.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnApplyFilter.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(76)))), ((int)(((byte)(175)))), ((int)(((byte)(80)))));
-            this.btnApplyFilter.FillHoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(86)))), ((int)(((byte)(185)))), ((int)(((byte)(90)))));
-            this.btnApplyFilter.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.btnApplyFilter.Location = new System.Drawing.Point(425, 5);
-            this.btnApplyFilter.MinimumSize = new System.Drawing.Size(1, 1);
-            this.btnApplyFilter.Name = "btnApplyFilter";
-            this.btnApplyFilter.Radius = 8;
-            this.btnApplyFilter.RectColor = System.Drawing.Color.Transparent;
-            this.btnApplyFilter.Size = new System.Drawing.Size(110, 32);
-            this.btnApplyFilter.TabIndex = 104;
-            this.btnApplyFilter.Text = "Áp dụng";
-            this.btnApplyFilter.TipsFont = new System.Drawing.Font("Microsoft Sans Serif", 9F);
+            this.dateFilter.BackColor = System.Drawing.Color.Transparent;
+            this.dateFilter.Location = new System.Drawing.Point(20, 0);
+            this.dateFilter.Mode = DemoPick.UCDateRangeFilter.DateFilterMode.Range;
+            this.dateFilter.Name = "dateFilter";
+            this.dateFilter.Size = new System.Drawing.Size(540, 39);
+            this.dateFilter.TabIndex = 100;
             // 
             // pnlCard2
             // 
@@ -482,11 +402,7 @@ namespace DemoPick
             // 
             this.AutoScroll = true;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
-            this.Controls.Add(this.btnApplyFilter);
-            this.Controls.Add(this.dtFilterTo);
-            this.Controls.Add(this.lblFilterTo);
-            this.Controls.Add(this.dtFilterFrom);
-            this.Controls.Add(this.lblFilterFrom);
+            this.Controls.Add(this.dateFilter);
             this.Controls.Add(this.pnlCard1);
             this.Controls.Add(this.pnlCard2);
             this.Controls.Add(this.pnlCard3);
@@ -513,5 +429,6 @@ namespace DemoPick
             this.PerformLayout();
 
         }
+
     }
 }

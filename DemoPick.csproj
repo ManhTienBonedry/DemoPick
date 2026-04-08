@@ -37,6 +37,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="CuoreUI, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CuoreUI.Winforms.2026.1.16\lib\net472\CuoreUI.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Bcl.HashCode, Version=6.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.HashCode.6.0.0\lib\net462\Microsoft.Bcl.HashCode.dll</HintPath>
     </Reference>
@@ -209,6 +212,12 @@
     <Compile Include="Views\UCDatLich.Designer.cs">
       <DependentUpon>UCDatLich.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\Controls\UCDateRangeFilter.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\Controls\UCDateRangeFilter.Designer.cs">
+      <DependentUpon>UCDateRangeFilter.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\UCTongQuan.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -273,6 +282,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Views\UCDatLich.resx">
       <DependentUpon>UCDatLich.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Controls\UCDateRangeFilter.resx">
+      <DependentUpon>UCDateRangeFilter.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\UCKhoHang.resx">
       <DependentUpon>UCKhoHang.cs</DependentUpon>

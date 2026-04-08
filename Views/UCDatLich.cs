@@ -16,6 +16,8 @@ namespace DemoPick
         private DateTime _currentDate = DateTime.Now;
         private readonly DemoPick.Controllers.BookingController _controller = new DemoPick.Controllers.BookingController();
 
+        private UCDateRangeFilter DateFilter => dateFilter;
+
         private DemoPick.Models.BookingModel _selectedBooking;
 
         private sealed class BookingHitInfo
@@ -29,41 +31,27 @@ namespace DemoPick
         public UCDatLich()
         {
             InitializeComponent();
-            
-            // Setup Calendar
-            dtpCalendar.Value = _currentDate;
+
+            _currentDate = _currentDate.Date;
+
+            // Setup shared date filter (SingleDate mode)
+            DateFilter.SelectedDate = _currentDate;
             UpdateDateLabel();
-            
-            // Prevent user from typing text manually into the date picker
-            dtpCalendar.KeyPress += (s, e) => {
-                e.Handled = true;
-            };
-            dtpCalendar.KeyDown += (s, e) => {
-                if (e.KeyCode == Keys.Delete || e.KeyCode == Keys.Back)
+
+            DateFilter.SelectedDateChanged += (s, e) =>
+            {
+                try
                 {
-                    e.Handled = true;
-                    e.SuppressKeyPress = true;
+                    var selected = DateFilter.SelectedDate;
+                    if (selected == _currentDate.Date) return;
+                    _currentDate = selected;
+                    UpdateDateLabel();
+                    RefreshTimeline();
                 }
-            };
-            
-            btnPrevDay.Click += (s, e) => {
-                _currentDate = _currentDate.AddDays(-1);
-                dtpCalendar.Value = _currentDate;
-                UpdateDateLabel();
-                RefreshTimeline();
-            };
-            
-            btnNextDay.Click += (s, e) => {
-                _currentDate = _currentDate.AddDays(1);
-                dtpCalendar.Value = _currentDate;
-                UpdateDateLabel();
-                RefreshTimeline();
-            };
-            
-            dtpCalendar.ValueChanged += (s, e) => {
-                _currentDate = dtpCalendar.Value;
-                UpdateDateLabel();
-                RefreshTimeline();
+                catch
+                {
+                    // Ignore control exceptions
+                }
             };
 
             // Double buffered to prevent flickering when scrolling/drawing GDI grid

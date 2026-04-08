@@ -1,4 +1,3 @@
-using System.Drawing;
 using System.Windows.Forms;
 using Sunny.UI;
 
@@ -14,7 +13,6 @@ namespace DemoPick
         public System.Windows.Forms.Panel pnlLegend;
 
         public System.Windows.Forms.Label lblDate;
-        public System.Windows.Forms.DateTimePicker dtpCalendar;
 
         public UIButton btnDatNhanh;
         public UIButton btnDatCoDinh;
@@ -42,10 +40,8 @@ namespace DemoPick
         private void InitializeComponent()
         {
             this.pnlControlBar = new System.Windows.Forms.Panel();
-            this.dtpCalendar = new System.Windows.Forms.DateTimePicker();
             this.lblDate = new System.Windows.Forms.Label();
-            this.btnPrevDay = new Sunny.UI.UIButton();
-            this.btnNextDay = new Sunny.UI.UIButton();
+            this.dateFilter = new DemoPick.UCDateRangeFilter();
             this.btnDatNhanh = new Sunny.UI.UIButton();
             this.btnDatCoDinh = new Sunny.UI.UIButton();
             this.btnDoiCa = new Sunny.UI.UIButton();
@@ -68,10 +64,8 @@ namespace DemoPick
             // pnlControlBar
             // 
             this.pnlControlBar.BackColor = System.Drawing.Color.Transparent;
-            this.pnlControlBar.Controls.Add(this.dtpCalendar);
+            this.pnlControlBar.Controls.Add(this.dateFilter);
             this.pnlControlBar.Controls.Add(this.lblDate);
-            this.pnlControlBar.Controls.Add(this.btnPrevDay);
-            this.pnlControlBar.Controls.Add(this.btnNextDay);
             this.pnlControlBar.Controls.Add(this.btnDatNhanh);
             this.pnlControlBar.Controls.Add(this.btnDatCoDinh);
             this.pnlControlBar.Controls.Add(this.btnDoiCa);
@@ -80,16 +74,6 @@ namespace DemoPick
             this.pnlControlBar.Name = "pnlControlBar";
             this.pnlControlBar.Size = new System.Drawing.Size(1324, 80);
             this.pnlControlBar.TabIndex = 1;
-            // 
-            // dtpCalendar
-            // 
-            this.dtpCalendar.Font = new System.Drawing.Font("Segoe UI", 12F);
-            this.dtpCalendar.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-            this.dtpCalendar.Location = new System.Drawing.Point(424, 30);
-            this.dtpCalendar.Name = "dtpCalendar";
-            this.dtpCalendar.Size = new System.Drawing.Size(144, 35);
-            this.dtpCalendar.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.dtpCalendar.TabIndex = 0;
             // 
             // lblDate
             // 
@@ -102,41 +86,16 @@ namespace DemoPick
             this.lblDate.TabIndex = 0;
             this.lblDate.Text = "Đang tải lịch...";
             // 
-            // btnPrevDay
+            // dateFilter
             // 
-            this.btnPrevDay.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnPrevDay.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(243)))), ((int)(((byte)(244)))), ((int)(((byte)(246)))));
-            this.btnPrevDay.FillHoverColor = System.Drawing.Color.LightGray;
-            this.btnPrevDay.Font = new System.Drawing.Font("Segoe UI", 12F);
-            this.btnPrevDay.ForeColor = System.Drawing.Color.DimGray;
-            this.btnPrevDay.Location = new System.Drawing.Point(302, 30);
-            this.btnPrevDay.MinimumSize = new System.Drawing.Size(1, 1);
-            this.btnPrevDay.Name = "btnPrevDay";
-            this.btnPrevDay.Radius = 18;
-            this.btnPrevDay.RectColor = System.Drawing.Color.Transparent;
-            this.btnPrevDay.RectHoverColor = System.Drawing.Color.Transparent;
-            this.btnPrevDay.Size = new System.Drawing.Size(40, 35);
-            this.btnPrevDay.TabIndex = 1;
-            this.btnPrevDay.Text = "<";
-            this.btnPrevDay.TipsFont = new System.Drawing.Font("Microsoft Sans Serif", 9F);
+            this.dateFilter.BackColor = System.Drawing.Color.Transparent;
+            this.dateFilter.Location = new System.Drawing.Point(302, 28);
+            this.dateFilter.Mode = DemoPick.UCDateRangeFilter.DateFilterMode.SingleDate;
+            this.dateFilter.Name = "dateFilter";
+            this.dateFilter.Size = new System.Drawing.Size(260, 39);
+            this.dateFilter.TabIndex = 1;
             // 
-            // btnNextDay
-            // 
-            this.btnNextDay.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnNextDay.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(243)))), ((int)(((byte)(244)))), ((int)(((byte)(246)))));
-            this.btnNextDay.FillHoverColor = System.Drawing.Color.LightGray;
-            this.btnNextDay.Font = new System.Drawing.Font("Segoe UI", 12F);
-            this.btnNextDay.ForeColor = System.Drawing.Color.DimGray;
-            this.btnNextDay.Location = new System.Drawing.Point(348, 30);
-            this.btnNextDay.MinimumSize = new System.Drawing.Size(1, 1);
-            this.btnNextDay.Name = "btnNextDay";
-            this.btnNextDay.Radius = 18;
-            this.btnNextDay.RectColor = System.Drawing.Color.Transparent;
-            this.btnNextDay.RectHoverColor = System.Drawing.Color.Transparent;
-            this.btnNextDay.Size = new System.Drawing.Size(40, 35);
-            this.btnNextDay.TabIndex = 2;
-            this.btnNextDay.Text = ">";
-            this.btnNextDay.TipsFont = new System.Drawing.Font("Microsoft Sans Serif", 9F);
+            // btnDatNhanh
             // 
             this.btnDatNhanh.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnDatNhanh.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(204)))), ((int)(((byte)(113)))));
@@ -155,6 +114,8 @@ namespace DemoPick
             this.btnDatNhanh.TabIndex = 4;
             this.btnDatNhanh.Text = "+ Đặt sân nhanh";
             this.btnDatNhanh.TipsFont = new System.Drawing.Font("Microsoft Sans Serif", 9F);
+            // 
+            // btnDatCoDinh
             // 
             this.btnDatCoDinh.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnDatCoDinh.FillColor = System.Drawing.Color.White;
@@ -176,6 +137,8 @@ namespace DemoPick
             this.btnDatCoDinh.TabIndex = 5;
             this.btnDatCoDinh.Text = "📅 Đặt sân cố định";
             this.btnDatCoDinh.TipsFont = new System.Drawing.Font("Microsoft Sans Serif", 9F);
+            // 
+            // btnDoiCa
             // 
             this.btnDoiCa.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnDoiCa.FillColor = System.Drawing.Color.White;
@@ -203,8 +166,8 @@ namespace DemoPick
             this.pnlTimelineContainer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.pnlTimelineContainer.BackColor = System.Drawing.Color.White;
             this.pnlTimelineContainer.AutoScroll = true;
+            this.pnlTimelineContainer.BackColor = System.Drawing.Color.White;
             this.pnlTimelineContainer.Controls.Add(this.pnlCanvas);
             this.pnlTimelineContainer.Location = new System.Drawing.Point(25, 80);
             this.pnlTimelineContainer.Name = "pnlTimelineContainer";
@@ -214,7 +177,6 @@ namespace DemoPick
             // pnlCanvas
             // 
             this.pnlCanvas.BackColor = System.Drawing.Color.White;
-            this.pnlCanvas.Dock = System.Windows.Forms.DockStyle.None;
             this.pnlCanvas.Location = new System.Drawing.Point(0, 0);
             this.pnlCanvas.Name = "pnlCanvas";
             this.pnlCanvas.Size = new System.Drawing.Size(1274, 563);
@@ -343,7 +305,6 @@ namespace DemoPick
 
         }
 
-        public UIButton btnPrevDay;
-        public UIButton btnNextDay;
+        private UCDateRangeFilter dateFilter;
     }
 }

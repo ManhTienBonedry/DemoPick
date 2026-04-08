@@ -10,6 +10,9 @@
 *.sln.docstates
 .vscode/
 
+# Copilot / agent artifacts
+.agents/
+
 # NuGet
 packages/
 *.nupkg

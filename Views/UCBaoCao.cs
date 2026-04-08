@@ -12,6 +12,8 @@ namespace DemoPick
     {
         private ReportService _reportService;
 
+        private UCDateRangeFilter DateFilter => dateFilter;
+
         private static readonly Color KpiPositiveColor = Color.FromArgb(76, 175, 80);
         private static readonly Color KpiNegativeColor = Color.FromArgb(239, 68, 68);
         private static readonly Color KpiNeutralColor = Color.FromArgb(107, 114, 128);
@@ -30,12 +32,12 @@ namespace DemoPick
             {
                 var today = DateTime.Today;
                 var defaultFrom = today.AddDays(-6);
-                if (dtFilterFrom != null) { dtFilterFrom.Value = defaultFrom; dtFilterFrom.Text = defaultFrom.ToString("yyyy-MM-dd"); }
-                if (dtFilterTo != null) { dtFilterTo.Value = today; dtFilterTo.Text = today.ToString("yyyy-MM-dd"); }
 
-                if (btnApplyFilter != null)
+                if (DateFilter != null)
                 {
-                    btnApplyFilter.Click += async (s, e) => await ApplyFilterAsync();
+                    DateFilter.FromDate = defaultFrom;
+                    DateFilter.ToDate = today;
+                    DateFilter.ApplyClicked += async (s, e) => await ApplyFilterAsync();
                 }
             }
             catch
@@ -82,11 +84,12 @@ namespace DemoPick
 
         private async System.Threading.Tasks.Task ApplyFilterAsync()
         {
-            var from = dtFilterFrom?.Value.Date ?? DateTime.Today.AddDays(-6);
-            var to = dtFilterTo?.Value.Date ?? DateTime.Today;
-            if (from > to)
+            var from = DateFilter?.FromDate ?? DateTime.Today.AddDays(-6);
+            var to = DateFilter?.ToDate ?? DateTime.Today;
+
+            if (DateFilter != null && !DateFilter.ValidateRange(out var err))
             {
-                MessageBox.Show("Ngày 'Từ' phải nhỏ hơn hoặc bằng ngày 'Đến'.", "Khoảng thời gian không hợp lệ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(err, "Khoảng thời gian không hợp lệ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -95,8 +98,8 @@ namespace DemoPick
 
         private async System.Threading.Tasks.Task ReloadAsync()
         {
-            var from = dtFilterFrom?.Value.Date ?? DateTime.Today.AddDays(-6);
-            var to = dtFilterTo?.Value.Date ?? DateTime.Today;
+            var from = DateFilter?.FromDate ?? DateTime.Today.AddDays(-6);
+            var to = DateFilter?.ToDate ?? DateTime.Today;
             await ReloadAsync(from, to);
         }
 
@@ -106,20 +109,22 @@ namespace DemoPick
             DateTime toExclusive = toDateInclusive.Date.AddDays(1);
             int days = (int)(toDateInclusive.Date - fromDateInclusive.Date).TotalDays + 1;
 
-            if (btnApplyFilter != null) btnApplyFilter.Enabled = false;
+            if (DateFilter != null) DateFilter.ApplyEnabled = false;
             try
             {
-                var topCourts = await _reportService.GetTopCourtsAsync(fromStart, toExclusive);
-                lstTopCourts.Items.Clear();
-                foreach (var c in topCourts)
+                try
                 {
-                    lstTopCourts.Items.Add(new ListViewItem(new[] { $"   {c.CourtId}   {c.Name}", c.Type, c.Occupancy, c.Revenue }));
+                    var topCourts = await _reportService.GetTopCourtsAsync(fromStart, toExclusive);
+                    lstTopCourts.Items.Clear();
+                    foreach (var c in topCourts)
+                    {
+                        lstTopCourts.Items.Add(new ListViewItem(new[] { $"   {c.CourtId}   {c.Name}", c.Type, c.Occupancy, c.Revenue }));
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                DatabaseHelper.TryLog("Report TopCourts Error", ex, "UCBaoCao.ReloadAsync TopCourts");
-            }
+                catch (Exception ex)
+                {
+                    DatabaseHelper.TryLog("Report TopCourts Error", ex, "UCBaoCao.ReloadAsync TopCourts");
+                }
 
             // KPI (selected range) + delta vs previous period (same length)
             try
@@ -312,7 +317,11 @@ namespace DemoPick
                 DatabaseHelper.TryLog("Report Charts Error", ex, "UCBaoCao.LoadDataAsync Trend/Pie");
             }
 
-            if (btnApplyFilter != null) btnApplyFilter.Enabled = true;
+            }
+            finally
+            {
+                if (DateFilter != null) DateFilter.ApplyEnabled = true;
+            }
         }
 
         private static void ApplyBadgePercent(Label badgeLabel, decimal currentValue, decimal previousValue)
