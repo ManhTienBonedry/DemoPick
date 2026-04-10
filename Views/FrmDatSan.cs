@@ -10,8 +10,23 @@ namespace DemoPick
         public FrmDatSan()
         {
             InitializeComponent();
+
+            try
+            {
+                if (ucDate != null)
+                {
+                    ucDate.Mode = UCDateRangeFilter.DateFilterMode.SingleDate;
+                    ucDate.SelectedDate = DateTime.Today;
+                }
+            }
+            catch
+            {
+                // ignore
+            }
             
             this.Load += FrmDatSan_Load;
+
+            TryClampComboDropDownToScreen(cbTime, maxHeight: 260, minHeight: 120);
 
             btnCancel.Click += (s, e) => this.Close();
             btnCancelTop.Click += (s, e) => this.Close();
@@ -20,6 +35,42 @@ namespace DemoPick
             
             pnlTop.MouseDown += Form_MouseDown;
             lblHeaderTop.MouseDown += Form_MouseDown;
+        }
+
+        private static void TryClampComboDropDownToScreen(ComboBox combo, int maxHeight, int minHeight)
+        {
+            if (combo == null) return;
+
+            try
+            {
+                combo.IntegralHeight = false;
+                combo.DropDown += (s, e) =>
+                {
+                    try
+                    {
+                        var working = Screen.FromControl(combo).WorkingArea;
+                        var below = combo.PointToScreen(new System.Drawing.Point(0, combo.Height));
+                        var top = combo.PointToScreen(System.Drawing.Point.Empty);
+
+                        int spaceBelow = working.Bottom - below.Y - 8;
+                        int spaceAbove = top.Y - working.Top - 8;
+
+                        int available = Math.Max(spaceBelow, spaceAbove);
+                        int h = Math.Min(maxHeight, available);
+                        h = Math.Max(minHeight, h);
+
+                        combo.DropDownHeight = h;
+                    }
+                    catch
+                    {
+                        // ignore
+                    }
+                };
+            }
+            catch
+            {
+                // ignore
+            }
         }
 
         private void FrmDatSan_Load(object sender, EventArgs e)
@@ -51,7 +102,7 @@ namespace DemoPick
                 return;
             }
 
-            DateTime selectedDate = dtDate.Value.Date;
+            DateTime selectedDate = ucDate.SelectedDate;
             string timeStr = cbTime.SelectedItem?.ToString() ?? "17:00"; 
             string[] timeParts = timeStr.Split(':');
             int hours = int.Parse(timeParts[0]);
@@ -75,7 +126,15 @@ namespace DemoPick
 
             try
             {
-                _controller.SubmitBooking(courtId, txtName.Text + " - " + txtPhone.Text, start, end);
+                string note = (txtNote.Text ?? "").Trim();
+                int? memberId = null;
+                try
+                {
+                    memberId = _controller.GetOrCreateMemberId(txtName.Text, txtPhone.Text);
+                }
+                catch { }
+
+                _controller.SubmitBooking(courtId, memberId, txtName.Text + " - " + txtPhone.Text, note, start, end, status: "Confirmed");
                 MessageBox.Show($"Đã chốt sân thành công!\n- {txtName.Text}\n- Mốc: Từ {start:HH:mm} đến {end:HH:mm} ngày {start:dd/MM/yyyy}", " Đặt sân hoàn tất", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 this.DialogResult = DialogResult.OK; 
                 this.Close();

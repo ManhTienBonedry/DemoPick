@@ -17,6 +17,8 @@ namespace DemoPick
         public UIButton btnDatNhanh;
         public UIButton btnDatCoDinh;
         public UIButton btnDoiCa;
+        public UIButton btnZoomOut;
+        public UIButton btnZoomIn;
 
         // Custom legend labels
         public System.Windows.Forms.Label l1C;
@@ -40,11 +42,13 @@ namespace DemoPick
         private void InitializeComponent()
         {
             this.pnlControlBar = new System.Windows.Forms.Panel();
-            this.lblDate = new System.Windows.Forms.Label();
             this.dateFilter = new DemoPick.UCDateRangeFilter();
+            this.lblDate = new System.Windows.Forms.Label();
             this.btnDatNhanh = new Sunny.UI.UIButton();
             this.btnDatCoDinh = new Sunny.UI.UIButton();
             this.btnDoiCa = new Sunny.UI.UIButton();
+            this.btnZoomOut = new Sunny.UI.UIButton();
+            this.btnZoomIn = new Sunny.UI.UIButton();
             this.pnlTimelineContainer = new System.Windows.Forms.Panel();
             this.pnlCanvas = new System.Windows.Forms.Panel();
             this.pnlLegend = new System.Windows.Forms.Panel();
@@ -66,6 +70,8 @@ namespace DemoPick
             this.pnlControlBar.BackColor = System.Drawing.Color.Transparent;
             this.pnlControlBar.Controls.Add(this.dateFilter);
             this.pnlControlBar.Controls.Add(this.lblDate);
+            this.pnlControlBar.Controls.Add(this.btnZoomOut);
+            this.pnlControlBar.Controls.Add(this.btnZoomIn);
             this.pnlControlBar.Controls.Add(this.btnDatNhanh);
             this.pnlControlBar.Controls.Add(this.btnDatCoDinh);
             this.pnlControlBar.Controls.Add(this.btnDoiCa);
@@ -74,6 +80,18 @@ namespace DemoPick
             this.pnlControlBar.Name = "pnlControlBar";
             this.pnlControlBar.Size = new System.Drawing.Size(1324, 80);
             this.pnlControlBar.TabIndex = 1;
+            // 
+            // dateFilter
+            // 
+            this.dateFilter.ApplyEnabled = true;
+            this.dateFilter.BackColor = System.Drawing.Color.Transparent;
+            this.dateFilter.FromDate = new System.DateTime(2026, 4, 9, 0, 0, 0, 0);
+            this.dateFilter.Location = new System.Drawing.Point(302, 28);
+            this.dateFilter.Name = "dateFilter";
+            this.dateFilter.SelectedDate = new System.DateTime(2026, 4, 9, 0, 0, 0, 0);
+            this.dateFilter.Size = new System.Drawing.Size(260, 39);
+            this.dateFilter.TabIndex = 1;
+            this.dateFilter.ToDate = new System.DateTime(2026, 4, 9, 0, 0, 0, 0);
             // 
             // lblDate
             // 
@@ -85,15 +103,6 @@ namespace DemoPick
             this.lblDate.Size = new System.Drawing.Size(199, 37);
             this.lblDate.TabIndex = 0;
             this.lblDate.Text = "Đang tải lịch...";
-            // 
-            // dateFilter
-            // 
-            this.dateFilter.BackColor = System.Drawing.Color.Transparent;
-            this.dateFilter.Location = new System.Drawing.Point(302, 28);
-            this.dateFilter.Mode = DemoPick.UCDateRangeFilter.DateFilterMode.SingleDate;
-            this.dateFilter.Name = "dateFilter";
-            this.dateFilter.Size = new System.Drawing.Size(260, 39);
-            this.dateFilter.TabIndex = 1;
             // 
             // btnDatNhanh
             // 
@@ -160,6 +169,52 @@ namespace DemoPick
             this.btnDoiCa.TabIndex = 6;
             this.btnDoiCa.Text = "✏ Đổi ca";
             this.btnDoiCa.TipsFont = new System.Drawing.Font("Microsoft Sans Serif", 9F);
+            // 
+            // btnZoomOut
+            // 
+            this.btnZoomOut.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnZoomOut.FillColor = System.Drawing.Color.White;
+            this.btnZoomOut.FillHoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.btnZoomOut.FillPressColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.btnZoomOut.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
+            this.btnZoomOut.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(26)))), ((int)(((byte)(35)))), ((int)(((byte)(50)))));
+            this.btnZoomOut.ForeHoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(26)))), ((int)(((byte)(35)))), ((int)(((byte)(50)))));
+            this.btnZoomOut.ForePressColor = System.Drawing.Color.FromArgb(((int)(((byte)(26)))), ((int)(((byte)(35)))), ((int)(((byte)(50)))));
+            this.btnZoomOut.Location = new System.Drawing.Point(568, 22);
+            this.btnZoomOut.MinimumSize = new System.Drawing.Size(1, 1);
+            this.btnZoomOut.Name = "btnZoomOut";
+            this.btnZoomOut.Radius = 18;
+            this.btnZoomOut.RectColor = System.Drawing.Color.FromArgb(((int)(((byte)(229)))), ((int)(((byte)(231)))), ((int)(((byte)(235)))));
+            this.btnZoomOut.RectHoverColor = System.Drawing.Color.Gray;
+            this.btnZoomOut.RectPressColor = System.Drawing.Color.DimGray;
+            this.btnZoomOut.Size = new System.Drawing.Size(44, 40);
+            this.btnZoomOut.Style = Sunny.UI.UIStyle.Custom;
+            this.btnZoomOut.TabIndex = 2;
+            this.btnZoomOut.Text = "−";
+            this.btnZoomOut.TipsFont = new System.Drawing.Font("Microsoft Sans Serif", 9F);
+            // 
+            // btnZoomIn
+            // 
+            this.btnZoomIn.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnZoomIn.FillColor = System.Drawing.Color.White;
+            this.btnZoomIn.FillHoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.btnZoomIn.FillPressColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.btnZoomIn.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
+            this.btnZoomIn.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(26)))), ((int)(((byte)(35)))), ((int)(((byte)(50)))));
+            this.btnZoomIn.ForeHoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(26)))), ((int)(((byte)(35)))), ((int)(((byte)(50)))));
+            this.btnZoomIn.ForePressColor = System.Drawing.Color.FromArgb(((int)(((byte)(26)))), ((int)(((byte)(35)))), ((int)(((byte)(50)))));
+            this.btnZoomIn.Location = new System.Drawing.Point(618, 22);
+            this.btnZoomIn.MinimumSize = new System.Drawing.Size(1, 1);
+            this.btnZoomIn.Name = "btnZoomIn";
+            this.btnZoomIn.Radius = 18;
+            this.btnZoomIn.RectColor = System.Drawing.Color.FromArgb(((int)(((byte)(229)))), ((int)(((byte)(231)))), ((int)(((byte)(235)))));
+            this.btnZoomIn.RectHoverColor = System.Drawing.Color.Gray;
+            this.btnZoomIn.RectPressColor = System.Drawing.Color.DimGray;
+            this.btnZoomIn.Size = new System.Drawing.Size(44, 40);
+            this.btnZoomIn.Style = Sunny.UI.UIStyle.Custom;
+            this.btnZoomIn.TabIndex = 3;
+            this.btnZoomIn.Text = "+";
+            this.btnZoomIn.TipsFont = new System.Drawing.Font("Microsoft Sans Serif", 9F);
             // 
             // pnlTimelineContainer
             // 

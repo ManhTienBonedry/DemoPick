@@ -142,6 +142,18 @@
     <Compile Include="Views\FrmDatSanCoDinh.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Views\FrmDatSanCoDinh.Init.cs">
+      <DependentUpon>FrmDatSanCoDinh.cs</DependentUpon>
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\FrmDatSanCoDinh.Booking.cs">
+      <DependentUpon>FrmDatSanCoDinh.cs</DependentUpon>
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\FrmDatSanCoDinh.WindowChrome.cs">
+      <DependentUpon>FrmDatSanCoDinh.cs</DependentUpon>
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Views\FrmDatSanCoDinh.Designer.cs">
       <DependentUpon>FrmDatSanCoDinh.cs</DependentUpon>
     </Compile>
@@ -172,11 +184,35 @@
     <Compile Include="Views\UCBanHang.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="Views\UCBanHang.Cart.cs">
+      <DependentUpon>UCBanHang.cs</DependentUpon>
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\UCBanHang.Catalog.cs">
+      <DependentUpon>UCBanHang.cs</DependentUpon>
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\UCBanHang.Courts.cs">
+      <DependentUpon>UCBanHang.cs</DependentUpon>
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Services\PriceCalculator.cs" />
     <Compile Include="Views\UCBanHang.Designer.cs">
       <DependentUpon>UCBanHang.cs</DependentUpon>
     </Compile>
     <Compile Include="Views\UCThanhToan.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\UCThanhToan.Courts.cs">
+      <DependentUpon>UCThanhToan.cs</DependentUpon>
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\UCThanhToan.Customer.cs">
+      <DependentUpon>UCThanhToan.cs</DependentUpon>
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\UCThanhToan.TotalsAndCheckout.cs">
+      <DependentUpon>UCThanhToan.cs</DependentUpon>
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Views\UCThanhToan.Designer.cs">
@@ -206,17 +242,29 @@
     <Compile Include="Views\UCBaoCao.Designer.cs">
       <DependentUpon>UCBaoCao.cs</DependentUpon>
     </Compile>
-    <Compile Include="Views\UCDatLich.cs">
+    <Compile Include="Views\Controls\UCDateRangeFilter.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Views\UCDatLich.Designer.cs">
-      <DependentUpon>UCDatLich.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Controls\UCDateRangeFilter.cs">
+    <Compile Include="Views\Controls\UCDateRangeFilter.Behaviors.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Views\Controls\UCDateRangeFilter.Designer.cs">
       <DependentUpon>UCDateRangeFilter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UCDatLich.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\UCDatLich.Data.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\UCDatLich.LayoutAndInteractions.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\UCDatLich.Rendering.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\UCDatLich.Designer.cs">
+      <DependentUpon>UCDatLich.cs</DependentUpon>
     </Compile>
     <Compile Include="Views\UCTongQuan.cs">
       <SubType>UserControl</SubType>
@@ -229,23 +277,40 @@
     <Compile Include="Services\DatabaseHelper.cs" />
     <Compile Include="Services\DbDiagnostics.cs" />
     <Compile Include="Services\DesignModeUtil.cs" />
+    <Compile Include="Services\UiTheme.cs" />
     <Compile Include="Services\AuthService.cs" />
+    <Compile Include="Services\AuthFeatures.cs" />
     <Compile Include="Services\AppSession.cs" />
+    <Compile Include="Services\SmokeTestRunner.cs" />
     <Compile Include="Services\SchemaInstaller.cs" />
     <Compile Include="Services\SqlScriptRunner.cs" />
     <Compile Include="Services\MigrationsRunner.cs" />
     <Compile Include="Services\CustomerService.cs" />
+    <Compile Include="Services\DatabaseMaintenanceService.cs" />
     <Compile Include="Services\InventoryService.cs" />
     <Compile Include="Services\PosService.cs" />
     <Compile Include="Services\InvoiceService.cs" />
     <Compile Include="Services\ReportService.cs" />
+    <Compile Include="Services\DashboardService.cs" />
     <Compile Include="Controllers\BookingController.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Views\FrmInvoicePreview.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Views\FrmInvoicePreview.Designer.cs">
+      <DependentUpon>FrmInvoicePreview.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Reports\Bill.rdlc" />
+    <EmbeddedResource Include="Views\FrmDatSanCoDinh.resx">
+      <DependentUpon>FrmDatSanCoDinh.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\FrmDoiMatKhau.resx">
+      <DependentUpon>FrmDoiMatKhau.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\FrmInvoicePreview.resx">
+      <DependentUpon>FrmInvoicePreview.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Views\FrmChinh.resx">
       <DependentUpon>FrmChinh.cs</DependentUpon>
     </EmbeddedResource>
@@ -280,11 +345,11 @@
     <EmbeddedResource Include="Views\UCBaoCao.resx">
       <DependentUpon>UCBaoCao.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Views\UCDatLich.resx">
-      <DependentUpon>UCDatLich.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Views\Controls\UCDateRangeFilter.resx">
       <DependentUpon>UCDateRangeFilter.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\UCDatLich.resx">
+      <DependentUpon>UCDatLich.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\UCKhoHang.resx">
       <DependentUpon>UCKhoHang.cs</DependentUpon>
@@ -293,15 +358,26 @@
       <DependentUpon>UCTongQuan.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
+    <None Include="README.md" />
     <None Include="Docs\README.md" />
     <None Include="Docs\CLICK-WIRING-CHECKLIST.md" />
+    <None Include="Docs\DB-WORKFLOW.md" />
+    <None Include="Docs\SECURITY-AUDIT.md" />
+    <None Include="Docs\SMOKE_TEST.md" />
+    <None Include="Docs\TIMELINE-ZOOM.md" />
     <None Include="NuGet.Config" />
     <EmbeddedResource Include="Database\PickleProDB_Complete.sql" />
     <EmbeddedResource Include="Database\Migrations\*.sql" />
+    <None Include="Database\TesterData_Seed.sql" />
+    <None Include="Database\Legacy\migration.sql" />
+    <None Include="Tools\TestPrice.cs" />
+    <Content Include="Resources\qr.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="Resources\pick.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\pick1.png" />
+    <None Include="Resources\*.png" Exclude="Resources\pick.png" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

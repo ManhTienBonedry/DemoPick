@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 using DemoPick.Services;
@@ -46,48 +47,36 @@ namespace DemoPick
 
         private async void LoadDataAsync()
         {
-            var items = await _inventoryService.GetInventoryItemsAsync();
-            lstKhoHang.Items.Clear();
-            foreach(var item in items)
+            try
             {
-                lstKhoHang.Items.Add(new ListViewItem(new[] { $"{item.Name}\nSKU: {item.Sku}", item.Category, item.Stock, item.Status, item.Price }));
-            }
+                var itemsTask = _inventoryService.GetInventoryItemsAsync();
+                var txsTask = _inventoryService.GetRecentTransactionsAsync();
+                var kpiTask = _inventoryService.GetInventoryKpisAsync();
 
-            var txs = await _inventoryService.GetRecentTransactionsAsync();
-            lstGiaoDich.Items.Clear();
-            foreach(var tx in txs)
-            {
-                string sub = (tx.SubDesc ?? "").Replace("\r", " ").Replace("\n", " ").Trim();
-                string line = string.IsNullOrWhiteSpace(sub) ? (tx.EventDesc ?? "") : $"{tx.EventDesc} — {sub}";
-                lstGiaoDich.Items.Add(new ListViewItem(new[] { line, tx.Time }));
-            }
+                await Task.WhenAll(itemsTask, txsTask, kpiTask);
 
-            // Sync Static KPI Labels
-            try {
-                var dt = DatabaseHelper.ExecuteQuery(@"
-                    SELECT 
-                        ISNULL(SUM(Price * StockQuantity), 0) as TotalVal,
-                        (SELECT COUNT(*) FROM Products WHERE StockQuantity <= MinThreshold AND Category != N'Dịch vụ đi kèm') as CriticalItems,
-                        (SELECT ISNULL(SUM(Quantity), 0) FROM InvoiceDetails) as Sales,
-                        (SELECT COUNT(*) FROM Invoices) as InvoicesCount
-                    FROM Products WHERE Category != N'Dịch vụ đi kèm'
-                ");
-                if (dt.Rows.Count > 0)
+                var items = itemsTask.Result;
+                lstKhoHang.Items.Clear();
+                foreach (var item in items)
                 {
-                    decimal totalVal = Convert.ToDecimal(dt.Rows[0]["TotalVal"]);
-                    lblC1Value.Text = totalVal == 0 ? "0đ" : totalVal.ToString("N0") + " đ";
-                    lblC2Value.Text = dt.Rows[0]["CriticalItems"].ToString() + " SP";
-                    lblC3Value.Text = dt.Rows[0]["Sales"].ToString() + " Xuất";
-                    lblC4Value.Text = dt.Rows[0]["InvoicesCount"].ToString() + " Đơn";
+                    lstKhoHang.Items.Add(new ListViewItem(new[] { $"{item.Name}\nSKU: {item.Sku}", item.Category, item.Stock, item.Status, item.Price }));
                 }
-                else 
+
+                var txs = txsTask.Result;
+                lstGiaoDich.Items.Clear();
+                foreach (var tx in txs)
                 {
-                    lblC1Value.Text = "0đ";
-                    lblC2Value.Text = "0 SP";
-                    lblC3Value.Text = "0 Xuất";
-                    lblC4Value.Text = "0 Đơn";
+                    string sub = (tx.SubDesc ?? "").Replace("\r", " ").Replace("\n", " ").Trim();
+                    string line = string.IsNullOrWhiteSpace(sub) ? (tx.EventDesc ?? "") : $"{tx.EventDesc} — {sub}";
+                    lstGiaoDich.Items.Add(new ListViewItem(new[] { line, tx.Time }));
                 }
-                
+
+                var kpi = kpiTask.Result ?? new DemoPick.Models.InventoryKpiModel();
+                lblC1Value.Text = kpi.TotalValue == 0 ? "0đ" : kpi.TotalValue.ToString("N0") + " đ";
+                lblC2Value.Text = kpi.CriticalItems + " SP";
+                lblC3Value.Text = kpi.Sales + " Xuất";
+                lblC4Value.Text = kpi.InvoicesCount + " Đơn";
+
                 lblC1Title.Text = "Tổng giá trị kho";
                 lblC2Title.Text = "Cảnh báo hết hàng";
                 lblC3Title.Text = "Sản phẩm đã bán";
@@ -95,7 +84,7 @@ namespace DemoPick
             }
             catch (Exception ex)
             {
-                DatabaseHelper.TryLog("Inventory KPI Sync Error", ex, "UCKhoHang.LoadDataAsync KPI Sync");
+                DatabaseHelper.TryLog("Inventory Load Error", ex, "UCKhoHang.LoadDataAsync");
             }
 
             // Chart (Clear mock data since DB is clean)

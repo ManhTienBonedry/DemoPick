@@ -1,6 +1,8 @@
 using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
+using DemoPick.Services;
 
 namespace DemoPick
 {
@@ -12,8 +14,17 @@ namespace DemoPick
             Range = 1,
         }
 
-        private DateFilterMode _mode = DateFilterMode.Range;
+        private DateFilterMode _mode = DateFilterMode.SingleDate;
         private bool _suppressEvents;
+        private bool _showApplyButton = true;
+
+        private DateTime _lastFromContentDate;
+        private DateTime _lastToContentDate;
+
+        private Timer _watchFromTimer;
+        private Timer _watchToTimer;
+        private int _watchFromTicks;
+        private int _watchToTicks;
 
         public event EventHandler SelectedDateChanged;
         public event EventHandler RangeChanged;
@@ -23,21 +34,76 @@ namespace DemoPick
         {
             InitializeComponent();
 
-            // Prevent user from typing manually
+            if (!DesignModeUtil.IsDesignMode(this))
+            {
+                ApplyPickerVisual(dtFrom);
+                ApplyPickerVisual(dtTo);
+
+                AttachSinglePopupBehavior(dtFrom);
+                AttachSinglePopupBehavior(dtTo);
+            }
+
             AttachReadOnlyDatePickerBehavior(dtFrom);
             AttachReadOnlyDatePickerBehavior(dtTo);
 
-            // Value change detection (CuoreUI uses Content + TextChanged)
-            dtFrom.TextChanged += (s, e) => OnPickerTextChanged(isFrom: true);
-            dtTo.TextChanged += (s, e) => OnPickerTextChanged(isFrom: false);
+            _lastFromContentDate = ReadPickerDate(dtFrom, DateTime.Today);
+            _lastToContentDate = ReadPickerDate(dtTo, DateTime.Today);
 
-            btnPrevDay.Click += (s, e) => SelectedDate = SelectedDate.AddDays(-1);
-            btnNextDay.Click += (s, e) => SelectedDate = SelectedDate.AddDays(1);
-            btnApply.Click += (s, e) => ApplyClicked?.Invoke(this, EventArgs.Empty);
+            AttachPickerChangeDetection(dtFrom, isFrom: true);
+            AttachPickerChangeDetection(dtTo, isFrom: false);
+
+            MouseButtons prevDown = MouseButtons.None;
+            MouseButtons nextDown = MouseButtons.None;
+            MouseButtons applyDown = MouseButtons.None;
+
+            btnPrevDay.MouseDown += (s, e) => prevDown = e.Button;
+            btnNextDay.MouseDown += (s, e) => nextDown = e.Button;
+            btnApply.MouseDown += (s, e) => applyDown = e.Button;
+
+            btnPrevDay.Click += (s, e) =>
+            {
+                if (prevDown != MouseButtons.Left) return;
+                SelectedDate = SelectedDate.AddDays(-1);
+            };
+            btnNextDay.Click += (s, e) =>
+            {
+                if (nextDown != MouseButtons.Left) return;
+                SelectedDate = SelectedDate.AddDays(1);
+            };
+            btnApply.Click += (s, e) =>
+            {
+                if (applyDown != MouseButtons.Left) return;
+                ApplyClicked?.Invoke(this, EventArgs.Empty);
+            };
+
+            Disposed += (s, e) =>
+            {
+                try { _watchFromTimer?.Stop(); } catch { }
+                try { _watchToTimer?.Stop(); } catch { }
+                try { _watchFromTimer?.Dispose(); } catch { }
+                try { _watchToTimer?.Dispose(); } catch { }
+                _watchFromTimer = null;
+                _watchToTimer = null;
+            };
 
             ApplyModeLayout();
         }
 
+        [Browsable(true)]
+        [DefaultValue(true)]
+        public bool ShowApplyButton
+        {
+            get => _showApplyButton;
+            set
+            {
+                if (_showApplyButton == value) return;
+                _showApplyButton = value;
+                ApplyModeLayout();
+            }
+        }
+
+        [Browsable(true)]
+        [DefaultValue(DateFilterMode.SingleDate)]
         public DateFilterMode Mode
         {
             get => _mode;
@@ -49,32 +115,33 @@ namespace DemoPick
             }
         }
 
+        [Browsable(false)]
         public DateTime SelectedDate
         {
-            get => (dtFrom?.Content ?? DateTime.Today).Date;
-            set
-            {
-                SetPickerDate(dtFrom, value);
-                if (_mode == DateFilterMode.SingleDate)
-                {
-                    SelectedDateChanged?.Invoke(this, EventArgs.Empty);
-                }
-            }
+            get => FromDate;
+            set => FromDate = value;
         }
 
+        [Browsable(false)]
         public DateTime FromDate
         {
             get => (dtFrom?.Content ?? DateTime.Today).Date;
             set
             {
                 SetPickerDate(dtFrom, value);
-                if (_mode == DateFilterMode.Range)
+
+                if (_mode == DateFilterMode.SingleDate)
+                {
+                    SelectedDateChanged?.Invoke(this, EventArgs.Empty);
+                }
+                else
                 {
                     RangeChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
         }
 
+        [Browsable(false)]
         public DateTime ToDate
         {
             get => (dtTo?.Content ?? DateTime.Today).Date;
@@ -88,9 +155,10 @@ namespace DemoPick
             }
         }
 
+        [Browsable(false)]
         public bool ApplyEnabled
         {
-            get => btnApply?.Enabled ?? false;
+            get => btnApply?.Enabled ?? true;
             set
             {
                 if (btnApply != null) btnApply.Enabled = value;
@@ -102,102 +170,13 @@ namespace DemoPick
             error = null;
             if (_mode != DateFilterMode.Range) return true;
 
-            var from = FromDate;
-            var to = ToDate;
-            if (from > to)
+            if (FromDate > ToDate)
             {
                 error = "Ngày 'Từ' phải nhỏ hơn hoặc bằng ngày 'Đến'.";
                 return false;
             }
 
             return true;
-        }
-
-        private void OnPickerTextChanged(bool isFrom)
-        {
-            if (_suppressEvents) return;
-
-            if (_mode == DateFilterMode.SingleDate)
-            {
-                if (!isFrom) return;
-                SelectedDateChanged?.Invoke(this, EventArgs.Empty);
-                return;
-            }
-
-            // Range
-            RangeChanged?.Invoke(this, EventArgs.Empty);
-        }
-
-        private void SetPickerDate(CuoreUI.Controls.cuiCalendarDatePicker picker, DateTime date)
-        {
-            if (picker == null) return;
-
-            try
-            {
-                _suppressEvents = true;
-                picker.Content = date.Date;
-                picker.Text = date.ToString("yyyy-MM-dd");
-            }
-            finally
-            {
-                _suppressEvents = false;
-            }
-        }
-
-        private static void AttachReadOnlyDatePickerBehavior(Control picker)
-        {
-            if (picker == null) return;
-
-            picker.KeyPress += (s, e) => { e.Handled = true; };
-            picker.KeyDown += (s, e) =>
-            {
-                if (e.KeyCode == Keys.Delete || e.KeyCode == Keys.Back)
-                {
-                    e.Handled = true;
-                    e.SuppressKeyPress = true;
-                }
-            };
-        }
-
-        private void ApplyModeLayout()
-        {
-            bool isRange = _mode == DateFilterMode.Range;
-
-            lblFrom.Visible = isRange;
-            lblTo.Visible = isRange;
-            dtTo.Visible = isRange;
-            btnApply.Visible = isRange;
-
-            btnPrevDay.Visible = !isRange;
-            btnNextDay.Visible = !isRange;
-
-            // Layout tweaks to keep consistent sizing with existing screens
-            if (isRange)
-            {
-                dtFrom.Location = new Point(55, 5);
-                dtFrom.Size = new Size(152, 32);
-
-                lblFrom.Location = new Point(20, 12);
-                lblTo.Location = new Point(215, 12);
-
-                dtTo.Location = new Point(259, 5);
-                dtTo.Size = new Size(152, 32);
-
-                btnApply.Location = new Point(425, 5);
-                btnApply.Size = new Size(110, 32);
-            }
-            else
-            {
-                // Prev/Next + single picker
-                btnPrevDay.Location = new Point(0, 2);
-                btnPrevDay.Size = new Size(40, 35);
-
-                btnNextDay.Location = new Point(46, 2);
-                btnNextDay.Size = new Size(40, 35);
-
-                dtFrom.Location = new Point(100, 0);
-                dtFrom.Size = new Size(152, 39);
-            }
         }
     }
 }

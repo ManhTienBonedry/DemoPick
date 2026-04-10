@@ -102,7 +102,7 @@ namespace DemoPick
             // dtFrom
             // 
             this.dtFrom.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-            this.dtFrom.Content = new System.DateTime(2026, 4, 8, 0, 0, 0, 0);
+            this.dtFrom.Content = new System.DateTime(2026, 4, 9, 0, 0, 0, 0);
             this.dtFrom.EnableThemeChangeButton = true;
             this.dtFrom.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F);
             this.dtFrom.ForeColor = System.Drawing.Color.Gray;
@@ -128,7 +128,7 @@ namespace DemoPick
             // dtTo
             // 
             this.dtTo.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-            this.dtTo.Content = new System.DateTime(2026, 4, 8, 0, 0, 0, 0);
+            this.dtTo.Content = new System.DateTime(2026, 4, 9, 0, 0, 0, 0);
             this.dtTo.EnableThemeChangeButton = true;
             this.dtTo.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F);
             this.dtTo.ForeColor = System.Drawing.Color.Gray;

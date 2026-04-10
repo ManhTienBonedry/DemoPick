@@ -192,55 +192,65 @@ namespace DemoPick
             try
             {
                 // Run the expensive queries in parallel to reduce screen-load latency.
-                Task<System.Collections.Generic.List<DemoPick.Models.CustomerModel>> customersTask = _customerService.GetAllCustomersAsync();
-
-                Task<System.Data.DataTable> tierTask = Task.Run(() =>
-                    DatabaseHelper.ExecuteQuery(@"
-                        SELECT 
-                            SUM(CASE WHEN IsFixed = 1 THEN 1 ELSE 0 END) as CntFixed,
-                            SUM(CASE WHEN IsFixed = 0 THEN 1 ELSE 0 END) as CntWalkin
-                        FROM Members
-                    "));
-
-                Task<System.Data.DataTable> revenueTask = Task.Run(() =>
-                    DatabaseHelper.ExecuteQuery("SELECT COUNT(*) AS Cnt, ISNULL(SUM(TotalSpent), 0) as Rev FROM Members"));
-
-                Task<System.Data.DataTable> courtTask = Task.Run(() =>
-                    DatabaseHelper.ExecuteQuery(@"
-                        DECLARE @total INT = (SELECT COUNT(*) * 16 FROM Courts WHERE Status='Active');
-                        DECLARE @booked INT = (SELECT ISNULL(SUM(DATEDIFF(minute, StartTime, EndTime)/60.0),0) FROM Bookings WHERE CAST(StartTime as DATE) = CAST(GETDATE() as DATE) AND Status != 'Cancelled' AND Status != 'Maintenance');
-                        SELECT CASE WHEN @total = 0 THEN 0 ELSE CAST((@booked * 100.0 / @total) AS INT) END AS OccPct;
-                    "));
+                var customersTask = LoadCustomersAsync();
+                var tierTask = _customerService.GetTierCountsAsync();
+                var revenueTask = _customerService.GetRevenueSummaryAsync();
+                var courtTask = _customerService.GetTodayOccupancyPctAsync();
 
                 await Task.WhenAll(customersTask, tierTask, revenueTask, courtTask);
 
-                var customers = customersTask.Result;
-                _allCustomersCache = customers;
-                FilterList("Tất cả", lblTabAll);
-
-                var dtTier = tierTask.Result;
-                if (dtTier.Rows.Count > 0)
-                {
-                    lblFixedCount.Text = "● " + (dtTier.Rows[0]["CntFixed"] == DBNull.Value ? "0" : dtTier.Rows[0]["CntFixed"]) + " Hội viên";
-                    lblWalkinCount.Text = "● " + (dtTier.Rows[0]["CntWalkin"] == DBNull.Value ? "0" : dtTier.Rows[0]["CntWalkin"]) + " Hội viên";
-                }
-
-                var dt = revenueTask.Result;
-                if (dt.Rows.Count > 0)
-                {
-                    lblBot1Value.Text = dt.Rows[0]["Cnt"].ToString();
-                    decimal rev = Convert.ToDecimal(dt.Rows[0]["Rev"]);
-                    lblBot3Value.Text = rev == 0 ? "0đ" : rev.ToString("N0") + " đ";
-                    lblBot2Value.Text = (dtTier.Rows.Count > 0 && dtTier.Rows[0]["CntFixed"] != DBNull.Value) ? dtTier.Rows[0]["CntFixed"].ToString() : "0";
-                }
-
-                var courtDt = courtTask.Result;
-                lblBot4Value.Text = (courtDt.Rows.Count > 0 ? courtDt.Rows[0]["OccPct"].ToString() : "0") + "%";
+                BindCustomers(customersTask.Result);
+                BindTierCounts(tierTask.Result);
+                BindRevenue(revenueTask.Result, tierTask.Result);
+                BindTodayOccupancy(courtTask.Result);
             }
             catch (Exception ex)
             {
                 DatabaseHelper.TryLog("Customer KPI Sync Error", ex, "UCKhachHang.LoadDataAsync");
             }
+        }
+
+        private Task<System.Collections.Generic.List<DemoPick.Models.CustomerModel>> LoadCustomersAsync()
+        {
+            return _customerService.GetAllCustomersAsync();
+        }
+
+        private void BindCustomers(System.Collections.Generic.List<DemoPick.Models.CustomerModel> customers)
+        {
+            _allCustomersCache = customers ?? new System.Collections.Generic.List<DemoPick.Models.CustomerModel>();
+            FilterList("Tất cả", lblTabAll);
+        }
+
+        private void BindTierCounts(DemoPick.Models.CustomerTierCountsModel tier)
+        {
+            if (tier == null)
+            {
+                tier = new DemoPick.Models.CustomerTierCountsModel();
+            }
+            lblFixedCount.Text = $"● {tier.FixedCount} Hội viên";
+            lblWalkinCount.Text = $"● {tier.WalkinCount} Hội viên";
+        }
+
+        private void BindRevenue(DemoPick.Models.CustomerRevenueSummaryModel revenue, DemoPick.Models.CustomerTierCountsModel tier)
+        {
+            if (revenue == null)
+            {
+                revenue = new DemoPick.Models.CustomerRevenueSummaryModel();
+            }
+
+            if (tier == null)
+            {
+                tier = new DemoPick.Models.CustomerTierCountsModel();
+            }
+
+            lblBot1Value.Text = revenue.MemberCount.ToString();
+            lblBot3Value.Text = revenue.Revenue == 0 ? "0đ" : revenue.Revenue.ToString("N0") + " đ";
+            lblBot2Value.Text = tier.FixedCount.ToString();
+        }
+
+        private void BindTodayOccupancy(int occPct)
+        {
+            lblBot4Value.Text = $"{occPct}%";
         }
     }
 }

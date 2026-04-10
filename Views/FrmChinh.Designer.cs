@@ -115,6 +115,7 @@ namespace DemoPick
             // 
             // pnlLogo
             // 
+            this.pnlLogo.BackColor = System.Drawing.Color.White;
             this.pnlLogo.Controls.Add(this.Piccachu);
             this.pnlLogo.Controls.Add(this.lblLogo1);
             this.pnlLogo.Controls.Add(this.lblLogo2);
@@ -362,7 +363,7 @@ namespace DemoPick
             this.lblNav7.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(107)))), ((int)(((byte)(114)))), ((int)(((byte)(128)))));
             this.lblNav7.Location = new System.Drawing.Point(40, 11);
             this.lblNav7.Name = "lblNav7";
-            this.lblNav7.Size = new System.Drawing.Size(110, 25);
+            this.lblNav7.Size = new System.Drawing.Size(108, 25);
             this.lblNav7.TabIndex = 0;
             this.lblNav7.Text = "Thanh toán";
             // 
@@ -427,11 +428,10 @@ namespace DemoPick
             this.pnlHeader.BackColor = System.Drawing.Color.White;
             this.pnlHeader.Controls.Add(this.lblPageTitle);
             this.pnlHeader.Controls.Add(this.lblPageSubtitle);
-            // this.pnlHeader.Controls.Add(this.txtSearch);
             this.pnlHeader.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlHeader.Location = new System.Drawing.Point(240, 0);
             this.pnlHeader.Name = "pnlHeader";
-            this.pnlHeader.Size = new System.Drawing.Size(1200, 75);
+            this.pnlHeader.Size = new System.Drawing.Size(1200, 90);
             this.pnlHeader.TabIndex = 1;
             // 
             // lblPageTitle
@@ -456,14 +456,29 @@ namespace DemoPick
             this.lblPageSubtitle.TabIndex = 2;
             this.lblPageSubtitle.Text = "Tổng quan hoạt động";
             // 
+            // txtSearch
+            // 
+            this.txtSearch.Cursor = System.Windows.Forms.Cursors.IBeam;
+            this.txtSearch.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
+            this.txtSearch.Location = new System.Drawing.Point(0, 0);
+            this.txtSearch.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.txtSearch.MinimumSize = new System.Drawing.Size(1, 16);
+            this.txtSearch.Name = "txtSearch";
+            this.txtSearch.Padding = new System.Windows.Forms.Padding(5);
+            this.txtSearch.ShowText = false;
+            this.txtSearch.Size = new System.Drawing.Size(150, 29);
+            this.txtSearch.TabIndex = 0;
+            this.txtSearch.TextAlignment = System.Drawing.ContentAlignment.MiddleLeft;
+            this.txtSearch.Watermark = "";
+            // 
             // pnlContent
             // 
             this.pnlContent.BackColor = System.Drawing.Color.Transparent;
             this.pnlContent.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlContent.Location = new System.Drawing.Point(240, 75);
+            this.pnlContent.Location = new System.Drawing.Point(240, 90);
             this.pnlContent.Name = "pnlContent";
             this.pnlContent.Padding = new System.Windows.Forms.Padding(20);
-            this.pnlContent.Size = new System.Drawing.Size(1200, 825);
+            this.pnlContent.Size = new System.Drawing.Size(1200, 810);
             this.pnlContent.TabIndex = 0;
             // 
             // FrmChinh

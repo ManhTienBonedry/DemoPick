@@ -1,5 +1,4 @@
 using System;
-using System.Data.SqlClient;
 using System.Drawing;
 using System.Globalization;
 using System.Windows.Forms;
@@ -28,6 +27,8 @@ namespace DemoPick
             }
             _reportService = new ReportService();
 
+            SetupTopCourtsTable();
+
             try
             {
                 var today = DateTime.Today;
@@ -35,6 +36,7 @@ namespace DemoPick
 
                 if (DateFilter != null)
                 {
+                    DateFilter.Mode = UCDateRangeFilter.DateFilterMode.Range;
                     DateFilter.FromDate = defaultFrom;
                     DateFilter.ToDate = today;
                     DateFilter.ApplyClicked += async (s, e) => await ApplyFilterAsync();
@@ -58,6 +60,47 @@ namespace DemoPick
             }
 
             _ = ReloadAsync();
+        }
+
+        private void SetupTopCourtsTable()
+        {
+            try
+            {
+                if (lstTopCourts == null) return;
+
+                lstTopCourts.Columns.Clear();
+                lstTopCourts.Columns.Add("Sân", 420);
+                lstTopCourts.Columns.Add("Loại", 180);
+                lstTopCourts.Columns.Add("Tỉ lệ", 180);
+                lstTopCourts.Columns.Add("Doanh thu", 200);
+            }
+            catch
+            {
+                // ignore
+            }
+        }
+
+        private void TrySetFilterDates(DateTime from, DateTime to)
+        {
+            try
+            {
+                if (dateFilter == null) return;
+                dateFilter.FromDate = from.Date;
+                dateFilter.ToDate = to.Date;
+            }
+            catch { }
+        }
+
+        private DateTime GetFilterFromDate()
+        {
+            try { return dateFilter != null ? dateFilter.FromDate.Date : DateTime.Today.AddDays(-6); }
+            catch { return DateTime.Today.AddDays(-6); }
+        }
+
+        private DateTime GetFilterToDate()
+        {
+            try { return dateFilter != null ? dateFilter.ToDate.Date : DateTime.Today; }
+            catch { return DateTime.Today; }
         }
 
         private void NavigateToDatLich()
@@ -84,22 +127,22 @@ namespace DemoPick
 
         private async System.Threading.Tasks.Task ApplyFilterAsync()
         {
-            var from = DateFilter?.FromDate ?? DateTime.Today.AddDays(-6);
-            var to = DateFilter?.ToDate ?? DateTime.Today;
-
             if (DateFilter != null && !DateFilter.ValidateRange(out var err))
             {
-                MessageBox.Show(err, "Khoảng thời gian không hợp lệ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(err ?? "Khoảng thời gian không hợp lệ.", "Khoảng thời gian không hợp lệ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
+
+            var from = GetFilterFromDate();
+            var to = GetFilterToDate();
 
             await ReloadAsync(from, to);
         }
 
         private async System.Threading.Tasks.Task ReloadAsync()
         {
-            var from = DateFilter?.FromDate ?? DateTime.Today.AddDays(-6);
-            var to = DateFilter?.ToDate ?? DateTime.Today;
+            var from = GetFilterFromDate();
+            var to = GetFilterToDate();
             await ReloadAsync(from, to);
         }
 
@@ -112,188 +155,79 @@ namespace DemoPick
             if (DateFilter != null) DateFilter.ApplyEnabled = false;
             try
             {
-                try
-                {
-                    var topCourts = await _reportService.GetTopCourtsAsync(fromStart, toExclusive);
-                    lstTopCourts.Items.Clear();
-                    foreach (var c in topCourts)
-                    {
-                        lstTopCourts.Items.Add(new ListViewItem(new[] { $"   {c.CourtId}   {c.Name}", c.Type, c.Occupancy, c.Revenue }));
-                    }
-                }
-                catch (Exception ex)
-                {
-                    DatabaseHelper.TryLog("Report TopCourts Error", ex, "UCBaoCao.ReloadAsync TopCourts");
-                }
+                await LoadTopCourtsAsync(fromStart, toExclusive);
+                await LoadKpisAsync(fromStart, toExclusive, days);
+                await LoadChartsAsync(fromStart, toExclusive, fromStart.Date, toDateInclusive.Date);
+            }
+            finally
+            {
+                if (DateFilter != null) DateFilter.ApplyEnabled = true;
+            }
+        }
 
+        private async System.Threading.Tasks.Task LoadTopCourtsAsync(DateTime fromStart, DateTime toExclusive)
+        {
+            try
+            {
+                var topCourts = await _reportService.GetTopCourtsAsync(fromStart, toExclusive);
+                lstTopCourts.Items.Clear();
+                foreach (var c in topCourts)
+                {
+                    lstTopCourts.Items.Add(new ListViewItem(new[] { $"   {c.CourtId}   {c.Name}", c.Type, c.Occupancy, c.Revenue }));
+                }
+            }
+            catch (Exception ex)
+            {
+                DatabaseHelper.TryLog("Report TopCourts Error", ex, "UCBaoCao.ReloadAsync TopCourts");
+            }
+        }
+
+        private async System.Threading.Tasks.Task LoadKpisAsync(DateTime fromStart, DateTime toExclusive, int days)
+        {
             // KPI (selected range) + delta vs previous period (same length)
             try
             {
-                var dt = DemoPick.Services.DatabaseHelper.ExecuteQuery(@"
-                    DECLARE @currStart DATETIME = @FromStart;
-                    DECLARE @currEnd DATETIME = @ToExclusive;
-                    DECLARE @days INT = @Days;
-                    DECLARE @prevStart DATETIME = DATEADD(DAY, -@days, @currStart);
-                    DECLARE @prevEnd DATETIME = @currStart;
+                var kpi = await _reportService.GetKpisAsync(fromStart, toExclusive, days);
 
-                    DECLARE @activeCourts INT = (SELECT COUNT(*) FROM Courts WHERE Status='Active');
-                    DECLARE @capacityHours DECIMAL(18,2) = @activeCourts * 16.0 * @days;
+                decimal currRev = kpi?.CurrRev ?? 0m;
+                decimal prevRev = kpi?.PrevRev ?? 0m;
+                decimal currOcc = kpi?.CurrOcc ?? 0m;
+                decimal prevOcc = kpi?.PrevOcc ?? 0m;
+                int currNewCust = kpi?.CurrNewCust ?? 0;
+                int prevNewCust = kpi?.PrevNewCust ?? 0;
 
-                    DECLARE @currPosRev DECIMAL(18,2) = ISNULL((SELECT SUM(FinalAmount) FROM Invoices WHERE CreatedAt >= @currStart AND CreatedAt < @currEnd), 0);
-                    DECLARE @prevPosRev DECIMAL(18,2) = ISNULL((SELECT SUM(FinalAmount) FROM Invoices WHERE CreatedAt >= @prevStart AND CreatedAt < @prevEnd), 0);
+                // Values (current range)
+                lblC1Value.Text = currRev == 0 ? "0đ" : currRev.ToString("N0", CultureInfo.CurrentCulture) + "đ";
+                lblC2Value.Text = Math.Round(currOcc, 0).ToString(CultureInfo.CurrentCulture) + "%";
+                lblC3Value.Text = currNewCust.ToString(CultureInfo.CurrentCulture);
 
-                    DECLARE @currCourtRev DECIMAL(18,2) = ISNULL((
-                        SELECT SUM((DATEDIFF(minute, B.StartTime, B.EndTime) / 60.0) * C.HourlyRate)
-                        FROM Bookings B
-                        JOIN Courts C ON B.CourtID = C.CourtID
-                        WHERE B.Status != 'Cancelled'
-                          AND B.Status != 'Maintenance'
-                          AND B.StartTime >= @currStart AND B.StartTime < @currEnd
-                    ), 0);
-                    DECLARE @prevCourtRev DECIMAL(18,2) = ISNULL((
-                        SELECT SUM((DATEDIFF(minute, B.StartTime, B.EndTime) / 60.0) * C.HourlyRate)
-                        FROM Bookings B
-                        JOIN Courts C ON B.CourtID = C.CourtID
-                        WHERE B.Status != 'Cancelled'
-                          AND B.Status != 'Maintenance'
-                          AND B.StartTime >= @prevStart AND B.StartTime < @prevEnd
-                    ), 0);
-
-                    DECLARE @currRev DECIMAL(18,2) = @currPosRev + @currCourtRev;
-                    DECLARE @prevRev DECIMAL(18,2) = @prevPosRev + @prevCourtRev;
-
-                    DECLARE @currBookedHours DECIMAL(18,2) = ISNULL((
-                        SELECT SUM(DATEDIFF(minute, StartTime, EndTime) / 60.0)
-                        FROM Bookings
-                        WHERE Status != 'Cancelled'
-                          AND Status != 'Maintenance'
-                          AND StartTime >= @currStart AND StartTime < @currEnd
-                    ), 0);
-                    DECLARE @prevBookedHours DECIMAL(18,2) = ISNULL((
-                        SELECT SUM(DATEDIFF(minute, StartTime, EndTime) / 60.0)
-                        FROM Bookings
-                        WHERE Status != 'Cancelled'
-                          AND Status != 'Maintenance'
-                          AND StartTime >= @prevStart AND StartTime < @prevEnd
-                    ), 0);
-
-                    DECLARE @currOcc DECIMAL(18,2) = CASE WHEN @capacityHours = 0 THEN 0 ELSE (@currBookedHours * 100.0 / @capacityHours) END;
-                    DECLARE @prevOcc DECIMAL(18,2) = CASE WHEN @capacityHours = 0 THEN 0 ELSE (@prevBookedHours * 100.0 / @capacityHours) END;
-
-                    ;WITH Activity AS (
-                        SELECT MemberID, CreatedAt AS At
-                        FROM Invoices
-                        WHERE MemberID IS NOT NULL AND CreatedAt < @currEnd
-                        UNION ALL
-                        SELECT MemberID, StartTime AS At
-                        FROM Bookings
-                        WHERE MemberID IS NOT NULL AND Status != 'Cancelled' AND Status != 'Maintenance' AND StartTime < @currEnd
-                    ), FirstActivity AS (
-                        SELECT MemberID, MIN(At) AS FirstAt
-                        FROM Activity
-                        GROUP BY MemberID
-                    )
-                    SELECT
-                        @currRev AS CurrRev,
-                        @prevRev AS PrevRev,
-                        @currOcc AS CurrOcc,
-                        @prevOcc AS PrevOcc,
-                        (SELECT COUNT(*) FROM FirstActivity WHERE FirstAt >= @currStart AND FirstAt < @currEnd) AS CurrNewCust,
-                        (SELECT COUNT(*) FROM FirstActivity WHERE FirstAt >= @prevStart AND FirstAt < @prevEnd) AS PrevNewCust;
-                ",
-                new SqlParameter("@FromStart", fromStart),
-                new SqlParameter("@ToExclusive", toExclusive),
-                new SqlParameter("@Days", days));
-                
-                if (dt.Rows.Count > 0)
-                {
-                    decimal currRev = Convert.ToDecimal(dt.Rows[0]["CurrRev"]);
-                    decimal prevRev = Convert.ToDecimal(dt.Rows[0]["PrevRev"]);
-                    decimal currOcc = Convert.ToDecimal(dt.Rows[0]["CurrOcc"]);
-                    decimal prevOcc = Convert.ToDecimal(dt.Rows[0]["PrevOcc"]);
-                    int currNewCust = Convert.ToInt32(dt.Rows[0]["CurrNewCust"]);
-                    int prevNewCust = Convert.ToInt32(dt.Rows[0]["PrevNewCust"]);
-
-                    // Values (current 7 days)
-                    lblC1Value.Text = currRev == 0 ? "0đ" : currRev.ToString("N0", CultureInfo.CurrentCulture) + "đ";
-                    lblC2Value.Text = Math.Round(currOcc, 0).ToString(CultureInfo.CurrentCulture) + "%";
-                    lblC3Value.Text = currNewCust.ToString(CultureInfo.CurrentCulture);
-
-                    // Badges (delta vs previous 7 days)
-                    ApplyBadgePercent(lblC1Badge, currRev, prevRev);
-                    ApplyBadgeDeltaPoints(lblC2Badge, currOcc, prevOcc);
-                    ApplyBadgePercent(lblC3Badge, currNewCust, prevNewCust);
-                }
+                // Badges (delta vs previous same-length period)
+                ApplyBadgePercent(lblC1Badge, currRev, prevRev);
+                ApplyBadgeDeltaPoints(lblC2Badge, currOcc, prevOcc);
+                ApplyBadgePercent(lblC3Badge, currNewCust, prevNewCust);
             }
             catch (Exception ex)
             {
                 DatabaseHelper.TryLog("Report KPI Error", ex, "UCBaoCao.LoadDataAsync KPI");
             }
+        }
 
-            // Trend Data - Dynamic (selected range)
-            chartTrend.Series[0].Points.Clear();
-            try {
-                var dtTrend = DemoPick.Services.DatabaseHelper.ExecuteQuery(@"
-                    ;WITH Dates AS (
-                        SELECT CAST(@FromDate AS DATE) AS Dt
-                        UNION ALL
-                        SELECT DATEADD(DAY, 1, Dt)
-                        FROM Dates
-                        WHERE Dt < CAST(@ToDate AS DATE)
-                    )
-                    SELECT
-                        FORMAT(D.Dt, 'dd/MM') as Label,
-                        ISNULL(SUM(I.FinalAmount), 0) + ISNULL(SUM(BR.CourtRevenue), 0) as Revenue
-                    FROM Dates D
-                    LEFT JOIN Invoices I 
-                        ON CAST(I.CreatedAt AS DATE) = D.Dt
-                        AND I.CreatedAt >= @FromStart AND I.CreatedAt < @ToExclusive
-                    LEFT JOIN (
-                        SELECT
-                            CAST(B.StartTime AS DATE) as Dt,
-                            SUM((DATEDIFF(minute, B.StartTime, B.EndTime) / 60.0) * C.HourlyRate) as CourtRevenue
-                        FROM Bookings B
-                        JOIN Courts C ON B.CourtID = C.CourtID
-                        WHERE B.Status != 'Cancelled'
-                                                    AND B.Status != 'Maintenance'
-                          AND B.StartTime >= @FromStart AND B.StartTime < @ToExclusive
-                        GROUP BY CAST(B.StartTime AS DATE)
-                    ) BR ON BR.Dt = D.Dt
-                    GROUP BY D.Dt
-                    ORDER BY D.Dt
-                    OPTION (MAXRECURSION 0);
-                ",
-                new SqlParameter("@FromDate", fromStart.Date),
-                new SqlParameter("@ToDate", toDateInclusive.Date),
-                new SqlParameter("@FromStart", fromStart),
-                new SqlParameter("@ToExclusive", toExclusive));
-                foreach (System.Data.DataRow r in dtTrend.Rows)
+        private async System.Threading.Tasks.Task LoadChartsAsync(DateTime fromStart, DateTime toExclusive, DateTime fromDateInclusive, DateTime toDateInclusive)
+        {
+            // Trend + Pie (selected range)
+            try
+            {
+                chartTrend.Series[0].Points.Clear();
+                var trend = await _reportService.GetTrendAsync(fromStart, toExclusive, fromDateInclusive, toDateInclusive);
+                foreach (var p in trend)
                 {
-                    chartTrend.Series[0].Points.AddXY(r["Label"].ToString(), Convert.ToDecimal(r["Revenue"]));
+                    chartTrend.Series[0].Points.AddXY(p.Label, p.Revenue);
                 }
 
-                // Pie Data - Dynamic courts revenue (selected range)
                 chartPie.Series[0].Points.Clear();
-                var dtPie = DemoPick.Services.DatabaseHelper.ExecuteQuery(@"
-                    SELECT TOP 4
-                        C.Name,
-                        ISNULL(SUM(CASE
-                            WHEN B.BookingID IS NULL THEN 0
-                            ELSE (DATEDIFF(minute, B.StartTime, B.EndTime) / 60.0) * C.HourlyRate
-                        END), 0) as Rev
-                    FROM Courts C
-                    LEFT JOIN Bookings B 
-                        ON C.CourtID = B.CourtID
-                        AND B.Status != 'Cancelled'
-                        AND B.Status != 'Maintenance'
-                        AND B.StartTime >= @FromStart AND B.StartTime < @ToExclusive
-                    GROUP BY C.Name
-                    ORDER BY Rev DESC
-                ",
-                new SqlParameter("@FromStart", fromStart),
-                new SqlParameter("@ToExclusive", toExclusive));
-                
-                if (dtPie.Rows.Count == 0 || (dtPie.Rows.Count > 0 && Convert.ToDecimal(dtPie.Rows[0]["Rev"]) == 0))
+                var pie = await _reportService.GetTopCourtsRevenueAsync(fromStart, toExclusive);
+
+                if (pie.Count == 0 || (pie.Count > 0 && pie[0].Revenue == 0))
                 {
                     chartPie.Series[0].Points.AddXY("Chưa có D.Thu", 100);
                     chartPie.Series[0].Points[0].Color = Color.LightGray;
@@ -302,25 +236,20 @@ namespace DemoPick
                 {
                     Color[] colors = { Color.FromArgb(76, 175, 80), Color.FromArgb(129, 199, 132), Color.FromArgb(165, 214, 167), Color.FromArgb(232, 245, 233) };
                     int i = 0;
-                    foreach (System.Data.DataRow r in dtPie.Rows)
+                    foreach (var s in pie)
                     {
-                        if (Convert.ToDecimal(r["Rev"]) > 0)
+                        if (s.Revenue > 0)
                         {
-                            chartPie.Series[0].Points.AddXY(r["Name"].ToString(), Convert.ToDecimal(r["Rev"]));
+                            chartPie.Series[0].Points.AddXY(s.Name, s.Revenue);
                             chartPie.Series[0].Points[chartPie.Series[0].Points.Count - 1].Color = colors[i % colors.Length];
                             i++;
                         }
                     }
                 }
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 DatabaseHelper.TryLog("Report Charts Error", ex, "UCBaoCao.LoadDataAsync Trend/Pie");
-            }
-
-            }
-            finally
-            {
-                if (DateFilter != null) DateFilter.ApplyEnabled = true;
             }
         }
 

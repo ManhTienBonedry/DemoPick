@@ -44,6 +44,7 @@ BEGIN
         CourtID INT NOT NULL,
         MemberID INT NULL,
         GuestName NVARCHAR(100) NULL,
+        Note NVARCHAR(200) NULL,
         StartTime DATETIME NOT NULL,
         EndTime DATETIME NOT NULL,
         Status NVARCHAR(50) NOT NULL CONSTRAINT DF_Bookings_Status DEFAULT 'Confirmed'
@@ -188,6 +189,7 @@ CREATE PROCEDURE dbo.sp_CreateBooking
     @CourtID INT,
     @MemberID INT = NULL,
     @GuestName NVARCHAR(100) = NULL,
+    @Note NVARCHAR(200) = NULL,
     @StartTime DATETIME,
     @EndTime DATETIME,
     @Status NVARCHAR(50) = ''Confirmed''
@@ -206,8 +208,8 @@ BEGIN
         RETURN;
     END
 
-    INSERT INTO dbo.Bookings (CourtID, MemberID, GuestName, StartTime, EndTime, Status)
-    VALUES (@CourtID, @MemberID, @GuestName, @StartTime, @EndTime, @Status);
+    INSERT INTO dbo.Bookings (CourtID, MemberID, GuestName, Note, StartTime, EndTime, Status)
+    VALUES (@CourtID, @MemberID, @GuestName, @Note, @StartTime, @EndTime, @Status);
 END
 ');
 END

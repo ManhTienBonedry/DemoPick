@@ -28,22 +28,45 @@ namespace DemoPick
             {
                 return;
             }
-            
-            // Self-heal corrupted database text (tr?i instead of trời)
-            try { DemoPick.Services.DatabaseHelper.ExecuteNonQuery("UPDATE Courts SET Name = REPLACE(Name, 'tr?i', N'trời') WHERE Name LIKE '%tr?i%';"); }
-            catch (Exception ex)
-            {
-                DemoPick.Services.DatabaseHelper.TryLog("DB Self-heal Skipped", ex, "FrmChinh.ctor");
-            }
+
+            new DatabaseMaintenanceService().TryHealCorruptedCourtNames();
 
             InitModules();
+
+            // Consistent inner page background across all modules (better contrast with white cards).
+            UiTheme.ApplyPageBackground(this);
+            UiTheme.ApplyPageBackground(pnlContent);
+
+            // Ensure the 1px sidebar border isn't covered by full-width child panels (e.g., admin footer).
+            // Padding reserves the last pixel column for the border line we draw in Paint.
+            if (pnlSidebar != null)
+            {
+                var p = pnlSidebar.Padding;
+                pnlSidebar.Padding = new Padding(p.Left, p.Top, Math.Max(p.Right, 1), p.Bottom);
+            }
+            if (pnlLogo != null)
+            {
+                pnlLogo.Dock = DockStyle.Top;
+            }
 
             ApplyCurrentUserUI();
             ApplyRolePermissions();
             
             // Draw clean subtle 1px borders per Design System #e5e7eb
-            pnlSidebar.Paint += (s, e) => e.Graphics.DrawLine(new Pen(Color.FromArgb(229, 231, 235), 1), pnlSidebar.Width-1, 0, pnlSidebar.Width-1, pnlSidebar.Height);
-            pnlHeader.Paint += (s, e) => e.Graphics.DrawLine(new Pen(Color.FromArgb(229, 231, 235), 1), 0, pnlHeader.Height-1, pnlHeader.Width, pnlHeader.Height-1);
+            pnlSidebar.Paint += (s, e) =>
+            {
+                using (var pen = new Pen(Color.FromArgb(229, 231, 235), 1))
+                {
+                    e.Graphics.DrawLine(pen, pnlSidebar.Width - 1, 0, pnlSidebar.Width - 1, pnlSidebar.Height);
+                }
+            };
+            pnlHeader.Paint += (s, e) =>
+            {
+                using (var pen = new Pen(Color.FromArgb(229, 231, 235), 1))
+                {
+                    e.Graphics.DrawLine(pen, 0, pnlHeader.Height - 1, pnlHeader.Width, pnlHeader.Height - 1);
+                }
+            };
 
         }
 
@@ -122,6 +145,10 @@ namespace DemoPick
         public void SwitchModule(UserControl uc, Sunny.UI.UIPanel activeBtn, string title, string subtitle)
         {
             pnlContent.Controls.Clear();
+
+            UiTheme.ApplyPageBackground(pnlContent);
+            UiTheme.ApplyModuleTheme(uc);
+
             pnlContent.Controls.Add(uc);
 
             // Refresh data-driven modules when navigating between pages.

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Threading.Tasks;
 using DemoPick.Models;
 
@@ -8,6 +9,111 @@ namespace DemoPick.Services
 {
     public class InventoryService
     {
+        public async Task AddProductAsync(string sku, string name, string category, decimal price, int stockQuantity, int minThreshold)
+        {
+            if (string.IsNullOrWhiteSpace(sku)) throw new ArgumentException("SKU is required.", nameof(sku));
+            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Name is required.", nameof(name));
+            if (price <= 0) throw new ArgumentOutOfRangeException(nameof(price), "Price must be > 0.");
+            if (stockQuantity <= 0) throw new ArgumentOutOfRangeException(nameof(stockQuantity), "StockQuantity must be > 0.");
+            if (minThreshold < 0) minThreshold = 0;
+
+            sku = sku.Trim();
+            name = name.Trim();
+            category = (category ?? "").Trim();
+
+            await Task.Run(() =>
+            {
+                const string insertSql = @"
+INSERT INTO Products (SKU, Name, Category, Price, StockQuantity, MinThreshold)
+VALUES (@SKU, @Name, @Category, @Price, @StockQuantity, @MinThreshold)";
+
+                DatabaseHelper.ExecuteNonQuery(
+                    insertSql,
+                    new SqlParameter("@SKU", sku),
+                    new SqlParameter("@Name", name),
+                    new SqlParameter("@Category", category),
+                    new SqlParameter("@Price", price),
+                    new SqlParameter("@StockQuantity", stockQuantity),
+                    new SqlParameter("@MinThreshold", minThreshold)
+                );
+
+                DatabaseHelper.ExecuteNonQuery(
+                    "INSERT INTO SystemLogs (EventDesc, SubDesc) VALUES (@EventDesc, @SubDesc)",
+                    new SqlParameter("@EventDesc", "Nhập Kho Trực Tiếp"),
+                    new SqlParameter("@SubDesc", $"+{stockQuantity} {name}")
+                );
+            });
+        }
+
+        public async Task<List<string>> GetProductCategoriesAsync()
+        {
+            return await Task.Run(() =>
+            {
+                var list = new List<string>();
+                var dt = DatabaseHelper.ExecuteQuery(
+                    "SELECT DISTINCT Category FROM Products WHERE Category IS NOT NULL AND LTRIM(RTRIM(Category)) <> '' ORDER BY Category");
+                foreach (DataRow row in dt.Rows)
+                {
+                    string cat = row[0]?.ToString();
+                    if (string.IsNullOrWhiteSpace(cat)) continue;
+                    list.Add(cat.Trim());
+                }
+                return list;
+            });
+        }
+
+        public async Task<List<ProductCatalogItemModel>> GetProductsAsync()
+        {
+            return await Task.Run(() =>
+            {
+                var list = new List<ProductCatalogItemModel>();
+                var dt = DatabaseHelper.ExecuteQuery("SELECT ProductID, Name, Price, Category FROM Products");
+                foreach (DataRow row in dt.Rows)
+                {
+                    int productId = row["ProductID"] == DBNull.Value ? 0 : Convert.ToInt32(row["ProductID"]);
+                    string name = row["Name"]?.ToString() ?? "";
+                    decimal price = row["Price"] == DBNull.Value ? 0m : Convert.ToDecimal(row["Price"]);
+                    string category = row["Category"]?.ToString() ?? "";
+
+                    list.Add(new ProductCatalogItemModel
+                    {
+                        ProductId = productId,
+                        Name = name,
+                        Price = price,
+                        Category = category
+                    });
+                }
+                return list;
+            });
+        }
+
+        public async Task<InventoryKpiModel> GetInventoryKpisAsync()
+        {
+            return await Task.Run(() =>
+            {
+                var dt = DatabaseHelper.ExecuteQuery(@"
+                    SELECT 
+                        ISNULL(SUM(Price * StockQuantity), 0) as TotalVal,
+                        (SELECT COUNT(*) FROM Products WHERE StockQuantity <= MinThreshold AND Category != N'Dịch vụ đi kèm') as CriticalItems,
+                        (SELECT ISNULL(SUM(Quantity), 0) FROM InvoiceDetails) as Sales,
+                        (SELECT COUNT(*) FROM Invoices) as InvoicesCount
+                    FROM Products WHERE Category != N'Dịch vụ đi kèm'
+                ");
+
+                if (dt.Rows.Count <= 0)
+                    return new InventoryKpiModel();
+
+                var row = dt.Rows[0];
+                return new InventoryKpiModel
+                {
+                    TotalValue = row["TotalVal"] == DBNull.Value ? 0m : Convert.ToDecimal(row["TotalVal"]),
+                    CriticalItems = row["CriticalItems"] == DBNull.Value ? 0 : Convert.ToInt32(row["CriticalItems"]),
+                    Sales = row["Sales"] == DBNull.Value ? 0 : Convert.ToInt32(row["Sales"]),
+                    InvoicesCount = row["InvoicesCount"] == DBNull.Value ? 0 : Convert.ToInt32(row["InvoicesCount"])
+                };
+            });
+        }
+
         public async Task<List<InventoryItemModel>> GetInventoryItemsAsync()
         {
             var list = new List<InventoryItemModel>();

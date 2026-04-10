@@ -97,7 +97,9 @@ namespace DemoPick
 
         private void btnClose_Click(object sender, EventArgs e)
         {
-            Application.Exit();
+            // Let AppFlowContext decide whether to exit.
+            this.DialogResult = DialogResult.Cancel;
+            this.Close();
         }
         
         private void pnlLeft_Paint(object sender, PaintEventArgs e)

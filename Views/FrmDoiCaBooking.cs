@@ -6,9 +6,12 @@ namespace DemoPick.Views
     public partial class FrmDoiCaBooking : Form
     {
         private DateTime _date;
+        private DateTime? _currentStart;
+        private DateTime? _currentEnd;
 
         public DateTime NewStart { get; private set; }
         public DateTime NewEnd { get; private set; }
+        public string NewNote { get; private set; }
 
         // Parameterless ctor for Visual Studio Designer.
         public FrmDoiCaBooking()
@@ -31,6 +34,9 @@ namespace DemoPick.Views
             lblStatusValue.Text = "-";
             lblCurrent.Text = "Hiện tại: -";
 
+            NewNote = string.Empty;
+            if (txtNote != null) txtNote.Text = string.Empty;
+
             if (cbTime.Items.Count > 0 && cbTime.SelectedIndex < 0) cbTime.SelectedIndex = Math.Min(11, cbTime.Items.Count - 1);
             if (cbDuration.Items.Count > 0 && cbDuration.SelectedIndex < 0) cbDuration.SelectedIndex = 1;
         }
@@ -40,6 +46,8 @@ namespace DemoPick.Views
             : this()
         {
             _date = date.Date;
+            _currentStart = currentStart;
+            _currentEnd = currentEnd;
 
             lblCurrent.Text = $"Hiện tại: {currentStart:dd/MM/yyyy HH:mm} - {currentEnd:HH:mm}";
 
@@ -65,6 +73,15 @@ namespace DemoPick.Views
             lblCourtValue.Text = string.IsNullOrWhiteSpace(courtName) ? "-" : courtName;
             lblGuestValue.Text = string.IsNullOrWhiteSpace(guestName) ? "-" : guestName;
             lblStatusValue.Text = string.IsNullOrWhiteSpace(status) ? "-" : status;
+        }
+
+        public FrmDoiCaBooking(DateTime date, int bookingId, string courtName, string guestName, string status, DateTime currentStart, DateTime currentEnd, string currentNote)
+            : this(date, bookingId, courtName, guestName, status, currentStart, currentEnd)
+        {
+            if (txtNote != null)
+            {
+                txtNote.Text = currentNote ?? string.Empty;
+            }
         }
 
         private void WireChrome()
@@ -122,14 +139,24 @@ namespace DemoPick.Views
             DateTime start = _date.AddHours(hh).AddMinutes(mm);
             DateTime end = start.AddMinutes(durationMins);
 
-            if (start < DateTime.Now)
+            bool isTimeUnchanged = _currentStart.HasValue && _currentEnd.HasValue && start == _currentStart.Value && end == _currentEnd.Value;
+
+            if (start < DateTime.Now && !isTimeUnchanged)
             {
                 MessageBox.Show("Giờ bắt đầu đã qua, vui lòng chọn lại.", "Giờ không hợp lệ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
+            string note = (txtNote?.Text ?? string.Empty).Trim();
+            if (note.Length > 200)
+            {
+                MessageBox.Show("Ghi chú tối đa 200 ký tự.", "Ghi chú quá dài", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             NewStart = start;
             NewEnd = end;
+            NewNote = note;
             DialogResult = DialogResult.OK;
             Close();
         }

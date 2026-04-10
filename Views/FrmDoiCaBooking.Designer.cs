@@ -25,6 +25,9 @@ namespace DemoPick.Views
         private System.Windows.Forms.Label lblDuration;
         internal System.Windows.Forms.ComboBox cbDuration;
 
+        private System.Windows.Forms.Label lblNote;
+        internal Sunny.UI.UITextBox txtNote;
+
         internal Sunny.UI.UIButton btnOk;
         internal Sunny.UI.UIButton btnCancel;
 
@@ -59,6 +62,8 @@ namespace DemoPick.Views
             this.cbTime = new System.Windows.Forms.ComboBox();
             this.lblDuration = new System.Windows.Forms.Label();
             this.cbDuration = new System.Windows.Forms.ComboBox();
+            this.lblNote = new System.Windows.Forms.Label();
+            this.txtNote = new Sunny.UI.UITextBox();
             this.btnOk = new Sunny.UI.UIButton();
             this.btnCancel = new Sunny.UI.UIButton();
             this.lblHint = new System.Windows.Forms.Label();
@@ -280,13 +285,39 @@ namespace DemoPick.Views
             this.cbDuration.Size = new System.Drawing.Size(116, 31);
             this.cbDuration.TabIndex = 15;
             // 
+            // lblNote
+            // 
+            this.lblNote.AutoSize = true;
+            this.lblNote.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.lblNote.Location = new System.Drawing.Point(20, 330);
+            this.lblNote.Name = "lblNote";
+            this.lblNote.Size = new System.Drawing.Size(105, 21);
+            this.lblNote.TabIndex = 19;
+            this.lblNote.Text = "Ghi chú thêm:";
+            // 
+            // txtNote
+            // 
+            this.txtNote.Cursor = System.Windows.Forms.Cursors.IBeam;
+            this.txtNote.Font = new System.Drawing.Font("Segoe UI", 10F);
+            this.txtNote.Location = new System.Drawing.Point(140, 324);
+            this.txtNote.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.txtNote.MinimumSize = new System.Drawing.Size(1, 16);
+            this.txtNote.Name = "txtNote";
+            this.txtNote.Padding = new System.Windows.Forms.Padding(5);
+            this.txtNote.Radius = 10;
+            this.txtNote.ShowText = false;
+            this.txtNote.Size = new System.Drawing.Size(360, 36);
+            this.txtNote.TabIndex = 20;
+            this.txtNote.TextAlignment = System.Drawing.ContentAlignment.MiddleLeft;
+            this.txtNote.Watermark = "Nhập ghi chú (nếu có)";
+            // 
             // btnOk
             // 
             this.btnOk.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnOk.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(204)))), ((int)(((byte)(113)))));
             this.btnOk.FillHoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(56)))), ((int)(((byte)(214)))), ((int)(((byte)(123)))));
             this.btnOk.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.btnOk.Location = new System.Drawing.Point(280, 332);
+            this.btnOk.Location = new System.Drawing.Point(280, 382);
             this.btnOk.MinimumSize = new System.Drawing.Size(1, 1);
             this.btnOk.Name = "btnOk";
             this.btnOk.Radius = 18;
@@ -304,7 +335,7 @@ namespace DemoPick.Views
             this.btnCancel.FillHoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
             this.btnCancel.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnCancel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(26)))), ((int)(((byte)(35)))), ((int)(((byte)(50)))));
-            this.btnCancel.Location = new System.Drawing.Point(398, 332);
+            this.btnCancel.Location = new System.Drawing.Point(398, 382);
             this.btnCancel.MinimumSize = new System.Drawing.Size(1, 1);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Radius = 18;
@@ -320,7 +351,7 @@ namespace DemoPick.Views
             this.lblHint.AutoSize = true;
             this.lblHint.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic);
             this.lblHint.ForeColor = System.Drawing.Color.Gray;
-            this.lblHint.Location = new System.Drawing.Point(20, 342);
+            this.lblHint.Location = new System.Drawing.Point(20, 392);
             this.lblHint.Name = "lblHint";
             this.lblHint.Size = new System.Drawing.Size(239, 20);
             this.lblHint.TabIndex = 18;
@@ -331,8 +362,10 @@ namespace DemoPick.Views
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(520, 390);
+            this.ClientSize = new System.Drawing.Size(520, 440);
             this.Controls.Add(this.lblHint);
+            this.Controls.Add(this.txtNote);
+            this.Controls.Add(this.lblNote);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOk);
             this.Controls.Add(this.cbDuration);

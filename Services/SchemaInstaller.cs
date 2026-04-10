@@ -54,12 +54,20 @@ namespace DemoPick.Services
             {
                 if (AuthService.TrySeedAdminIfEmpty(out string seededUser, out string seededPass))
                 {
-                    MessageBox.Show(
-                        $"[DEBUG] Đã tạo tài khoản Admin mặc định.\n\nUser: {seededUser}\nPass: {seededPass}\n\n" +
-                        "Gợi ý: set env var DEMOPICK_BOOTSTRAP_ADMIN_PASSWORD để dùng pass cố định khi dev.",
-                        "Bootstrap Admin (DEBUG)",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information);
+                    bool suppressUi = string.Equals(
+                        Environment.GetEnvironmentVariable("DEMOPICK_SUPPRESS_UI"),
+                        "1",
+                        StringComparison.OrdinalIgnoreCase);
+
+                    if (!suppressUi)
+                    {
+                        MessageBox.Show(
+                            $"[DEBUG] Đã tạo tài khoản Admin mặc định.\n\nUser: {seededUser}\nPass: {seededPass}\n\n" +
+                            "Gợi ý: set env var DEMOPICK_BOOTSTRAP_ADMIN_PASSWORD để dùng pass cố định khi dev.",
+                            "Bootstrap Admin (DEBUG)",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information);
+                    }
                 }
             }
             catch

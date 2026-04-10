@@ -8,103 +8,54 @@ using Sunny.UI;
 
 namespace DemoPick
 {
-    public sealed class FrmInvoicePreview : Form
+    public partial class FrmInvoicePreview : Form
     {
         private readonly int _invoiceId;
         private readonly string _courtName;
 
-        private ReportViewer _viewer;
-        private UIPanel _topBar;
-        private UIButton _btnExportPdf;
-        private UIButton _btnExportExcel;
-        private UIButton _btnClose;
+        private static string TryGetExternalImageUriFromResources(string fileStem)
+        {
+            try
+            {
+                string resourcesDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources");
+                if (!Directory.Exists(resourcesDir))
+                    return "";
+
+                string[] preferredExts = { ".png", ".jpg", ".jpeg" };
+                for (int i = 0; i < preferredExts.Length; i++)
+                {
+                    string preferredPath = Path.Combine(resourcesDir, fileStem + preferredExts[i]);
+                    if (File.Exists(preferredPath))
+                        return new Uri(preferredPath).AbsoluteUri;
+                }
+
+                string[] anyMatches = Directory.GetFiles(resourcesDir, fileStem + ".*");
+                for (int i = 0; i < anyMatches.Length; i++)
+                {
+                    if (File.Exists(anyMatches[i]))
+                        return new Uri(anyMatches[i]).AbsoluteUri;
+                }
+
+                return "";
+            }
+            catch
+            {
+                return "";
+            }
+        }
 
         public FrmInvoicePreview(int invoiceId, string courtName)
         {
             _invoiceId = invoiceId;
             _courtName = courtName ?? "";
 
-            InitializeUi();
+            InitializeComponent();
+
+            btnExportPdf.Click += (s, e) => Export("PDF", "pdf", "PDF (*.pdf)|*.pdf");
+            btnExportExcel.Click += (s, e) => Export("EXCELOPENXML", "xlsx", "Excel (*.xlsx)|*.xlsx");
+            btnClose.Click += (s, e) => Close();
 
             Load += (s, e) => LoadReport();
-        }
-
-        private void InitializeUi()
-        {
-            Text = "Hóa đơn";
-            StartPosition = FormStartPosition.CenterParent;
-            Width = 950;
-            Height = 700;
-
-            _topBar = new UIPanel
-            {
-                Dock = DockStyle.Top,
-                Height = 48,
-                FillColor = System.Drawing.Color.White,
-                RectColor = System.Drawing.Color.FromArgb(229, 231, 235),
-                Radius = 0,
-                Text = null
-            };
-
-            _btnExportPdf = new UIButton
-            {
-                Text = "Xuất PDF",
-                Width = 120,
-                Height = 32,
-                Left = 12,
-                Top = 8,
-                Radius = 8,
-                FillColor = System.Drawing.Color.FromArgb(76, 175, 80),
-                FillHoverColor = System.Drawing.Color.FromArgb(86, 185, 90),
-                RectColor = System.Drawing.Color.Transparent,
-                Cursor = Cursors.Hand,
-            };
-            _btnExportPdf.Click += (s, e) => Export("PDF", "pdf", "PDF (*.pdf)|*.pdf");
-
-            _btnExportExcel = new UIButton
-            {
-                Text = "Xuất Excel",
-                Width = 120,
-                Height = 32,
-                Left = 140,
-                Top = 8,
-                Radius = 8,
-                FillColor = System.Drawing.Color.FromArgb(59, 130, 246),
-                FillHoverColor = System.Drawing.Color.FromArgb(79, 150, 255),
-                RectColor = System.Drawing.Color.Transparent,
-                Cursor = Cursors.Hand,
-            };
-            _btnExportExcel.Click += (s, e) => Export("EXCELOPENXML", "xlsx", "Excel (*.xlsx)|*.xlsx");
-
-            _btnClose = new UIButton
-            {
-                Text = "Đóng",
-                Width = 120,
-                Height = 32,
-                Anchor = AnchorStyles.Top | AnchorStyles.Right,
-                Radius = 8,
-                FillColor = System.Drawing.Color.FromArgb(107, 114, 128),
-                FillHoverColor = System.Drawing.Color.FromArgb(127, 134, 148),
-                RectColor = System.Drawing.Color.Transparent,
-                Cursor = Cursors.Hand,
-            };
-            _btnClose.Top = 8;
-            _btnClose.Left = _topBar.Width - _btnClose.Width - 12;
-            _btnClose.Click += (s, e) => Close();
-            _topBar.SizeChanged += (s, e) => _btnClose.Left = _topBar.Width - _btnClose.Width - 12;
-
-            _topBar.Controls.Add(_btnExportPdf);
-            _topBar.Controls.Add(_btnExportExcel);
-            _topBar.Controls.Add(_btnClose);
-
-            _viewer = new ReportViewer
-            {
-                Dock = DockStyle.Fill,
-                ProcessingMode = ProcessingMode.Local
-            };
-
-            Controls.Add(_viewer);
-            Controls.Add(_topBar);
         }
 
         private void LoadReport()
@@ -148,27 +99,26 @@ namespace DemoPick
                     linesDt.Rows.Add(l.ItemName ?? "", l.Quantity, l.UnitPrice, l.LineTotal);
                 }
 
-                _viewer.Reset();
-                _viewer.LocalReport.EnableExternalImages = true;
-                _viewer.LocalReport.ReportEmbeddedResource = "DemoPick.Reports.Bill.rdlc";
-                _viewer.LocalReport.DataSources.Clear();
-                _viewer.LocalReport.DataSources.Add(new ReportDataSource("InvoiceHeader", headerDt));
-                _viewer.LocalReport.DataSources.Add(new ReportDataSource("InvoiceLines", linesDt));
+                reportViewer.Reset();
+                reportViewer.LocalReport.EnableExternalImages = true;
+                reportViewer.LocalReport.ReportEmbeddedResource = "DemoPick.Reports.Bill.rdlc";
+                reportViewer.LocalReport.DataSources.Clear();
+                reportViewer.LocalReport.DataSources.Add(new ReportDataSource("InvoiceHeader", headerDt));
+                reportViewer.LocalReport.DataSources.Add(new ReportDataSource("InvoiceLines", linesDt));
 
                 string logoPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "pick.png");
                 string logoUri = File.Exists(logoPath) ? new Uri(logoPath).AbsoluteUri : "";
 
-                string qrPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "qr.png");
-                string qrUri = File.Exists(qrPath) ? new Uri(qrPath).AbsoluteUri : "";
+                string qrUri = TryGetExternalImageUriFromResources("qr");
 
-                _viewer.LocalReport.SetParameters(new[]
+                reportViewer.LocalReport.SetParameters(new[]
                 {
                     new ReportParameter("LogoPath", logoUri, true),
                     new ReportParameter("QrPath", qrUri, true),
                     new ReportParameter("CourtName", _courtName ?? "", true)
                 });
 
-                _viewer.RefreshReport();
+                reportViewer.RefreshReport();
             }
             catch (Exception ex)
             {
@@ -200,7 +150,7 @@ namespace DemoPick
                     string encoding;
                     string extension;
 
-                    byte[] bytes = _viewer.LocalReport.Render(
+                    byte[] bytes = reportViewer.LocalReport.Render(
                         renderFormat,
                         null,
                         out mimeType,

@@ -61,7 +61,24 @@ namespace DemoPick
 
         private void btnThoat_Click(object sender, EventArgs e)
         {
-            Application.Exit();
+            // Exit the app via the main form so AppFlowContext can end the message loop safely.
+            try
+            {
+                if (this.Owner is Form owner)
+                {
+                    owner.DialogResult = DialogResult.Cancel;
+                    owner.Close();
+                }
+                else
+                {
+                    Application.ExitThread();
+                }
+            }
+            catch
+            {
+                // Best effort.
+                try { Application.ExitThread(); } catch { }
+            }
         }
     }
 }

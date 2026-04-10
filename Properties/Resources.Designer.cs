@@ -63,6 +63,66 @@ namespace DemoPick.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap giaodich {
+            get {
+                object obj = ResourceManager.GetObject("giaodich", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap hết_hàng {
+            get {
+                object obj = ResourceManager.GetObject("hết hàng", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap khach_moi {
+            get {
+                object obj = ResourceManager.GetObject("khach moi", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Kho_1 {
+            get {
+                object obj = ResourceManager.GetObject("Kho 1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Kho_2 {
+            get {
+                object obj = ResourceManager.GetObject("Kho 2", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap kho_4 {
+            get {
+                object obj = ResourceManager.GetObject("kho 4", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap pick {
             get {
                 object obj = ResourceManager.GetObject("pick", resourceCulture);
@@ -76,6 +136,16 @@ namespace DemoPick.Properties {
         internal static System.Drawing.Bitmap pick1 {
             get {
                 object obj = ResourceManager.GetObject("pick1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap tổng_doanh_thu {
+            get {
+                object obj = ResourceManager.GetObject("tổng doanh thu", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

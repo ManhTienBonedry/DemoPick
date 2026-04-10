@@ -8,9 +8,12 @@ namespace DemoPick
 {
     public partial class FrmThemSP : Sunny.UI.UIForm
     {
+        private readonly InventoryService _inventoryService;
+
         public FrmThemSP()
         {
             InitializeComponent();
+            _inventoryService = new InventoryService();
             txtSKU.Text = "PD-" + DateTime.Now.ToString("yyMMddHHmm");
             SetupForm();
         }
@@ -21,7 +24,7 @@ namespace DemoPick
             btnLuu.Click += BtnLuu_Click;
         }
 
-        private void BtnLuu_Click(object sender, EventArgs e)
+        private async void BtnLuu_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtTen.Text) || string.IsNullOrWhiteSpace(txtGia.Text))
             {
@@ -43,28 +46,13 @@ namespace DemoPick
 
             try
             {
-                string sql = @"
-                    INSERT INTO Products (SKU, Name, Category, Price, StockQuantity, MinThreshold)
-                    VALUES (@SKU, @Name, @Category, @Price, @StockQuantity, @MinThreshold)";
-
-                var p = new System.Data.SqlClient.SqlParameter[]
-                {
-                    new System.Data.SqlClient.SqlParameter("@SKU", txtSKU.Text.Trim()),
-                    new System.Data.SqlClient.SqlParameter("@Name", txtTen.Text.Trim()),
-                    new System.Data.SqlClient.SqlParameter("@Category", cboLoai.SelectedItem?.ToString() ?? ""),
-                    new System.Data.SqlClient.SqlParameter("@Price", price),
-                    new System.Data.SqlClient.SqlParameter("@StockQuantity", qty),
-                    new System.Data.SqlClient.SqlParameter("@MinThreshold", 5)
-                };
-
-                DatabaseHelper.ExecuteNonQuery(sql, p);
-
-                // Add Transaction Log
-                string logSql = "INSERT INTO SystemLogs (EventDesc, SubDesc) VALUES (@EventDesc, @SubDesc)";
-                DatabaseHelper.ExecuteNonQuery(
-                    logSql,
-                    new System.Data.SqlClient.SqlParameter("@EventDesc", "Nhập Kho Trực Tiếp"),
-                    new System.Data.SqlClient.SqlParameter("@SubDesc", $"+{txtSoLuong.Text} {txtTen.Text}")
+                await _inventoryService.AddProductAsync(
+                    txtSKU.Text.Trim(),
+                    txtTen.Text.Trim(),
+                    cboLoai.SelectedItem?.ToString() ?? "",
+                    price,
+                    qty,
+                    minThreshold: 5
                 );
 
                 MessageBox.Show("Bơm hàng thành công rực rỡ! Đội POS vỗ tay!", "Cập Nhật SQL", MessageBoxButtons.OK, MessageBoxIcon.Information);

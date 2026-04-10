@@ -35,9 +35,9 @@ namespace DemoPick
         private void InitializeComponent()
         {
             this.pnlHeader = new System.Windows.Forms.Panel();
+            this.btnClose = new System.Windows.Forms.Label();
             this.lblTitle = new System.Windows.Forms.Label();
             this.lblSubTitle = new System.Windows.Forms.Label();
-            this.btnClose = new System.Windows.Forms.Label();
             this.lblOld = new System.Windows.Forms.Label();
             this.txtOldPass = new Sunny.UI.UITextBox();
             this.lblNew = new System.Windows.Forms.Label();
@@ -51,7 +51,7 @@ namespace DemoPick
             // 
             // pnlHeader
             // 
-            this.pnlHeader.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
+            this.pnlHeader.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(238)))), ((int)(((byte)(253)))), ((int)(((byte)(242)))));
             this.pnlHeader.Controls.Add(this.btnClose);
             this.pnlHeader.Controls.Add(this.lblTitle);
             this.pnlHeader.Controls.Add(this.lblSubTitle);
@@ -81,7 +81,7 @@ namespace DemoPick
             this.lblTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(26)))), ((int)(((byte)(35)))), ((int)(((byte)(50)))));
             this.lblTitle.Location = new System.Drawing.Point(30, 25);
             this.lblTitle.Name = "lblTitle";
-            this.lblTitle.Size = new System.Drawing.Size(192, 37);
+            this.lblTitle.Size = new System.Drawing.Size(189, 37);
             this.lblTitle.TabIndex = 0;
             this.lblTitle.Text = "Đổi mật khẩu";
             // 
@@ -92,7 +92,7 @@ namespace DemoPick
             this.lblSubTitle.ForeColor = System.Drawing.Color.Gray;
             this.lblSubTitle.Location = new System.Drawing.Point(32, 65);
             this.lblSubTitle.Name = "lblSubTitle";
-            this.lblSubTitle.Size = new System.Drawing.Size(306, 21);
+            this.lblSubTitle.Size = new System.Drawing.Size(299, 21);
             this.lblSubTitle.TabIndex = 1;
             this.lblSubTitle.Text = "Bảo mật tài khoản bằng mật khẩu an toàn";
             // 
@@ -103,7 +103,7 @@ namespace DemoPick
             this.lblOld.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(60)))), ((int)(((byte)(70)))));
             this.lblOld.Location = new System.Drawing.Point(30, 120);
             this.lblOld.Name = "lblOld";
-            this.lblOld.Size = new System.Drawing.Size(110, 23);
+            this.lblOld.Size = new System.Drawing.Size(109, 23);
             this.lblOld.TabIndex = 1;
             this.lblOld.Text = "Mật khẩu cũ";
             // 
@@ -113,6 +113,7 @@ namespace DemoPick
             this.txtOldPass.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(252)))), ((int)(((byte)(253)))));
             this.txtOldPass.Font = new System.Drawing.Font("Segoe UI", 12F);
             this.txtOldPass.Location = new System.Drawing.Point(35, 150);
+            this.txtOldPass.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.txtOldPass.MinimumSize = new System.Drawing.Size(1, 16);
             this.txtOldPass.Name = "txtOldPass";
             this.txtOldPass.Padding = new System.Windows.Forms.Padding(5);
@@ -123,6 +124,7 @@ namespace DemoPick
             this.txtOldPass.Size = new System.Drawing.Size(380, 40);
             this.txtOldPass.TabIndex = 2;
             this.txtOldPass.TextAlignment = System.Drawing.ContentAlignment.MiddleLeft;
+            this.txtOldPass.Watermark = "";
             // 
             // lblNew
             // 
@@ -131,7 +133,7 @@ namespace DemoPick
             this.lblNew.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(60)))), ((int)(((byte)(70)))));
             this.lblNew.Location = new System.Drawing.Point(30, 210);
             this.lblNew.Name = "lblNew";
-            this.lblNew.Size = new System.Drawing.Size(121, 23);
+            this.lblNew.Size = new System.Drawing.Size(123, 23);
             this.lblNew.TabIndex = 3;
             this.lblNew.Text = "Mật khẩu mới";
             // 
@@ -141,6 +143,7 @@ namespace DemoPick
             this.txtNewPass.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(252)))), ((int)(((byte)(253)))));
             this.txtNewPass.Font = new System.Drawing.Font("Segoe UI", 12F);
             this.txtNewPass.Location = new System.Drawing.Point(35, 240);
+            this.txtNewPass.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.txtNewPass.MinimumSize = new System.Drawing.Size(1, 16);
             this.txtNewPass.Name = "txtNewPass";
             this.txtNewPass.Padding = new System.Windows.Forms.Padding(5);
@@ -151,6 +154,7 @@ namespace DemoPick
             this.txtNewPass.Size = new System.Drawing.Size(380, 40);
             this.txtNewPass.TabIndex = 4;
             this.txtNewPass.TextAlignment = System.Drawing.ContentAlignment.MiddleLeft;
+            this.txtNewPass.Watermark = "";
             // 
             // lblConfirm
             // 
@@ -159,7 +163,7 @@ namespace DemoPick
             this.lblConfirm.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(60)))), ((int)(((byte)(70)))));
             this.lblConfirm.Location = new System.Drawing.Point(30, 300);
             this.lblConfirm.Name = "lblConfirm";
-            this.lblConfirm.Size = new System.Drawing.Size(193, 23);
+            this.lblConfirm.Size = new System.Drawing.Size(187, 23);
             this.lblConfirm.TabIndex = 5;
             this.lblConfirm.Text = "Xác nhận lại mật khẩu";
             // 
@@ -169,6 +173,7 @@ namespace DemoPick
             this.txtConfirm.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(252)))), ((int)(((byte)(253)))));
             this.txtConfirm.Font = new System.Drawing.Font("Segoe UI", 12F);
             this.txtConfirm.Location = new System.Drawing.Point(35, 330);
+            this.txtConfirm.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.txtConfirm.MinimumSize = new System.Drawing.Size(1, 16);
             this.txtConfirm.Name = "txtConfirm";
             this.txtConfirm.Padding = new System.Windows.Forms.Padding(5);
@@ -179,6 +184,24 @@ namespace DemoPick
             this.txtConfirm.Size = new System.Drawing.Size(380, 40);
             this.txtConfirm.TabIndex = 6;
             this.txtConfirm.TextAlignment = System.Drawing.ContentAlignment.MiddleLeft;
+            this.txtConfirm.Watermark = "";
+            // 
+            // btnSave
+            // 
+            this.btnSave.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnSave.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(119)))), ((int)(((byte)(219)))), ((int)(((byte)(44)))));
+            this.btnSave.FillHoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(129)))), ((int)(((byte)(229)))), ((int)(((byte)(54)))));
+            this.btnSave.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold);
+            this.btnSave.Location = new System.Drawing.Point(235, 400);
+            this.btnSave.MinimumSize = new System.Drawing.Size(1, 1);
+            this.btnSave.Name = "btnSave";
+            this.btnSave.Radius = 8;
+            this.btnSave.RectColor = System.Drawing.Color.FromArgb(((int)(((byte)(119)))), ((int)(((byte)(219)))), ((int)(((byte)(44)))));
+            this.btnSave.Size = new System.Drawing.Size(180, 45);
+            this.btnSave.TabIndex = 8;
+            this.btnSave.Text = "Lưu thay đổi";
+            this.btnSave.TipsFont = new System.Drawing.Font("Microsoft Sans Serif", 9F);
+            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
             // 
             // btnCancel
             // 
@@ -195,23 +218,8 @@ namespace DemoPick
             this.btnCancel.Size = new System.Drawing.Size(180, 45);
             this.btnCancel.TabIndex = 7;
             this.btnCancel.Text = "Hủy bỏ";
+            this.btnCancel.TipsFont = new System.Drawing.Font("Microsoft Sans Serif", 9F);
             this.btnCancel.Click += new System.EventHandler(this.btnClose_Click);
-            // 
-            // btnSave
-            // 
-            this.btnSave.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnSave.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(119)))), ((int)(((byte)(219)))), ((int)(((byte)(44)))));
-            this.btnSave.FillHoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(129)))), ((int)(((byte)(229)))), ((int)(((byte)(54)))));
-            this.btnSave.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold);
-            this.btnSave.Location = new System.Drawing.Point(235, 400);
-            this.btnSave.MinimumSize = new System.Drawing.Size(1, 1);
-            this.btnSave.Name = "btnSave";
-            this.btnSave.Radius = 8;
-            this.btnSave.RectColor = System.Drawing.Color.FromArgb(((int)(((byte)(119)))), ((int)(((byte)(219)))), ((int)(((byte)(44)))));
-            this.btnSave.Size = new System.Drawing.Size(180, 45);
-            this.btnSave.TabIndex = 8;
-            this.btnSave.Text = "Lưu thay đổi";
-            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
             // 
             // FrmDoiMatKhau
             // 

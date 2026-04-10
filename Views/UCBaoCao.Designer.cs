@@ -95,7 +95,7 @@ namespace DemoPick
             this.pnlCard1.Controls.Add(this.lblC1Value);
             this.pnlCard1.FillColor = System.Drawing.Color.White;
             this.pnlCard1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
-            this.pnlCard1.Location = new System.Drawing.Point(20, 40);
+            this.pnlCard1.Location = new System.Drawing.Point(20, 60);
             this.pnlCard1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.pnlCard1.MinimumSize = new System.Drawing.Size(1, 1);
             this.pnlCard1.Name = "pnlCard1";
@@ -155,7 +155,7 @@ namespace DemoPick
             this.pnlCard2.Controls.Add(this.lblC2Value);
             this.pnlCard2.FillColor = System.Drawing.Color.White;
             this.pnlCard2.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
-            this.pnlCard2.Location = new System.Drawing.Point(400, 40);
+            this.pnlCard2.Location = new System.Drawing.Point(400, 60);
             this.pnlCard2.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.pnlCard2.MinimumSize = new System.Drawing.Size(1, 1);
             this.pnlCard2.Name = "pnlCard2";
@@ -206,7 +206,7 @@ namespace DemoPick
             this.pnlCard3.Controls.Add(this.lblC3Value);
             this.pnlCard3.FillColor = System.Drawing.Color.White;
             this.pnlCard3.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
-            this.pnlCard3.Location = new System.Drawing.Point(780, 40);
+            this.pnlCard3.Location = new System.Drawing.Point(780, 60);
             this.pnlCard3.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.pnlCard3.MinimumSize = new System.Drawing.Size(1, 1);
             this.pnlCard3.Name = "pnlCard3";
@@ -256,7 +256,7 @@ namespace DemoPick
             this.pnlTrend.Controls.Add(this.chartTrend);
             this.pnlTrend.FillColor = System.Drawing.Color.White;
             this.pnlTrend.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
-            this.pnlTrend.Location = new System.Drawing.Point(20, 170);
+            this.pnlTrend.Location = new System.Drawing.Point(20, 190);
             this.pnlTrend.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.pnlTrend.MinimumSize = new System.Drawing.Size(1, 1);
             this.pnlTrend.Name = "pnlTrend";
@@ -302,7 +302,7 @@ namespace DemoPick
             this.pnlPie.Controls.Add(this.chartPie);
             this.pnlPie.FillColor = System.Drawing.Color.White;
             this.pnlPie.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
-            this.pnlPie.Location = new System.Drawing.Point(780, 170);
+            this.pnlPie.Location = new System.Drawing.Point(780, 190);
             this.pnlPie.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.pnlPie.MinimumSize = new System.Drawing.Size(1, 1);
             this.pnlPie.Name = "pnlPie";
@@ -349,7 +349,7 @@ namespace DemoPick
             this.pnlTopCourts.Controls.Add(this.lstTopCourts);
             this.pnlTopCourts.FillColor = System.Drawing.Color.White;
             this.pnlTopCourts.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
-            this.pnlTopCourts.Location = new System.Drawing.Point(20, 490);
+            this.pnlTopCourts.Location = new System.Drawing.Point(20, 510);
             this.pnlTopCourts.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.pnlTopCourts.MinimumSize = new System.Drawing.Size(1, 1);
             this.pnlTopCourts.Name = "pnlTopCourts";

@@ -192,7 +192,7 @@ namespace DemoPick
             // btnLuu
             // 
             this.btnLuu.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnLuu.FillColor = System.Drawing.Color.Lime;
+            this.btnLuu.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(119)))), ((int)(((byte)(219)))), ((int)(((byte)(44)))));
             this.btnLuu.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
             this.btnLuu.Location = new System.Drawing.Point(250, 425);
             this.btnLuu.MinimumSize = new System.Drawing.Size(1, 1);
@@ -205,7 +205,7 @@ namespace DemoPick
             // btnDong
             // 
             this.btnDong.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnDong.FillColor = System.Drawing.Color.Lime;
+            this.btnDong.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(119)))), ((int)(((byte)(219)))), ((int)(((byte)(44)))));
             this.btnDong.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnDong.Location = new System.Drawing.Point(130, 425);
             this.btnDong.MinimumSize = new System.Drawing.Size(1, 1);
@@ -238,7 +238,7 @@ namespace DemoPick
             this.Name = "FrmThemSP";
             this.RectColor = System.Drawing.Color.White;
             this.Text = "Nhập Kho";
-            this.TitleColor = System.Drawing.Color.Lime;
+            this.TitleColor = System.Drawing.Color.FromArgb(((int)(((byte)(119)))), ((int)(((byte)(219)))), ((int)(((byte)(44)))));
             this.ZoomScaleRect = new System.Drawing.Rectangle(19, 19, 450, 500);
             this.ResumeLayout(false);
 

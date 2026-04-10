@@ -21,7 +21,7 @@ namespace DemoPick
         private Label lblCourt;
         private ComboBox cbCourt;
         private Label lblDate;
-        private DateTimePicker dtDate;
+        private UCDateRangeFilter ucDate;
         private Label lblTime;
         private ComboBox cbTime;
         private Label lblDuration;
@@ -44,8 +44,8 @@ namespace DemoPick
         private void InitializeComponent()
         {
             this.pnlTop = new System.Windows.Forms.Panel();
-            this.lblHeaderTop = new System.Windows.Forms.Label();
             this.btnCancelTop = new System.Windows.Forms.Label();
+            this.lblHeaderTop = new System.Windows.Forms.Label();
             this.lblCustomerInfo = new System.Windows.Forms.Label();
             this.lblCustomerName = new System.Windows.Forms.Label();
             this.txtName = new Sunny.UI.UITextBox();
@@ -55,7 +55,7 @@ namespace DemoPick
             this.lblCourt = new System.Windows.Forms.Label();
             this.cbCourt = new System.Windows.Forms.ComboBox();
             this.lblDate = new System.Windows.Forms.Label();
-            this.dtDate = new System.Windows.Forms.DateTimePicker();
+            this.ucDate = new DemoPick.UCDateRangeFilter();
             this.lblTime = new System.Windows.Forms.Label();
             this.cbTime = new System.Windows.Forms.ComboBox();
             this.lblDuration = new System.Windows.Forms.Label();
@@ -71,7 +71,7 @@ namespace DemoPick
             // 
             // pnlTop
             // 
-            this.pnlTop.BackColor = System.Drawing.Color.Chartreuse;
+            this.pnlTop.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(119)))), ((int)(((byte)(219)))), ((int)(((byte)(44)))));
             this.pnlTop.Controls.Add(this.btnCancelTop);
             this.pnlTop.Controls.Add(this.lblHeaderTop);
             this.pnlTop.Dock = System.Windows.Forms.DockStyle.Top;
@@ -214,20 +214,20 @@ namespace DemoPick
             this.lblDate.TabIndex = 15;
             this.lblDate.Text = "Ngày chơi:";
             // 
-            // dtDate
+            // ucDate
             // 
-            this.dtDate.Font = new System.Drawing.Font("Segoe UI", 12F);
-            this.dtDate.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-            this.dtDate.Location = new System.Drawing.Point(20, 335);
-            this.dtDate.Name = "dtDate";
-            this.dtDate.Size = new System.Drawing.Size(210, 34);
-            this.dtDate.TabIndex = 3;
+            this.ucDate.Location = new System.Drawing.Point(20, 332);
+            this.ucDate.Mode = DemoPick.UCDateRangeFilter.DateFilterMode.SingleDate;
+            this.ucDate.Name = "ucDate";
+            this.ucDate.ShowApplyButton = true;
+            this.ucDate.Size = new System.Drawing.Size(260, 39);
+            this.ucDate.TabIndex = 3;
             // 
             // lblTime
             // 
             this.lblTime.AutoSize = true;
             this.lblTime.Font = new System.Drawing.Font("Segoe UI", 10F);
-            this.lblTime.Location = new System.Drawing.Point(250, 310);
+            this.lblTime.Location = new System.Drawing.Point(290, 310);
             this.lblTime.Name = "lblTime";
             this.lblTime.Size = new System.Drawing.Size(104, 23);
             this.lblTime.TabIndex = 14;
@@ -257,9 +257,9 @@ namespace DemoPick
             "21:00",
             "22:00",
             "23:00"});
-            this.cbTime.Location = new System.Drawing.Point(250, 335);
+            this.cbTime.Location = new System.Drawing.Point(290, 335);
             this.cbTime.Name = "cbTime";
-            this.cbTime.Size = new System.Drawing.Size(210, 36);
+            this.cbTime.Size = new System.Drawing.Size(170, 36);
             this.cbTime.TabIndex = 4;
             // 
             // lblDuration
@@ -342,7 +342,7 @@ namespace DemoPick
             // btnConfirm
             // 
             this.btnConfirm.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnConfirm.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(204)))), ((int)(((byte)(113)))));
+            this.btnConfirm.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(119)))), ((int)(((byte)(219)))), ((int)(((byte)(44)))));
             this.btnConfirm.FillHoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(56)))), ((int)(((byte)(214)))), ((int)(((byte)(123)))));
             this.btnConfirm.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
             this.btnConfirm.Location = new System.Drawing.Point(250, 560);
@@ -390,7 +390,7 @@ namespace DemoPick
             this.Controls.Add(this.lblDuration);
             this.Controls.Add(this.cbTime);
             this.Controls.Add(this.lblTime);
-            this.Controls.Add(this.dtDate);
+            this.Controls.Add(this.ucDate);
             this.Controls.Add(this.lblDate);
             this.Controls.Add(this.cbCourt);
             this.Controls.Add(this.lblCourt);
