@@ -1,0 +1,3 @@
+Timestamp,Machine,Module,Iterations,ElapsedMs,OpsPerSec,BaselineMinOpsPerSec,Passed,Mode
+2026-04-10 17:05:42,MANHTIEN,PriceCalculator,20000,18,1077098.73,861678.98,1,baseline-guard
+2026-04-10 17:05:42,MANHTIEN,PendingOrders,20000,6,2968592.29,2374873.83,1,baseline-guard

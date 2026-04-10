@@ -86,6 +86,7 @@ namespace DemoPick
         private void ShowMain()
         {
             var main = new FrmChinh();
+
             main.FormClosed += (s, e) =>
             {
                 if (main.DialogResult == DialogResult.Retry)
