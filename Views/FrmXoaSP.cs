@@ -53,8 +53,7 @@ namespace DemoPick
                 Font = new Font("Segoe UI", 10F)
             };
             _lstProducts.Columns.Add("ID", 70, HorizontalAlignment.Right);
-            _lstProducts.Columns.Add("SKU", 120, HorizontalAlignment.Left);
-            _lstProducts.Columns.Add("Tên", 260, HorizontalAlignment.Left);
+            _lstProducts.Columns.Add("Tên", 320, HorizontalAlignment.Left);
             _lstProducts.Columns.Add("Danh mục", 180, HorizontalAlignment.Left);
             _lstProducts.Columns.Add("Giá", 120, HorizontalAlignment.Right);
             _lstProducts.Columns.Add("Tồn", 80, HorizontalAlignment.Right);
@@ -151,7 +150,6 @@ namespace DemoPick
                         Tag = p
                     };
 
-                    lvi.SubItems.Add((p.Sku ?? string.Empty).Trim());
                     lvi.SubItems.Add((p.Name ?? string.Empty).Trim());
                     lvi.SubItems.Add((p.Category ?? string.Empty).Trim());
                     lvi.SubItems.Add(p.Price.ToString("N0") + "đ");
@@ -188,7 +186,7 @@ namespace DemoPick
             }
 
             var confirm = MessageBox.Show(
-                $"Bạn có chắc muốn xóa '{p.Name}' (SKU: {p.Sku})?",
+                $"Bạn có chắc muốn xóa '{p.Name}'?",
                 "Xác nhận xóa",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Warning);

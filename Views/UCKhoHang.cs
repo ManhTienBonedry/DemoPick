@@ -148,9 +148,7 @@ namespace DemoPick
                     lstKhoHang.Items.Clear();
                     foreach (var item in items)
                     {
-                        string nameCell = string.IsNullOrWhiteSpace(item.Sku)
-                            ? (item.Name ?? string.Empty)
-                            : $"{item.Name} (SKU: {item.Sku})";
+                        string nameCell = item.Name ?? string.Empty;
 
                         var lvi = new ListViewItem(new[] { nameCell, item.Category, item.Stock, ToUiStatus(item.Status), item.Price });
                         lvi.Tag = new DemoPick.Models.ProductCatalogItemModel

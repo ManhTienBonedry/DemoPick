@@ -1,4 +1,5 @@
 using System;
+using System.Data.SqlClient;
 using System.Drawing;
 using System.Globalization;
 using System.Windows.Forms;
@@ -21,7 +22,7 @@ namespace DemoPick
         {
             InitializeComponent();
             _inventoryService = new InventoryService();
-            txtSKU.Text = "PD-" + DateTime.Now.ToString("yyMMddHHmm");
+            txtSKU.Text = GenerateInternalSku();
             SetupForm();
         }
 
@@ -30,6 +31,25 @@ namespace DemoPick
             btnDong.Click += (s, e) => this.Close();
             btnLuu.Click += BtnLuu_Click;
             this.Shown += async (s, e) => await LoadCategoriesAsync();
+
+            // SKU is an internal code (anti-duplication). We keep it in DB but hide it from UI.
+            try
+            {
+                if (lblSKU != null) lblSKU.Visible = false;
+                if (txtSKU != null) txtSKU.Visible = false;
+            }
+            catch
+            {
+                // Best effort.
+            }
+        }
+
+        private static string GenerateInternalSku()
+        {
+            // Not a "scan code" for now; just a unique internal identifier.
+            string ts = DateTime.Now.ToString("yyMMddHHmmss");
+            string rand = Guid.NewGuid().ToString("N").Substring(0, 6).ToUpperInvariant();
+            return $"PD-{ts}-{rand}";
         }
 
         private async System.Threading.Tasks.Task LoadCategoriesAsync()
@@ -90,14 +110,35 @@ namespace DemoPick
 
             try
             {
-                await _inventoryService.AddProductAsync(
-                    txtSKU.Text.Trim(),
-                    txtTen.Text.Trim(),
-                    cboLoai.SelectedItem?.ToString() ?? "",
-                    price,
-                    qty,
-                    minThreshold: 5
-                );
+                string sku = (txtSKU.Text ?? string.Empty).Trim();
+                if (string.IsNullOrWhiteSpace(sku) || sku.StartsWith("SVC-", StringComparison.OrdinalIgnoreCase))
+                {
+                    sku = GenerateInternalSku();
+                    txtSKU.Text = sku;
+                }
+
+                const int maxAttempts = 3;
+                for (int attempt = 1; attempt <= maxAttempts; attempt++)
+                {
+                    try
+                    {
+                        await _inventoryService.AddProductAsync(
+                            sku,
+                            txtTen.Text.Trim(),
+                            cboLoai.SelectedItem?.ToString() ?? "",
+                            price,
+                            qty,
+                            minThreshold: 5
+                        );
+                        break;
+                    }
+                    catch (SqlException ex) when ((ex.Number == 2601 || ex.Number == 2627) && attempt < maxAttempts)
+                    {
+                        // SKU unique index collision - regenerate and retry.
+                        sku = GenerateInternalSku();
+                        txtSKU.Text = sku;
+                    }
+                }
 
                 MessageBox.Show("Bơm hàng thành công rực rỡ! Đội POS vỗ tay!", "Cập Nhật SQL", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 this.DialogResult = DialogResult.OK;

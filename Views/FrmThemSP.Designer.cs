@@ -166,6 +166,7 @@ namespace DemoPick
             this.lblSKU.Size = new System.Drawing.Size(390, 25);
             this.lblSKU.TabIndex = 9;
             this.lblSKU.Text = "Mã Quét Quản Lý Đầu Cuối (SKU):";
+            this.lblSKU.Visible = false;
             // 
             // txtSKU
             // 
@@ -181,13 +182,14 @@ namespace DemoPick
             this.txtSKU.TabIndex = 10;
             this.txtSKU.TextAlignment = System.Drawing.ContentAlignment.MiddleLeft;
             this.txtSKU.Watermark = "";
+            this.txtSKU.Visible = false;
             // 
             // btnLuu
             // 
             this.btnLuu.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnLuu.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(119)))), ((int)(((byte)(219)))), ((int)(((byte)(44)))));
             this.btnLuu.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-            this.btnLuu.Location = new System.Drawing.Point(250, 425);
+            this.btnLuu.Location = new System.Drawing.Point(250, 345);
             this.btnLuu.MinimumSize = new System.Drawing.Size(1, 1);
             this.btnLuu.Name = "btnLuu";
             this.btnLuu.Size = new System.Drawing.Size(170, 45);
@@ -200,7 +202,7 @@ namespace DemoPick
             this.btnDong.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnDong.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(119)))), ((int)(((byte)(219)))), ((int)(((byte)(44)))));
             this.btnDong.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.btnDong.Location = new System.Drawing.Point(130, 425);
+            this.btnDong.Location = new System.Drawing.Point(130, 345);
             this.btnDong.MinimumSize = new System.Drawing.Size(1, 1);
             this.btnDong.Name = "btnDong";
             this.btnDong.Size = new System.Drawing.Size(110, 45);
@@ -212,7 +214,7 @@ namespace DemoPick
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(450, 500);
+            this.ClientSize = new System.Drawing.Size(450, 420);
             this.ControlBoxFillHoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(255)))), ((int)(((byte)(128)))));
             this.Controls.Add(this.btnDong);
             this.Controls.Add(this.btnLuu);
@@ -232,7 +234,7 @@ namespace DemoPick
             this.RectColor = System.Drawing.Color.White;
             this.Text = "Nhập Kho";
             this.TitleColor = System.Drawing.Color.FromArgb(((int)(((byte)(119)))), ((int)(((byte)(219)))), ((int)(((byte)(44)))));
-            this.ZoomScaleRect = new System.Drawing.Rectangle(19, 19, 450, 500);
+            this.ZoomScaleRect = new System.Drawing.Rectangle(19, 19, 450, 420);
             this.ResumeLayout(false);
 
         }
