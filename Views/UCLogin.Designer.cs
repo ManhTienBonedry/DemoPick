@@ -4,7 +4,7 @@ using Sunny.UI;
 
 namespace DemoPick
 {
-    partial class FrmLogin
+    partial class UCLogin
     {
         private System.ComponentModel.IContainer components = null;
 
@@ -271,12 +271,11 @@ namespace DemoPick
             this.lblRegisterNow.Text = "Đăng ký ngay";
             this.lblRegisterNow.Click += new System.EventHandler(this.lblRegisterNow_Click);
             
-            // FrmLogin
-            this.ClientSize = new System.Drawing.Size(900, 620);
+            // UCLogin
             this.Controls.Add(this.pnlRight);
             this.Controls.Add(this.pnlLeft);
-            this.Name = "FrmLogin";
-            this.Text = "Đăng nhập";
+            this.Name = "UCLogin";
+            this.Size = new System.Drawing.Size(900, 620);
             
             this.pnlLeft.ResumeLayout(false);
             this.pnlLeft.PerformLayout();

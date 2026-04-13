@@ -374,9 +374,9 @@ namespace DemoPick
             this.pnlAdmin.Controls.Add(this.lblAdminName);
             this.pnlAdmin.Controls.Add(this.lblAdminStatus);
             this.pnlAdmin.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.pnlAdmin.Location = new System.Drawing.Point(0, 825);
+            this.pnlAdmin.Location = new System.Drawing.Point(0, 794);
             this.pnlAdmin.Name = "pnlAdmin";
-            this.pnlAdmin.Size = new System.Drawing.Size(240, 75);
+            this.pnlAdmin.Size = new System.Drawing.Size(240, 106);
             this.pnlAdmin.TabIndex = 7;
             // 
             // pnlAdminAvatar
@@ -384,31 +384,31 @@ namespace DemoPick
             this.pnlAdminAvatar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(252)))), ((int)(((byte)(231)))));
             this.pnlAdminAvatar.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("pnlAdminAvatar.BackgroundImage")));
             this.pnlAdminAvatar.Controls.Add(this.lblAdminAvatarText);
-            this.pnlAdminAvatar.Location = new System.Drawing.Point(20, 18);
+            this.pnlAdminAvatar.Location = new System.Drawing.Point(15, 20);
             this.pnlAdminAvatar.Name = "pnlAdminAvatar";
-            this.pnlAdminAvatar.Size = new System.Drawing.Size(40, 40);
+            this.pnlAdminAvatar.Size = new System.Drawing.Size(55, 57);
             this.pnlAdminAvatar.TabIndex = 0;
             this.pnlAdminAvatar.Paint += new System.Windows.Forms.PaintEventHandler(this.pnlAdminAvatar_Paint);
             // 
             // lblAdminAvatarText
             // 
             this.lblAdminAvatarText.AutoSize = true;
-            this.lblAdminAvatarText.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.lblAdminAvatarText.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Bold);
             this.lblAdminAvatarText.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(163)))), ((int)(((byte)(74)))));
-            this.lblAdminAvatarText.Location = new System.Drawing.Point(12, 9);
+            this.lblAdminAvatarText.Location = new System.Drawing.Point(14, 9);
             this.lblAdminAvatarText.Name = "lblAdminAvatarText";
-            this.lblAdminAvatarText.Size = new System.Drawing.Size(22, 23);
+            this.lblAdminAvatarText.Size = new System.Drawing.Size(31, 32);
             this.lblAdminAvatarText.TabIndex = 0;
             this.lblAdminAvatarText.Text = "A";
             // 
             // lblAdminName
             // 
             this.lblAdminName.AutoSize = true;
-            this.lblAdminName.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.lblAdminName.Font = new System.Drawing.Font("Segoe UI", 13F, System.Drawing.FontStyle.Bold);
             this.lblAdminName.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(26)))), ((int)(((byte)(35)))), ((int)(((byte)(50)))));
-            this.lblAdminName.Location = new System.Drawing.Point(70, 20);
+            this.lblAdminName.Location = new System.Drawing.Point(83, 20);
             this.lblAdminName.Name = "lblAdminName";
-            this.lblAdminName.Size = new System.Drawing.Size(64, 23);
+            this.lblAdminName.Size = new System.Drawing.Size(81, 30);
             this.lblAdminName.TabIndex = 1;
             this.lblAdminName.Text = "Admin";
             // 
@@ -417,7 +417,7 @@ namespace DemoPick
             this.lblAdminStatus.AutoSize = true;
             this.lblAdminStatus.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.lblAdminStatus.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(107)))), ((int)(((byte)(114)))), ((int)(((byte)(128)))));
-            this.lblAdminStatus.Location = new System.Drawing.Point(70, 44);
+            this.lblAdminStatus.Location = new System.Drawing.Point(87, 50);
             this.lblAdminStatus.Name = "lblAdminStatus";
             this.lblAdminStatus.Size = new System.Drawing.Size(61, 20);
             this.lblAdminStatus.TabIndex = 2;

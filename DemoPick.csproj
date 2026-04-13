@@ -115,12 +115,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Views\FrmLogin.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Views\FrmLogin.Designer.cs">
-      <DependentUpon>FrmLogin.cs</DependentUpon>
-    </Compile>
     <Compile Include="Views\FrmDoiMatKhau.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -157,11 +151,23 @@
     <Compile Include="Views\FrmDatSanCoDinh.Designer.cs">
       <DependentUpon>FrmDatSanCoDinh.cs</DependentUpon>
     </Compile>
-    <Compile Include="Views\FrmRegister.cs">
+    <Compile Include="Views\FrmAuthHost.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Views\FrmRegister.Designer.cs">
-      <DependentUpon>FrmRegister.cs</DependentUpon>
+    <Compile Include="Views\FrmAuthHost.Designer.cs">
+      <DependentUpon>FrmAuthHost.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UCLogin.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\UCLogin.Designer.cs">
+      <DependentUpon>UCLogin.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UCRegister.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\UCRegister.Designer.cs">
+      <DependentUpon>UCRegister.cs</DependentUpon>
     </Compile>
     <Compile Include="Views\FrmUserMenu.cs">
       <SubType>Form</SubType>
@@ -333,11 +339,14 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="Views\FrmLogin.resx">
-      <DependentUpon>FrmLogin.cs</DependentUpon>
+    <EmbeddedResource Include="Views\FrmAuthHost.resx">
+      <DependentUpon>FrmAuthHost.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Views\FrmRegister.resx">
-      <DependentUpon>FrmRegister.cs</DependentUpon>
+    <EmbeddedResource Include="Views\UCLogin.resx">
+      <DependentUpon>UCLogin.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\UCRegister.resx">
+      <DependentUpon>UCRegister.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\FrmThemSP.resx">
       <DependentUpon>FrmThemSP.cs</DependentUpon>
@@ -377,6 +386,8 @@
     <None Include="Database\TesterData_Seed.sql" />
     <None Include="Database\Legacy\migration.sql" />
     <None Include="Tools\TestPrice.cs" />
+    <Content Include="Resources\PickleBall.jpg" />
+    <None Include="Resources\PickleBall1.jpg" />
     <Content Include="Resources\qr.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

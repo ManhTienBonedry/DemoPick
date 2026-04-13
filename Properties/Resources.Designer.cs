@@ -143,6 +143,16 @@ namespace DemoPick.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap PickleBall {
+            get {
+                object obj = ResourceManager.GetObject("PickleBall", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap tổng_doanh_thu {
             get {
                 object obj = ResourceManager.GetObject("tổng doanh thu", resourceCulture);

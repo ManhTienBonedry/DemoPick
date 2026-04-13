@@ -69,10 +69,10 @@ namespace DemoPick
 
         private void ShowLogin()
         {
-            var login = new FrmLogin();
-            login.FormClosed += (s, e) =>
+            var auth = new FrmAuthHost();
+            auth.FormClosed += (s, e) =>
             {
-                if (login.DialogResult == DialogResult.OK)
+                if (auth.DialogResult == DialogResult.OK)
                 {
                     ShowMain();
                 }
@@ -80,9 +80,9 @@ namespace DemoPick
                 {
                     ExitThread();
                 }
-                login.Dispose();
+                auth.Dispose();
             };
-            login.Show();
+            auth.Show();
         }
 
         private void ShowMain()

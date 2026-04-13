@@ -4,7 +4,7 @@ using Sunny.UI;
 
 namespace DemoPick
 {
-    partial class FrmRegister
+    partial class UCRegister
     {
         private System.ComponentModel.IContainer components = null;
 
@@ -351,13 +351,12 @@ namespace DemoPick
             this.picCourt.TabIndex = 0;
             this.picCourt.TabStop = false;
             // 
-            // FrmRegister
+            // UCRegister
             // 
-            this.ClientSize = new System.Drawing.Size(920, 620);
             this.Controls.Add(this.pnlRight);
             this.Controls.Add(this.pnlLeft);
-            this.Name = "FrmRegister";
-            this.Text = "Đăng ký";
+            this.Name = "UCRegister";
+            this.Size = new System.Drawing.Size(920, 620);
             this.pnlLeft.ResumeLayout(false);
             this.pnlLeft.PerformLayout();
             this.pnlRight.ResumeLayout(false);

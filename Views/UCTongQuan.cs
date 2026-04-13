@@ -10,6 +10,8 @@ namespace DemoPick
     {
         private DashboardService _dashboardService;
 
+        private bool _scrollResetQueued;
+
         public UCTongQuan()
         {
             InitializeComponent();
@@ -24,6 +26,58 @@ namespace DemoPick
 
             _dashboardService = new DashboardService();
             LoadRealDataAsync();
+        }
+
+        protected override void OnVisibleChanged(EventArgs e)
+        {
+            base.OnVisibleChanged(e);
+
+            if (DesignModeUtil.IsDesignMode(this))
+            {
+                return;
+            }
+
+            if (Visible)
+            {
+                QueueResetScrollToTop();
+            }
+        }
+
+        public void ResetScrollToTop()
+        {
+            if (!AutoScroll) return;
+
+            try
+            {
+                SuspendLayout();
+                AutoScrollPosition = new Point(0, 0);
+
+                try { if (VerticalScroll != null) VerticalScroll.Value = 0; } catch { }
+                try { if (HorizontalScroll != null) HorizontalScroll.Value = 0; } catch { }
+            }
+            finally
+            {
+                ResumeLayout(true);
+            }
+        }
+
+        private void QueueResetScrollToTop()
+        {
+            if (_scrollResetQueued) return;
+            _scrollResetQueued = true;
+
+            try
+            {
+                BeginInvoke((Action)(() =>
+                {
+                    _scrollResetQueued = false;
+                    ResetScrollToTop();
+                }));
+            }
+            catch
+            {
+                _scrollResetQueued = false;
+            }
         }
 
         private void AttachBorders()
@@ -86,11 +140,6 @@ namespace DemoPick
             lstBookings.Columns.Add("Trạng thái", 150);
             lstBookings.Columns.Add("Doanh thu", 150);
             lstBookings.Items.Clear();
-        }
-
-        private void UCTongQuan_Load(object sender, EventArgs e)
-        {
-            LoadRealDataAsync();
         }
 
         private async void LoadRealDataAsync()
