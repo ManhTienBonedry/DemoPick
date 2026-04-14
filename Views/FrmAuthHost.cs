@@ -43,7 +43,8 @@ namespace DemoPick
             }
 
             // Full-screen borderless host.
-            this.FormBorderStyle = FormBorderStyle.None;
+            // Use standard window chrome so users can close/minimize normally.
+            this.FormBorderStyle = FormBorderStyle.Sizable;
             this.StartPosition = FormStartPosition.CenterScreen;
             this.WindowState = FormWindowState.Maximized;
 

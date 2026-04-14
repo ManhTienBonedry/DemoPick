@@ -20,6 +20,12 @@ namespace DemoPick
                 return;
             }
 
+            // Use the normal window close button instead of a custom big 'X' on the card.
+            if (btnClose != null)
+            {
+                btnClose.Visible = false;
+            }
+
             try
             {
                 // Match legacy register card look (rounded corners).
