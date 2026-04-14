@@ -1,10 +1,12 @@
+using DemoPick.Models;
+
 namespace DemoPick.Services
 {
     internal static class AppSession
     {
-        internal static AuthService.AuthUser CurrentUser { get; private set; }
+        internal static AuthUser CurrentUser { get; private set; }
 
-        internal static void SignIn(AuthService.AuthUser user)
+        internal static void SignIn(AuthUser user)
         {
             CurrentUser = user;
         }

@@ -23,7 +23,12 @@ namespace DemoPick
             try
             {
                 // Match legacy register card look (rounded corners).
-                this.Region = Region.FromHrgn(CreateRoundRectRgn(0, 0, Width, Height, 20, 20));
+                IntPtr hRgn = CreateRoundRectRgn(0, 0, Width, Height, 20, 20);
+                if (hRgn != IntPtr.Zero)
+                {
+                    this.Region = Region.FromHrgn(hRgn);
+                    DeleteObject(hRgn);
+                }
             }
             catch
             {
@@ -45,6 +50,9 @@ namespace DemoPick
             int nBottomRect,
             int nWidthEllipse,
             int nHeightEllipse);
+
+        [System.Runtime.InteropServices.DllImport("gdi32.dll", SetLastError = true)]
+        private static extern bool DeleteObject(IntPtr hObject);
 
         private void btnRegister_Click(object sender, EventArgs e)
         {

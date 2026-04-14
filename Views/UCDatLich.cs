@@ -81,7 +81,10 @@ namespace DemoPick
             pnlTimelineContainer.Paint += (s, e) =>
             {
                 var p = s as Panel;
-                e.Graphics.DrawRectangle(new Pen(Color.FromArgb(229, 231, 235), 1), 0, 0, p.Width - 1, p.Height - 1);
+                using (var pen = new Pen(Color.FromArgb(229, 231, 235), 1))
+                {
+                    e.Graphics.DrawRectangle(pen, 0, 0, p.Width - 1, p.Height - 1);
+                }
             };
 
             pnlCanvas.Paint += RenderTimelineGrid;

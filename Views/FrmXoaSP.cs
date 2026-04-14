@@ -185,6 +185,16 @@ namespace DemoPick
                 return;
             }
 
+            if (p.Category != null && p.Category.Trim().Equals(AppConstants.ProductCategories.Service, StringComparison.OrdinalIgnoreCase))
+            {
+                MessageBox.Show(
+                    "Không thể xóa các sản phẩm thuộc danh mục 'Dịch vụ' mặc định.", 
+                    "Không thể xóa", 
+                    MessageBoxButtons.OK, 
+                    MessageBoxIcon.Warning);
+                return;
+            }
+
             var confirm = MessageBox.Show(
                 $"Bạn có chắc muốn xóa '{p.Name}'?",
                 "Xác nhận xóa",

@@ -282,11 +282,15 @@
       <DependentUpon>UCTongQuan.cs</DependentUpon>
     </Compile>
     <Compile Include="Models\AppModels.cs" />
+    <Compile Include="Models\AuthUser.cs" />
+    <Compile Include="Models\CartLine.cs" />
     <Compile Include="Services\Db.cs" />
     <Compile Include="Services\DatabaseHelper.cs" />
     <Compile Include="Services\DbDiagnostics.cs" />
     <Compile Include="Services\DesignModeUtil.cs" />
+    <Compile Include="Services\AppConstants.cs" />
     <Compile Include="Services\UiTheme.cs" />
+    <Compile Include="Services\SqlQueries.cs" />
     <Compile Include="Services\AuthService.cs" />
     <Compile Include="Services\AuthFeatures.cs" />
     <Compile Include="Services\AppSession.cs" />

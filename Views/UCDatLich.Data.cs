@@ -23,10 +23,28 @@ namespace DemoPick
                 System.Collections.Generic.List<DemoPick.Models.BookingModel> bookings;
 
                 try { courts = _controller.GetCourts() ?? new System.Collections.Generic.List<DemoPick.Models.CourtModel>(); }
-                catch { courts = new System.Collections.Generic.List<DemoPick.Models.CourtModel>(); }
+                catch (Exception ex)
+                {
+                    DemoPick.Services.DatabaseHelper.TryLogThrottled(
+                        throttleKey: "UCDatLich.ReloadCourts",
+                        eventDesc: "Timeline Load Courts Error",
+                        ex: ex,
+                        context: "UCDatLich.ReloadTimelineAsync",
+                        minSeconds: 60);
+                    courts = new System.Collections.Generic.List<DemoPick.Models.CourtModel>();
+                }
 
                 try { bookings = _controller.GetBookingsByDate(date) ?? new System.Collections.Generic.List<DemoPick.Models.BookingModel>(); }
-                catch { bookings = new System.Collections.Generic.List<DemoPick.Models.BookingModel>(); }
+                catch (Exception ex)
+                {
+                    DemoPick.Services.DatabaseHelper.TryLogThrottled(
+                        throttleKey: "UCDatLich.ReloadBookings",
+                        eventDesc: "Timeline Load Bookings Error",
+                        ex: ex,
+                        context: "UCDatLich.ReloadTimelineAsync",
+                        minSeconds: 60);
+                    bookings = new System.Collections.Generic.List<DemoPick.Models.BookingModel>();
+                }
 
                 return new Tuple<System.Collections.Generic.List<DemoPick.Models.CourtModel>, System.Collections.Generic.List<DemoPick.Models.BookingModel>>(courts, bookings);
             }).ContinueWith(t =>

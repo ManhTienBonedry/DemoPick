@@ -37,40 +37,7 @@ namespace DemoPick.Services
         public static InvoiceHeader GetInvoiceHeader(int invoiceId, string courtName)
         {
             var dt = DatabaseHelper.ExecuteQuery(
-                @";WITH Inv AS (
-    SELECT TOP (1)
-        i.InvoiceID,
-        i.CreatedAt,
-        i.MemberID,
-        m.FullName AS MemberName,
-        i.PaymentMethod,
-        i.TotalAmount,
-        i.DiscountAmount,
-        i.FinalAmount
-    FROM dbo.Invoices i
-    LEFT JOIN dbo.Members m ON m.MemberID = i.MemberID
-    WHERE i.InvoiceID = @InvoiceID
-), Bk AS (
-    SELECT TOP (1)
-        b.StartTime AS BookingStartTime,
-        b.EndTime AS BookingEndTime
-    FROM dbo.Bookings b
-    INNER JOIN dbo.Courts c ON c.CourtID = b.CourtID
-    CROSS JOIN Inv
-    WHERE @CourtName IS NOT NULL
-      AND LTRIM(RTRIM(@CourtName)) <> ''
-      AND c.Name = @CourtName
-            AND b.Status = 'Paid'
-      AND b.EndTime >= DATEADD(MINUTE, -10, Inv.CreatedAt)
-      AND b.EndTime <= DATEADD(MINUTE,  10, Inv.CreatedAt)
-    ORDER BY ABS(DATEDIFF(SECOND, b.EndTime, Inv.CreatedAt))
-)
-SELECT
-    Inv.*,
-    Bk.BookingStartTime,
-    Bk.BookingEndTime
-FROM Inv
-LEFT JOIN Bk ON 1 = 1;",
+                SqlQueries.Invoice.InvoiceHeader,
                 new SqlParameter("@InvoiceID", invoiceId),
                 new SqlParameter("@CourtName", (object)(courtName ?? "") ?? DBNull.Value)
             );
@@ -99,19 +66,7 @@ LEFT JOIN Bk ON 1 = 1;",
         {
             var list = new List<InvoiceLine>();
             var dt = DatabaseHelper.ExecuteQuery(
-                @"SELECT
-                      CASE
-                          WHEN d.ProductID IS NULL AND d.BookingID IS NOT NULL THEN N'Tiền sân'
-                                                    WHEN d.ProductID IS NULL THEN N'(Dịch vụ)'
-                          ELSE ISNULL(p.Name, N'(Dịch vụ)')
-                      END AS ItemName,
-                      d.Quantity,
-                      d.UnitPrice,
-                      CAST(d.Quantity * d.UnitPrice AS DECIMAL(18,2)) AS LineTotal
-                  FROM dbo.InvoiceDetails d
-                  LEFT JOIN dbo.Products p ON p.ProductID = d.ProductID
-                  WHERE d.InvoiceID = @InvoiceID
-                  ORDER BY d.DetailID ASC",
+                SqlQueries.Invoice.InvoiceLines,
                 new SqlParameter("@InvoiceID", invoiceId)
             );
 

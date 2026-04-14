@@ -1,5 +1,6 @@
 using System;
 using System.Windows.Forms;
+using DemoPick.Services;
 
 namespace DemoPick
 {
@@ -31,12 +32,15 @@ namespace DemoPick
             }
 
             int courtId = 0;
-            try
+            object selected = cbCourt?.SelectedValue;
+            if (selected is int id)
             {
-                if (cbCourt.SelectedValue != null)
-                    courtId = (int)cbCourt.SelectedValue;
+                courtId = id;
             }
-            catch { courtId = 0; }
+            else if (selected != null && int.TryParse(selected.ToString(), out int parsed))
+            {
+                courtId = parsed;
+            }
             if (courtId <= 0)
             {
                 MessageBox.Show("Không xác định được sân. Vui lòng thử lại.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -61,18 +65,26 @@ namespace DemoPick
             bool dSat = chkSat.Checked;
             bool dSun = chkSun.Checked;
 
-            string status = rbBaoTri.Checked ? "Maintenance" : "Confirmed";
+            string status = rbBaoTri.Checked ? AppConstants.BookingStatus.Maintenance : AppConstants.BookingStatus.Confirmed;
             string guestName = rbBaoTri.Checked ? (txtName.Text ?? "Ban Quản Lý (Bảo Trì)") : (txtName.Text.Trim() + " - " + txtPhone.Text.Trim());
             string note = (txtNote.Text ?? "").Trim();
 
             int? memberId = null;
-            if (!string.Equals(status, "Maintenance", StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(status, AppConstants.BookingStatus.Maintenance, StringComparison.OrdinalIgnoreCase))
             {
                 try
                 {
                     memberId = _controller.GetOrCreateMemberId(txtName.Text, txtPhone.Text);
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    DatabaseHelper.TryLogThrottled(
+                        throttleKey: "FrmDatSanCoDinh.GetOrCreateMemberId",
+                        eventDesc: "Member Upsert Error",
+                        ex: ex,
+                        context: "FrmDatSanCoDinh.BtnConfirm_Click",
+                        minSeconds: 300);
+                }
             }
 
             int created = 0;

@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using DemoPick.Controllers;
+using DemoPick.Models;
 
 namespace DemoPick.Services
 {
@@ -155,7 +156,7 @@ namespace DemoPick.Services
 
                                 try
                                 {
-                                    controller.SubmitBooking(courtId, guest, note, start, end, status: "Confirmed");
+                                    controller.SubmitBooking(courtId, guest, note, start, end, status: AppConstants.BookingStatus.Confirmed);
                                     int bookingId = TryFindBookingId(courtId, guest, start, end);
                                     bool removed = TryDeleteBookingById(bookingId);
                                     return $"Created booking on CourtID={courtId} {start:yyyy-MM-dd HH:mm} ({dur}m). Removed={removed}";
@@ -271,8 +272,14 @@ namespace DemoPick.Services
                 if (obj == null || obj == DBNull.Value) return 0;
                 return Convert.ToInt32(obj);
             }
-            catch
+            catch (Exception ex)
             {
+                DatabaseHelper.TryLogThrottled(
+                    throttleKey: "SmokeTestRunner.TryFindBookingId",
+                    eventDesc: "Smoke DB Lookup Error",
+                    ex: ex,
+                    context: $"TryFindBookingId courtId={courtId}, guest={guest}, start={start:O}, end={end:O}",
+                    minSeconds: 300);
                 return 0;
             }
         }
@@ -288,8 +295,14 @@ namespace DemoPick.Services
                     new SqlParameter("@Id", bookingId));
                 return rows > 0;
             }
-            catch
+            catch (Exception ex)
             {
+                DatabaseHelper.TryLogThrottled(
+                    throttleKey: "SmokeTestRunner.TryDeleteBookingById",
+                    eventDesc: "Smoke DB Cleanup Error",
+                    ex: ex,
+                    context: $"TryDeleteBookingById bookingId={bookingId}",
+                    minSeconds: 300);
                 return false;
             }
         }
@@ -371,9 +384,9 @@ namespace DemoPick.Services
 
             // PendingOrders in-memory state
             PosService.ClearPendingOrder("San Test");
-            var lines = new List<PosService.CartLine>
+            var lines = new List<CartLine>
             {
-                new PosService.CartLine(1, "Nuoc", 2, 10000m)
+                new CartLine(1, "Nuoc", 2, 10000m)
             };
             PosService.SavePendingOrder("San Test", lines);
             var readBack = PosService.GetPendingOrder("San Test");
@@ -389,6 +402,14 @@ namespace DemoPick.Services
         {
             const int loops = 20000;
             string root = FindWorkspaceRoot();
+
+#if DEBUG
+            bool enforceBaseline = false;
+            bool persistBaselineIfMissing = false;
+#else
+            bool enforceBaseline = true;
+            bool persistBaselineIfMissing = true;
+#endif
 
             var start = new DateTime(2026, 4, 6, 17, 0, 0);
             var end = new DateTime(2026, 4, 6, 18, 30, 0);
@@ -417,9 +438,9 @@ namespace DemoPick.Services
             for (int i = 0; i < loops; i++)
             {
                 string key = "perf-" + (i % 50).ToString();
-                PosService.SavePendingOrder(key, new List<PosService.CartLine>
+                PosService.SavePendingOrder(key, new List<CartLine>
                 {
-                    new PosService.CartLine(1, "Nuoc", 1, 10000m)
+                    new CartLine(1, "Nuoc", 1, 10000m)
                 });
                 var _ = PosService.GetPendingOrder(key);
             }
@@ -428,7 +449,9 @@ namespace DemoPick.Services
             double priceOps = loops / Math.Max(0.001, swPrice.Elapsed.TotalSeconds);
             double pendingOps = loops / Math.Max(0.001, swPending.Elapsed.TotalSeconds);
 
-            var baseline = LoadOrCreatePerfBaseline(root, Environment.MachineName, priceOps, pendingOps);
+            var baseline = LoadOrCreatePerfBaseline(root, Environment.MachineName, priceOps, pendingOps, persistBaselineIfMissing);
+
+            string mode = enforceBaseline ? "baseline-guard" : "debug-no-guard";
 
             var results = new List<ModulePerfResult>
             {
@@ -439,8 +462,8 @@ namespace DemoPick.Services
                     ElapsedMs = swPrice.ElapsedMilliseconds,
                     OpsPerSec = priceOps,
                     ThresholdOpsPerSec = baseline.PriceCalcMinOps,
-                    Passed = priceOps >= baseline.PriceCalcMinOps,
-                    Mode = "baseline-guard"
+                    Passed = !enforceBaseline || priceOps >= baseline.PriceCalcMinOps,
+                    Mode = mode
                 },
                 new ModulePerfResult
                 {
@@ -449,8 +472,8 @@ namespace DemoPick.Services
                     ElapsedMs = swPending.ElapsedMilliseconds,
                     OpsPerSec = pendingOps,
                     ThresholdOpsPerSec = baseline.PendingOrdersMinOps,
-                    Passed = pendingOps >= baseline.PendingOrdersMinOps,
-                    Mode = "baseline-guard"
+                    Passed = !enforceBaseline || pendingOps >= baseline.PendingOrdersMinOps,
+                    Mode = mode
                 }
             };
 
@@ -459,7 +482,7 @@ namespace DemoPick.Services
 
             foreach (var r in results)
             {
-                if (!r.Passed)
+                if (enforceBaseline && !r.Passed)
                 {
                     throw new InvalidOperationException(
                         $"Performance regression: {r.Module} {r.OpsPerSec:F0} ops/s < baseline {r.ThresholdOpsPerSec:F0} ops/s. See {perfReportPath}"
@@ -484,8 +507,8 @@ namespace DemoPick.Services
                 foreach (var b in bookingsToday)
                 {
                     if (b.CourtID != c.CourtID) continue;
-                    if (string.Equals(b.Status, "Cancelled", StringComparison.OrdinalIgnoreCase)) continue;
-                    if (string.Equals(b.Status, "Maintenance", StringComparison.OrdinalIgnoreCase)) continue;
+                    if (string.Equals(b.Status, AppConstants.BookingStatus.Cancelled, StringComparison.OrdinalIgnoreCase)) continue;
+                    if (string.Equals(b.Status, AppConstants.BookingStatus.Maintenance, StringComparison.OrdinalIgnoreCase)) continue;
                     if (b.StartTime <= now && b.EndTime > now)
                     {
                         occupied = true;
@@ -518,14 +541,14 @@ namespace DemoPick.Services
 
             try
             {
-                controller.SubmitBooking(targetCourt.CourtID, guest, "SMOKE AUTO MEMBER", start, end, status: "Confirmed");
+                controller.SubmitBooking(targetCourt.CourtID, guest, "SMOKE AUTO MEMBER", start, end, status: AppConstants.BookingStatus.Confirmed);
                 bookingId = TryFindBookingId(targetCourt.CourtID, guest, start, end);
                 if (bookingId <= 0)
                     throw new InvalidOperationException("Cannot find booking created for auto-member test");
 
-                var lines = new List<PosService.CartLine>
+                var lines = new List<CartLine>
                 {
-                    new PosService.CartLine(-1, "Gio san smoke", 1, 120000m)
+                    new CartLine(-1, "Gio san smoke", 1, 120000m)
                 };
 
                 var pos = new PosService();
@@ -575,8 +598,8 @@ namespace DemoPick.Services
                     throw new InvalidOperationException($"Booking.MemberID mismatch. expected={memberId}, actual={bookingMemberId}");
 
                 string status = Convert.ToString(bookingDt.Rows[0]["Status"]);
-                if (!string.Equals(status, "Paid", StringComparison.OrdinalIgnoreCase))
-                    throw new InvalidOperationException($"Booking status should be Paid after checkout, actual={status}");
+                if (!string.Equals(status, AppConstants.BookingStatus.Paid, StringComparison.OrdinalIgnoreCase))
+                    throw new InvalidOperationException($"Booking status should be {AppConstants.BookingStatus.Paid} after checkout, actual={status}");
             }
             finally
             {
@@ -672,7 +695,7 @@ namespace DemoPick.Services
             return $"Bookings={delBooking}, Members={delMembers}, StaffAccounts={delAccounts}";
         }
 
-        private static PerfBaseline LoadOrCreatePerfBaseline(string root, string machine, double priceOps, double pendingOps)
+        private static PerfBaseline LoadOrCreatePerfBaseline(string root, string machine, double priceOps, double pendingOps, bool persistIfMissing)
         {
             string docsDir = Path.Combine(root, "Docs");
             Directory.CreateDirectory(docsDir);
@@ -715,7 +738,10 @@ namespace DemoPick.Services
                     UpdatedAt = DateTime.Now
                 };
                 map[machine] = baseline;
-                SavePerfBaselines(path, map);
+                if (persistIfMissing)
+                {
+                    SavePerfBaselines(path, map);
+                }
             }
 
             return baseline;

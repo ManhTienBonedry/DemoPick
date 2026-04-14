@@ -53,7 +53,13 @@ namespace DemoPick
             // Form styles
             this.FormBorderStyle = FormBorderStyle.None;
             this.StartPosition = FormStartPosition.CenterParent;
-            this.Region = new Region(RoundedRect(new Rectangle(0, 0, this.Width, this.Height), 20));
+
+            using (var path = RoundedRect(new Rectangle(0, 0, this.Width, this.Height), 20))
+            {
+                var old = this.Region;
+                this.Region = new Region(path);
+                if (old != null) old.Dispose();
+            }
             this.Paint += Frm_Paint;
         }
     }

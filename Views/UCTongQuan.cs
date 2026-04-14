@@ -52,13 +52,27 @@ namespace DemoPick
                 SuspendLayout();
                 AutoScrollPosition = new Point(0, 0);
 
-                try { if (VerticalScroll != null) VerticalScroll.Value = 0; } catch { }
-                try { if (HorizontalScroll != null) HorizontalScroll.Value = 0; } catch { }
+                ResetScrollValue(VerticalScroll, target: 0);
+                ResetScrollValue(HorizontalScroll, target: 0);
             }
             finally
             {
                 ResumeLayout(true);
             }
+        }
+
+        private static void ResetScrollValue(ScrollProperties scroll, int target)
+        {
+            if (scroll == null) return;
+
+            int min = scroll.Minimum;
+            int max = scroll.Maximum - scroll.LargeChange + 1;
+            if (max < min) max = min;
+
+            if (target < min) target = min;
+            if (target > max) target = max;
+
+            scroll.Value = target;
         }
 
         private void QueueResetScrollToTop()
@@ -84,7 +98,11 @@ namespace DemoPick
         {
             PaintEventHandler drawBorder = (s, e) => {
                 var pnl = s as Panel;
-                e.Graphics.DrawRectangle(new Pen(Color.FromArgb(229, 231, 235), 1), 0, 0, pnl.Width - 1, pnl.Height - 1);
+                if (pnl == null) return;
+                using (var pen = new Pen(Color.FromArgb(229, 231, 235), 1))
+                {
+                    e.Graphics.DrawRectangle(pen, 0, 0, pnl.Width - 1, pnl.Height - 1);
+                }
             };
             pnlCard1.Paint += drawBorder;
             pnlCard2.Paint += drawBorder;

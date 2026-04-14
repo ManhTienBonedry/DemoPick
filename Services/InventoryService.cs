@@ -29,12 +29,8 @@ namespace DemoPick.Services
 
             await Task.Run(() =>
             {
-                const string insertSql = @"
-INSERT INTO Products (SKU, Name, Category, Price, StockQuantity, MinThreshold)
-VALUES (@SKU, @Name, @Category, @Price, @StockQuantity, @MinThreshold)";
-
                 DatabaseHelper.ExecuteNonQuery(
-                    insertSql,
+                    SqlQueries.Inventory.InsertProduct,
                     new SqlParameter("@SKU", sku),
                     new SqlParameter("@Name", name),
                     new SqlParameter("@Category", category),
@@ -44,7 +40,7 @@ VALUES (@SKU, @Name, @Category, @Price, @StockQuantity, @MinThreshold)";
                 );
 
                 DatabaseHelper.ExecuteNonQuery(
-                    "INSERT INTO SystemLogs (EventDesc, SubDesc) VALUES (@EventDesc, @SubDesc)",
+                    SqlQueries.Inventory.InsertSystemLog,
                     new SqlParameter("@EventDesc", "Nhập Kho Trực Tiếp"),
                     new SqlParameter("@SubDesc", $"+{stockQuantity} {name}")
                 );
@@ -57,13 +53,7 @@ VALUES (@SKU, @Name, @Category, @Price, @StockQuantity, @MinThreshold)";
             {
                 var list = new List<string>();
                 var dt = DatabaseHelper.ExecuteQuery(
-                                        @"SELECT DISTINCT Category
-                                            FROM Products
-                                            WHERE Category IS NOT NULL
-                                                AND LTRIM(RTRIM(Category)) <> ''
-                                                AND Category <> N'Dịch vụ đi kèm'
-                                                AND SKU NOT LIKE N'SVC-%'
-                                            ORDER BY Category");
+                    SqlQueries.Inventory.ProductCategories);
                 foreach (DataRow row in dt.Rows)
                 {
                     string cat = row[0]?.ToString();
@@ -86,7 +76,7 @@ VALUES (@SKU, @Name, @Category, @Price, @StockQuantity, @MinThreshold)";
                 try
                 {
                     var nameObj = DatabaseHelper.ExecuteScalar(
-                        "SELECT TOP 1 Name FROM Products WHERE ProductID = @ProductID",
+                        SqlQueries.Inventory.ProductNameById,
                         new SqlParameter("@ProductID", productId));
 
                     var productName = (nameObj == null || nameObj == DBNull.Value)
@@ -99,7 +89,7 @@ VALUES (@SKU, @Name, @Category, @Price, @StockQuantity, @MinThreshold)";
                     }
 
                     var usedObj = DatabaseHelper.ExecuteScalar(
-                        "SELECT COUNT(1) FROM InvoiceDetails WHERE ProductID = @ProductID",
+                        SqlQueries.Inventory.InvoiceDetailsCountByProductId,
                         new SqlParameter("@ProductID", productId));
                     int usedCount = usedObj == null || usedObj == DBNull.Value ? 0 : Convert.ToInt32(usedObj);
 
@@ -113,7 +103,7 @@ VALUES (@SKU, @Name, @Category, @Price, @StockQuantity, @MinThreshold)";
                     }
 
                     int rows = DatabaseHelper.ExecuteNonQuery(
-                        "DELETE FROM Products WHERE ProductID = @ProductID",
+                        SqlQueries.Inventory.DeleteProductById,
                         new SqlParameter("@ProductID", productId));
 
                     if (rows <= 0)
@@ -140,12 +130,7 @@ VALUES (@SKU, @Name, @Category, @Price, @StockQuantity, @MinThreshold)";
             return await Task.Run(() =>
             {
                 var list = new List<ProductCatalogItemModel>();
-                                var dt = DatabaseHelper.ExecuteQuery(
-                                        @"SELECT ProductID, Name, Price, Category
-                                            FROM Products
-                                            WHERE Category <> N'Dịch vụ đi kèm'
-                                                AND SKU NOT LIKE N'SVC-%'
-                                            ORDER BY ProductID DESC");
+                var dt = DatabaseHelper.ExecuteQuery(SqlQueries.Inventory.ProductsCatalog);
                 foreach (DataRow row in dt.Rows)
                 {
                     int productId = row["ProductID"] == DBNull.Value ? 0 : Convert.ToInt32(row["ProductID"]);
@@ -170,10 +155,7 @@ VALUES (@SKU, @Name, @Category, @Price, @StockQuantity, @MinThreshold)";
             return await Task.Run(() =>
             {
                 var list = new List<ProductDeleteListItemModel>();
-                var dt = DatabaseHelper.ExecuteQuery(
-                    @"SELECT ProductID, SKU, Name, Category, Price, StockQuantity
-                      FROM Products
-                      ORDER BY ProductID DESC");
+                var dt = DatabaseHelper.ExecuteQuery(SqlQueries.Inventory.ProductsForDeletion);
 
                 foreach (DataRow row in dt.Rows)
                 {
@@ -196,14 +178,7 @@ VALUES (@SKU, @Name, @Category, @Price, @StockQuantity, @MinThreshold)";
         {
             return await Task.Run(() =>
             {
-                var dt = DatabaseHelper.ExecuteQuery(@"
-                    SELECT 
-                        ISNULL(SUM(Price * StockQuantity), 0) as TotalVal,
-                        (SELECT COUNT(*) FROM Products WHERE StockQuantity <= MinThreshold AND Category != N'Dịch vụ đi kèm') as CriticalItems,
-                        (SELECT ISNULL(SUM(Quantity), 0) FROM InvoiceDetails) as Sales,
-                        (SELECT COUNT(*) FROM Invoices) as InvoicesCount
-                    FROM Products WHERE Category != N'Dịch vụ đi kèm'
-                ");
+                var dt = DatabaseHelper.ExecuteQuery(SqlQueries.Inventory.InventoryKpis);
 
                 if (dt.Rows.Count <= 0)
                     return new InventoryKpiModel();
@@ -222,7 +197,7 @@ VALUES (@SKU, @Name, @Category, @Price, @StockQuantity, @MinThreshold)";
         public async Task<List<InventoryItemModel>> GetInventoryItemsAsync()
         {
             var list = new List<InventoryItemModel>();
-            string query = "SELECT ProductID, SKU, Name, Category, StockQuantity, MinThreshold, Price FROM Products WHERE Category != N'Dịch vụ đi kèm'";
+            string query = SqlQueries.Inventory.InventoryItems;
 
             await Task.Run(() => {
                 var dt = DatabaseHelper.ExecuteQuery(query);
@@ -255,11 +230,7 @@ VALUES (@SKU, @Name, @Category, @Price, @StockQuantity, @MinThreshold)";
             var list = new List<TransactionModel>();
             // Inventory screen should show actual inventory/sales transactions,
             // not generic system error logs from other modules.
-            string query = @"
-SELECT TOP 10 EventDesc, SubDesc, CreatedAt
-FROM dbo.SystemLogs
-WHERE EventDesc IN (N'Nhập Kho Trực Tiếp', N'POS Checkout')
-ORDER BY CreatedAt DESC";
+            string query = SqlQueries.Inventory.RecentTransactions;
 
             await Task.Run(() => {
                 var dt = DatabaseHelper.ExecuteQuery(query);
@@ -306,7 +277,7 @@ ORDER BY CreatedAt DESC";
             try
             {
                 object obj = DatabaseHelper.ExecuteScalar(
-                    "SELECT COUNT(1) FROM dbo.Invoices WHERE InvoiceID = @Id",
+                    SqlQueries.Inventory.InvoiceExistsCount,
                     new SqlParameter("@Id", invoiceId));
                 int count = obj == null || obj == DBNull.Value ? 0 : Convert.ToInt32(obj);
                 return count > 0;

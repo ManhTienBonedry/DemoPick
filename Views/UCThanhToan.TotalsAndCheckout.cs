@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using DemoPick.Models;
 using DemoPick.Services;
 using Sunny.UI;
 
@@ -32,10 +33,7 @@ namespace DemoPick
                 {
                     // By default: quantity-based services. Some add-ons are per-hour.
                     string name = pl.ProductName ?? "";
-                    string unit = "Cái";
-                    if (name.IndexOf("máy bắn bóng", StringComparison.OrdinalIgnoreCase) >= 0) unit = "Giờ";
-                    else if (name.IndexOf("nhặt bóng", StringComparison.OrdinalIgnoreCase) >= 0) unit = "Giờ";
-                    else if (name.IndexOf("bóng", StringComparison.OrdinalIgnoreCase) >= 0 && name.IndexOf("rổ", StringComparison.OrdinalIgnoreCase) >= 0) unit = "Rổ";
+                    string unit = PriceCalculator.GuessServiceUnit(name);
 
                     services.Add(new DemoPick.Services.ServiceCharge
                     {
@@ -47,26 +45,14 @@ namespace DemoPick
                     });
                 }
 
-                decimal courtMultiplier = 1m;
-                try
-                {
-                    string t = _selectedCourt?.CourtType ?? "";
-                    string n = _selectedCourt?.Name ?? "";
-                    if (t.IndexOf("tập", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                        t.IndexOf("practice", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                        n.IndexOf("tập", StringComparison.OrdinalIgnoreCase) >= 0)
-                    {
-                        courtMultiplier = 0.5m;
-                    }
-                }
-                catch { }
+                decimal courtMultiplier = PriceCalculator.GetCourtRateMultiplier(_selectedCourt?.CourtType, _selectedCourt?.Name);
 
                 var breakdown = DemoPick.Services.PriceCalculator.CalculateTotal(_currentBooking.StartTime, _currentBooking.EndTime, _isFixedCustomer, services, courtMultiplier);
 
                 foreach (var ts in breakdown.TimeSlots)
                 {
                     var lviCourt = new ListViewItem(new[] { "Giờ sân " + ts.Description, $"{ts.Hours:0.##}h", ts.Total.ToString("N0") + "đ" });
-                    lviCourt.Tag = new PosService.CartLine(-1, "Giờ sân " + ts.Description, 1, ts.Total);
+                    lviCourt.Tag = new CartLine(-1, "Giờ sân " + ts.Description, 1, ts.Total);
                     lviCourt.ForeColor = Color.DarkBlue;
                     lstCart.Items.Add(lviCourt);
                 }
@@ -74,7 +60,7 @@ namespace DemoPick
                 foreach (var svc in breakdown.Services)
                 {
                     var lvi = new ListViewItem(new[] { svc.ServiceName, svc.Quantity.ToString(), svc.Total.ToString("N0") + "đ" });
-                    lvi.Tag = new PosService.CartLine(svc.ProductID, svc.ServiceName, svc.Quantity, svc.UnitPrice);
+                    lvi.Tag = new CartLine(svc.ProductID, svc.ServiceName, svc.Quantity, svc.UnitPrice);
                     lstCart.Items.Add(lvi);
                 }
 
@@ -128,10 +114,10 @@ namespace DemoPick
 
             try
             {
-                var lines = new System.Collections.Generic.List<PosService.CartLine>();
+                var lines = new System.Collections.Generic.List<CartLine>();
                 foreach (ListViewItem item in lstCart.Items)
                 {
-                    if (item.Tag is PosService.CartLine line)
+                    if (item.Tag is CartLine line)
                     {
                         lines.Add(line);
                     }

@@ -21,6 +21,11 @@ namespace DemoPick
         
         private List<Sunny.UI.UIPanel> menuButtons;
 
+        private Font _menuFontRegular;
+        private Font _menuFontBold;
+
+        private Size _adminAvatarRegionSize = Size.Empty;
+
         public FrmChinh()
         {
             InitializeComponent();
@@ -33,6 +38,15 @@ namespace DemoPick
             var dbMaint = new DatabaseMaintenanceService();
             dbMaint.TryHealCorruptedCourtNames();
             System.Threading.Tasks.Task.Run(() => dbMaint.TryPurgeOrphanPosCheckoutLogs());
+
+            _menuFontRegular = new Font("Segoe UI", 11F, FontStyle.Regular);
+            _menuFontBold = new Font("Segoe UI", 11F, FontStyle.Bold);
+
+            this.Disposed += (s, e) =>
+            {
+                _menuFontRegular?.Dispose();
+                _menuFontBold?.Dispose();
+            };
 
             InitModules();
 
@@ -203,7 +217,7 @@ namespace DemoPick
                 {
                     lbl.BackColor = Color.Transparent;
                     lbl.ForeColor = active ? Color.White : Color.FromArgb(107, 114, 128);
-                    lbl.Font = new Font("Segoe UI", 11F, active ? FontStyle.Bold : FontStyle.Regular);
+                    lbl.Font = active ? _menuFontBold : _menuFontRegular;
                 }
             }
         }
@@ -232,8 +246,8 @@ namespace DemoPick
 
         private void ApplyRolePermissions()
         {
-            bool isAdmin = AppSession.IsInRole("Admin");
-            bool isStaff = AppSession.IsInRole("Staff");
+            bool isAdmin = AppSession.IsInRole(AppConstants.Roles.Admin);
+            bool isStaff = AppSession.IsInRole(AppConstants.Roles.Staff);
 
             // Allow Staff to use Inventory & Reports too (Admin keeps full access).
             bool canAccessOps = isAdmin || isStaff;
@@ -274,10 +288,19 @@ namespace DemoPick
             if (sender is Panel p)
             {
                 e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                using (GraphicsPath gp = new GraphicsPath())
+                var curSize = new Size(p.Width, p.Height);
+                if (curSize.Width <= 0 || curSize.Height <= 0) return;
+
+                if (_adminAvatarRegionSize != curSize || p.Region == null)
                 {
-                    gp.AddEllipse(0, 0, p.Width - 1, p.Height - 1);
-                    p.Region = new Region(gp);
+                    using (GraphicsPath gp = new GraphicsPath())
+                    {
+                        gp.AddEllipse(0, 0, p.Width - 1, p.Height - 1);
+                        var old = p.Region;
+                        p.Region = new Region(gp);
+                        if (old != null) old.Dispose();
+                        _adminAvatarRegionSize = curSize;
+                    }
                 }
             }
         }

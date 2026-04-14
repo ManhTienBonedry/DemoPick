@@ -21,7 +21,12 @@ namespace DemoPick
             this.StartPosition = FormStartPosition.CenterParent;
 
             // Rounded corners logic
-            this.Region = new Region(RoundedRect(new Rectangle(0, 0, this.Width, this.Height), 20));
+            using (var path = RoundedRect(new Rectangle(0, 0, this.Width, this.Height), 20))
+            {
+                var old = this.Region;
+                this.Region = new Region(path);
+                if (old != null) old.Dispose();
+            }
             this.Paint += Frm_Paint;
         }
 
@@ -29,8 +34,9 @@ namespace DemoPick
         {
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             using (Pen p = new Pen(Color.FromArgb(220, 220, 220), 1))
+            using (GraphicsPath path = RoundedRect(new Rectangle(0, 0, this.Width - 1, this.Height - 1), 20))
             {
-                e.Graphics.DrawPath(p, RoundedRect(new Rectangle(0, 0, this.Width - 1, this.Height - 1), 20));
+                e.Graphics.DrawPath(p, path);
             }
         }
 
@@ -136,7 +142,10 @@ namespace DemoPick
         {
             if (field == null) return;
 
-            try { field.Focus(); } catch { }
+            if (!field.IsDisposed && field.CanFocus)
+            {
+                field.Focus();
+            }
             if (!selectAll) return;
 
             try

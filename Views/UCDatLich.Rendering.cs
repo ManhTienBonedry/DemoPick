@@ -2,6 +2,7 @@ using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
+using DemoPick.Services;
 
 namespace DemoPick
 {
@@ -23,21 +24,33 @@ namespace DemoPick
             int hoursToDraw = GridHoursToDraw;
             float hourWidth = (float)(width - courtColWidth) / hoursToDraw;
 
-            Pen gridPen = new Pen(Color.FromArgb(243, 244, 246), 1);
-            Font axisFont = new Font("Segoe UI", 9F, FontStyle.Bold);
-            Brush axisBrush = new SolidBrush(Color.FromArgb(107, 114, 128));
+            Pen gridPen = null;
+            Font axisFont = null;
+            Brush axisBrush = null;
+            Brush headerBgBrush = null;
+            Pen headerBorderPen = null;
+            Brush pastHourBrush = null;
+            Brush courtNameBrush = null;
 
             StringFormat headerFormat = null;
             StringFormat courtFormat = null;
             try
             {
+                gridPen = new Pen(Color.FromArgb(243, 244, 246), 1);
+                axisFont = new Font("Segoe UI", 9F, FontStyle.Bold);
+                axisBrush = new SolidBrush(Color.FromArgb(107, 114, 128));
+                headerBgBrush = new SolidBrush(Color.FromArgb(249, 250, 251));
+                headerBorderPen = new Pen(Color.FromArgb(229, 231, 235), 1);
+                pastHourBrush = new SolidBrush(Color.FromArgb(235, 235, 235));
+                courtNameBrush = new SolidBrush(Color.FromArgb(26, 35, 50));
+
                 headerFormat = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
                 courtFormat = new StringFormat { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Center, Trimming = StringTrimming.EllipsisCharacter, FormatFlags = StringFormatFlags.NoWrap };
 
                 // Draw header background
-                g.FillRectangle(new SolidBrush(Color.FromArgb(249, 250, 251)), 0, 0, width, timeRowHeight);
-                g.DrawLine(new Pen(Color.FromArgb(229, 231, 235), 1), 0, timeRowHeight, width, timeRowHeight);
-                g.DrawLine(new Pen(Color.FromArgb(229, 231, 235), 1), courtColWidth, 0, courtColWidth, height);
+                g.FillRectangle(headerBgBrush, 0, 0, width, timeRowHeight);
+                g.DrawLine(headerBorderPen, 0, timeRowHeight, width, timeRowHeight);
+                g.DrawLine(headerBorderPen, courtColWidth, 0, courtColWidth, height);
 
                 // Draw Time Headers
                 for (int i = 0; i < hoursToDraw; i++)
@@ -49,7 +62,7 @@ namespace DemoPick
                     if (_currentDate.Date < DateTime.Now.Date ||
                        (_currentDate.Date == DateTime.Now.Date && h < DateTime.Now.Hour))
                     {
-                        g.FillRectangle(new SolidBrush(Color.FromArgb(235, 235, 235)), x, timeRowHeight, hourWidth, height - timeRowHeight);
+                        g.FillRectangle(pastHourBrush, x, timeRowHeight, hourWidth, height - timeRowHeight);
                     }
 
                     // Vertical grid lines
@@ -80,11 +93,8 @@ namespace DemoPick
                     g.DrawLine(gridPen, 0, y + rowHeight, width, y + rowHeight);
 
                     // Court string
-                    using (var courtBrush = new SolidBrush(Color.FromArgb(26, 35, 50)))
-                    {
-                        var rect = new RectangleF(12, y, courtColWidth - 18, rowHeight);
-                        g.DrawString(courts[i].Name, axisFont, courtBrush, rect, courtFormat);
-                    }
+                    var rect = new RectangleF(12, y, courtColWidth - 18, rowHeight);
+                    g.DrawString(courts[i].Name, axisFont, courtNameBrush, rect, courtFormat);
                 }
 
                 // DRAW REAL BOOKINGS
@@ -98,12 +108,12 @@ namespace DemoPick
                     float durHours = (float)(b.EndTime - b.StartTime).TotalHours;
 
                     Color bookingColor = Color.FromArgb(59, 130, 246); // Blue (default)
-                    if (string.Equals(b.Status, "Confirmed", StringComparison.OrdinalIgnoreCase)) bookingColor = Color.FromArgb(76, 175, 80); // Green
-                    else if (string.Equals(b.Status, "Pending", StringComparison.OrdinalIgnoreCase)) bookingColor = Color.FromArgb(245, 158, 11); // Orange
-                    else if (string.Equals(b.Status, "Maintenance", StringComparison.OrdinalIgnoreCase)) bookingColor = Color.FromArgb(239, 68, 68); // Red
+                    if (string.Equals(b.Status, AppConstants.BookingStatus.Confirmed, StringComparison.OrdinalIgnoreCase)) bookingColor = Color.FromArgb(76, 175, 80); // Green
+                    else if (string.Equals(b.Status, AppConstants.BookingStatus.Pending, StringComparison.OrdinalIgnoreCase)) bookingColor = Color.FromArgb(245, 158, 11); // Orange
+                    else if (string.Equals(b.Status, AppConstants.BookingStatus.Maintenance, StringComparison.OrdinalIgnoreCase)) bookingColor = Color.FromArgb(239, 68, 68); // Red
 
                     bool selected = _selectedBooking != null && _selectedBooking.BookingID == b.BookingID;
-                    bool showNote = !string.Equals(b.Status, "Paid", StringComparison.OrdinalIgnoreCase);
+                    bool showNote = !string.Equals(b.Status, AppConstants.BookingStatus.Paid, StringComparison.OrdinalIgnoreCase);
                     RectangleF rect = DrawBooking(g, courtColWidth, timeRowHeight, hourWidth, rowHeight, cIdx, startHour, durHours, b.GuestName, bookingColor, b.StartTime, b.EndTime, selected, b.Note, showNote);
                     _bookingHits.Add(new BookingHitInfo { Rect = rect, Booking = b });
                 }
@@ -112,6 +122,13 @@ namespace DemoPick
             {
                 if (headerFormat != null) headerFormat.Dispose();
                 if (courtFormat != null) courtFormat.Dispose();
+                if (gridPen != null) gridPen.Dispose();
+                if (axisFont != null) axisFont.Dispose();
+                if (axisBrush != null) axisBrush.Dispose();
+                if (headerBgBrush != null) headerBgBrush.Dispose();
+                if (headerBorderPen != null) headerBorderPen.Dispose();
+                if (pastHourBrush != null) pastHourBrush.Dispose();
+                if (courtNameBrush != null) courtNameBrush.Dispose();
             }
         }
 
@@ -128,29 +145,43 @@ namespace DemoPick
             // Draw Block
             using (GraphicsPath path = GetRoundedRect(new RectangleF(x, y, w, h), 6))
             {
-                g.FillPath(new SolidBrush(Color.FromArgb(40, color)), path); // 15% opacity bg
-                g.DrawPath(new Pen(color, 2), path); // Solid Border
+                using (var bgBrush = new SolidBrush(Color.FromArgb(40, color)))
+                using (var borderPen = new Pen(color, 2))
+                {
+                    g.FillPath(bgBrush, path); // 15% opacity bg
+                    g.DrawPath(borderPen, path); // Solid Border
+                }
 
                 if (selected)
                 {
-                    g.DrawPath(new Pen(Color.FromArgb(26, 35, 50), 2), path);
+                    using (var selPen = new Pen(Color.FromArgb(26, 35, 50), 2))
+                    {
+                        g.DrawPath(selPen, path);
+                    }
                 }
             }
 
             // Draw vertical solid indicator line on the left
-            g.FillRectangle(new SolidBrush(color), x + 2, y + 4, 3, h - 8);
+            using (var indicatorBrush = new SolidBrush(color))
+            {
+                g.FillRectangle(indicatorBrush, x + 2, y + 4, 3, h - 8);
+            }
 
             // Draw Title inside block
-            Font f = new Font("Segoe UI", 9F, FontStyle.Bold);
-
             string safeTitle = string.IsNullOrWhiteSpace(title) ? "(Không tên)" : title;
             string timeText = $"{startTime:HH:mm} - {endTime:HH:mm}";
 
             // Draw 2-3 lines: name + time range + (optional) note
-            g.DrawString(safeTitle, f, new SolidBrush(Color.FromArgb(26, 35, 50)), x + 10, y + 6);
-            using (Font tf = new Font("Segoe UI", 8.5F, FontStyle.Regular))
+            using (Font f = new Font("Segoe UI", 9F, FontStyle.Bold))
+            using (var titleBrush = new SolidBrush(Color.FromArgb(26, 35, 50)))
             {
-                g.DrawString(timeText, tf, new SolidBrush(Color.FromArgb(75, 85, 99)), x + 10, y + 26);
+                g.DrawString(safeTitle, f, titleBrush, x + 10, y + 6);
+            }
+
+            using (Font tf = new Font("Segoe UI", 8.5F, FontStyle.Regular))
+            using (var timeBrush = new SolidBrush(Color.FromArgb(75, 85, 99)))
+            {
+                g.DrawString(timeText, tf, timeBrush, x + 10, y + 26);
             }
 
             if (showNote && !string.IsNullOrWhiteSpace(note) && h >= 62)

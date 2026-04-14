@@ -230,7 +230,8 @@ BEGIN
     SET p.StockQuantity = p.StockQuantity - i.Quantity
     FROM dbo.Products p
     INNER JOIN inserted i ON p.ProductID = i.ProductID
-    WHERE i.ProductID IS NOT NULL;
+        WHERE i.ProductID IS NOT NULL
+            AND ISNULL(p.Category, N'''') <> N''Dịch vụ'';
 END
 ');
 END

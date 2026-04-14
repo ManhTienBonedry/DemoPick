@@ -12,7 +12,7 @@ namespace DemoPick.Services
         public async Task<List<CustomerModel>> GetAllCustomersAsync()
         {
             var list = new List<CustomerModel>();
-            string query = "SELECT MemberID, FullName, Phone, TotalHoursPurchased, IsFixed, TotalSpent, CreatedAt FROM Members ORDER BY CreatedAt DESC";
+            string query = SqlQueries.Customer.AllCustomers;
 
             await Task.Run(() => {
                 var dt = DatabaseHelper.ExecuteQuery(query);
@@ -43,12 +43,7 @@ namespace DemoPick.Services
         {
             return await Task.Run(() =>
             {
-                var dt = DatabaseHelper.ExecuteQuery(@"
-                    SELECT 
-                        SUM(CASE WHEN IsFixed = 1 THEN 1 ELSE 0 END) as CntFixed,
-                        SUM(CASE WHEN IsFixed = 0 OR IsFixed IS NULL THEN 1 ELSE 0 END) as CntWalkin
-                    FROM Members
-                ");
+                var dt = DatabaseHelper.ExecuteQuery(SqlQueries.Customer.TierCounts);
 
                 if (dt.Rows.Count <= 0)
                     return new CustomerTierCountsModel();
@@ -66,7 +61,7 @@ namespace DemoPick.Services
         {
             return await Task.Run(() =>
             {
-                var dt = DatabaseHelper.ExecuteQuery("SELECT COUNT(*) AS Cnt, ISNULL(SUM(TotalSpent), 0) as Rev FROM Members");
+                var dt = DatabaseHelper.ExecuteQuery(SqlQueries.Customer.RevenueSummary);
                 if (dt.Rows.Count <= 0)
                     return new CustomerRevenueSummaryModel();
 
@@ -83,17 +78,7 @@ namespace DemoPick.Services
         {
             return await Task.Run(() =>
             {
-                object occObj = DatabaseHelper.ExecuteScalar(@"
-                    DECLARE @total INT = (SELECT COUNT(*) * 18 FROM Courts WHERE (Status = 'Active' OR Status IS NULL OR LTRIM(RTRIM(Status)) = ''));
-                    DECLARE @booked DECIMAL(18,2) = (
-                        SELECT ISNULL(SUM(DATEDIFF(minute, StartTime, EndTime)/60.0),0)
-                        FROM Bookings
-                        WHERE CAST(StartTime as DATE) = CAST(GETDATE() as DATE)
-                          AND Status != 'Cancelled'
-                          AND Status != 'Maintenance'
-                    );
-                    SELECT CASE WHEN @total = 0 THEN 0 ELSE CAST((@booked * 100.0 / @total) AS INT) END;
-                ");
+                object occObj = DatabaseHelper.ExecuteScalar(SqlQueries.Customer.TodayOccupancyPct);
 
                 if (occObj == null || occObj == DBNull.Value) return 0;
                 return Convert.ToInt32(occObj);
@@ -111,7 +96,7 @@ namespace DemoPick.Services
             return await Task.Run(() =>
             {
                 var dt = DatabaseHelper.ExecuteQuery(
-                    "SELECT TOP 1 MemberID, FullName, Tier, IsFixed FROM Members WHERE Phone = @Phone OR CAST(MemberID as VARCHAR(20)) = @Qid",
+                    SqlQueries.Customer.FindCheckoutCustomer,
                     new SqlParameter("@Phone", phone),
                     new SqlParameter("@Qid", qid)
                 );
@@ -122,8 +107,43 @@ namespace DemoPick.Services
                 bool isFixed = false;
                 if (dt.Columns.Contains("IsFixed") && row["IsFixed"] != DBNull.Value)
                 {
-                    try { isFixed = Convert.ToBoolean(row["IsFixed"]); }
-                    catch { isFixed = false; }
+                    object raw = row["IsFixed"];
+                    if (raw is bool b)
+                    {
+                        isFixed = b;
+                    }
+                    else if (raw is byte by)
+                    {
+                        isFixed = by != 0;
+                    }
+                    else if (raw is short sh)
+                    {
+                        isFixed = sh != 0;
+                    }
+                    else if (raw is int i)
+                    {
+                        isFixed = i != 0;
+                    }
+                    else if (raw is long l)
+                    {
+                        isFixed = l != 0;
+                    }
+                    else if (raw is decimal dec)
+                    {
+                        isFixed = dec != 0m;
+                    }
+                    else if (raw != null)
+                    {
+                        string s = raw.ToString();
+                        if (!string.IsNullOrWhiteSpace(s))
+                        {
+                            s = s.Trim();
+                            if (bool.TryParse(s, out bool parsedBool))
+                                isFixed = parsedBool;
+                            else if (int.TryParse(s, out int parsedInt))
+                                isFixed = parsedInt != 0;
+                        }
+                    }
                 }
 
                 return new CheckoutCustomerModel

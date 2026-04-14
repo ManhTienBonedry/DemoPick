@@ -38,7 +38,7 @@ BEGIN
     EXEC('CREATE PROCEDURE dbo.sp_CreateBooking AS BEGIN SET NOCOUNT ON; END');
 END");
 
-                    DatabaseHelper.ExecuteNonQuery(@"
+                    DatabaseHelper.ExecuteNonQuery($@"
 ALTER PROCEDURE dbo.sp_CreateBooking
     @CourtID INT,
     @MemberID INT = NULL,
@@ -46,7 +46,7 @@ ALTER PROCEDURE dbo.sp_CreateBooking
     @Note NVARCHAR(200) = NULL,
     @StartTime DATETIME,
     @EndTime DATETIME,
-    @Status NVARCHAR(50) = 'Confirmed'
+    @Status NVARCHAR(50) = '{AppConstants.BookingStatus.Confirmed}'
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -54,7 +54,7 @@ BEGIN
     IF EXISTS (
         SELECT 1 FROM dbo.Bookings
         WHERE CourtID = @CourtID
-          AND Status != 'Cancelled'
+                    AND Status != '{AppConstants.BookingStatus.Cancelled}'
           AND (StartTime < @EndTime AND EndTime > @StartTime)
     )
     BEGIN
@@ -68,10 +68,16 @@ END");
 
                     _noteSchemaOk = true;
                 }
-                catch
+                catch (Exception ex)
                 {
                     // Best-effort: do not crash the app if the database is not up to date.
                     _noteSchemaOk = false;
+                    DatabaseHelper.TryLogThrottled(
+                        throttleKey: "BookingController.TryEnsureBookingNoteSchema",
+                        eventDesc: "Booking Note Schema Ensure Failed",
+                        ex: ex,
+                        context: "BookingController.TryEnsureBookingNoteSchema",
+                        minSeconds: 300);
                 }
                 finally
                 {
@@ -90,8 +96,14 @@ END");
                 object col = DatabaseHelper.ExecuteScalar("SELECT COL_LENGTH('dbo.Bookings', 'Note')");
                 return !(col == null || col == DBNull.Value);
             }
-            catch
+            catch (Exception ex)
             {
+                DatabaseHelper.TryLogThrottled(
+                    throttleKey: "BookingController.HasBookingNoteColumn",
+                    eventDesc: "Booking Note Schema Check Failed",
+                    ex: ex,
+                    context: "BookingController.HasBookingNoteColumn",
+                    minSeconds: 300);
                 return false;
             }
         }
@@ -109,8 +121,14 @@ WHERE object_id = OBJECT_ID('dbo.sp_CreateBooking')
                 int count = obj == null || obj == DBNull.Value ? 0 : Convert.ToInt32(obj);
                 return count > 0;
             }
-            catch
+            catch (Exception ex)
             {
+                DatabaseHelper.TryLogThrottled(
+                    throttleKey: "BookingController.SpCreateBookingHasNoteParam",
+                    eventDesc: "Booking Proc Metadata Check Failed",
+                    ex: ex,
+                    context: "BookingController.SpCreateBookingHasNoteParam",
+                    minSeconds: 300);
                 return false;
             }
         }
@@ -128,8 +146,14 @@ WHERE object_id = OBJECT_ID('dbo.sp_CreateBooking')
                 int count = obj == null || obj == DBNull.Value ? 0 : Convert.ToInt32(obj);
                 return count > 0;
             }
-            catch
+            catch (Exception ex)
             {
+                DatabaseHelper.TryLogThrottled(
+                    throttleKey: "BookingController.SpCreateBookingHasMemberIdParam",
+                    eventDesc: "Booking Proc Metadata Check Failed",
+                    ex: ex,
+                    context: "BookingController.SpCreateBookingHasMemberIdParam",
+                    minSeconds: 300);
                 return false;
             }
         }
@@ -190,10 +214,10 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);",
         public List<CourtModel> GetCourts()
         {
             var list = new List<CourtModel>();
-            string query = @"
+            string query = $@"
 SELECT CourtID, Name, CourtType, HourlyRate
 FROM Courts
-WHERE (Status = 'Active' OR Status IS NULL OR LTRIM(RTRIM(Status)) = '')
+WHERE (Status = '{AppConstants.CourtStatus.Active}' OR Status IS NULL OR LTRIM(RTRIM(Status)) = '')
 ORDER BY
     CASE
         WHEN CourtType IN (N'Trong nhà', N'Trong Nha', N'Indoor') OR Name LIKE N'%(Trong nhà)%' THEN 1
@@ -236,16 +260,16 @@ ORDER BY
 
                         bool hasNote = HasBookingNoteColumn();
                         string query = hasNote
-                                ? @"
+                                ? $@"
                                 SELECT BookingID, CourtID, GuestName, Note, StartTime, EndTime, Status
                                 FROM Bookings
                                 WHERE CAST(StartTime AS DATE) = @Date
-                                    AND Status != 'Cancelled'"
-                                : @"
+                                    AND Status != '{AppConstants.BookingStatus.Cancelled}'"
+                                : $@"
                                 SELECT BookingID, CourtID, GuestName, CAST(NULL AS NVARCHAR(200)) AS Note, StartTime, EndTime, Status
                                 FROM Bookings
                                 WHERE CAST(StartTime AS DATE) = @Date
-                                    AND Status != 'Cancelled'";
+                                    AND Status != '{AppConstants.BookingStatus.Cancelled}'";
                   
             var dt = DatabaseHelper.ExecuteQuery(query, new SqlParameter("@Date", date.Date));
             foreach (DataRow row in dt.Rows)
@@ -272,7 +296,7 @@ ORDER BY
 
         public void SubmitBooking(int courtId, string guestName, DateTime startTime, DateTime endTime)
         {
-            SubmitBooking(courtId, guestName, note: null, startTime: startTime, endTime: endTime, status: "Confirmed");
+            SubmitBooking(courtId, guestName, note: null, startTime: startTime, endTime: endTime, status: AppConstants.BookingStatus.Confirmed);
         }
 
         public void SubmitBooking(int courtId, string guestName, DateTime startTime, DateTime endTime, string status)
@@ -323,7 +347,7 @@ ORDER BY
 
                 cmd.Parameters.AddWithValue("@StartTime", startTime);
                 cmd.Parameters.AddWithValue("@EndTime", endTime);
-                cmd.Parameters.AddWithValue("@Status", string.IsNullOrWhiteSpace(status) ? "Confirmed" : status);
+                cmd.Parameters.AddWithValue("@Status", string.IsNullOrWhiteSpace(status) ? AppConstants.BookingStatus.Confirmed : status);
 
                 conn.Open();
                 cmd.ExecuteNonQuery();
@@ -351,13 +375,13 @@ ORDER BY
                 int courtId = Convert.ToInt32(dt.Rows[0]["CourtID"]);
                 string status = dt.Rows[0]["Status"] == DBNull.Value ? "" : dt.Rows[0]["Status"].ToString();
 
-                if (string.Equals(status, "Cancelled", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(status, AppConstants.BookingStatus.Cancelled, StringComparison.OrdinalIgnoreCase))
                     throw new InvalidOperationException("Booking đã bị hủy.");
-                if (string.Equals(status, "Paid", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(status, AppConstants.BookingStatus.Paid, StringComparison.OrdinalIgnoreCase))
                     throw new InvalidOperationException("Booking đã thanh toán, không thể đổi ca.");
 
                 object conflictObj = DatabaseHelper.ExecuteScalar(
-                    "SELECT COUNT(*) FROM dbo.Bookings WHERE CourtID = @CourtID AND BookingID <> @BookingID AND Status <> 'Cancelled' AND StartTime < @NewEnd AND EndTime > @NewStart",
+                    $"SELECT COUNT(*) FROM dbo.Bookings WHERE CourtID = @CourtID AND BookingID <> @BookingID AND Status <> '{AppConstants.BookingStatus.Cancelled}' AND StartTime < @NewEnd AND EndTime > @NewStart",
                     new SqlParameter("@CourtID", courtId),
                     new SqlParameter("@BookingID", bookingId),
                     new SqlParameter("@NewStart", newStartTime),
@@ -369,7 +393,7 @@ ORDER BY
                     throw new InvalidOperationException("Khung giờ mới bị trùng lịch. Vui lòng chọn ca khác.");
 
                 DatabaseHelper.ExecuteNonQuery(
-                    "UPDATE dbo.Bookings SET StartTime = @Start, EndTime = @End WHERE BookingID = @Id AND Status <> 'Cancelled'",
+                    $"UPDATE dbo.Bookings SET StartTime = @Start, EndTime = @End WHERE BookingID = @Id AND Status <> '{AppConstants.BookingStatus.Cancelled}'",
                     new SqlParameter("@Start", newStartTime),
                     new SqlParameter("@End", newEndTime),
                     new SqlParameter("@Id", bookingId)
@@ -402,9 +426,9 @@ ORDER BY
                 DateTime currentStart = Convert.ToDateTime(dt.Rows[0]["StartTime"]);
                 DateTime currentEnd = Convert.ToDateTime(dt.Rows[0]["EndTime"]);
 
-                if (string.Equals(status, "Cancelled", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(status, AppConstants.BookingStatus.Cancelled, StringComparison.OrdinalIgnoreCase))
                     throw new InvalidOperationException("Booking đã bị hủy.");
-                if (string.Equals(status, "Paid", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(status, AppConstants.BookingStatus.Paid, StringComparison.OrdinalIgnoreCase))
                     throw new InvalidOperationException("Booking đã thanh toán, không thể đổi ca.");
 
                 bool timeChanged = newStartTime != currentStart || newEndTime != currentEnd;
@@ -414,7 +438,7 @@ ORDER BY
                     if (newStartTime < DateTime.Now) throw new ArgumentException("Giờ bắt đầu đã qua, vui lòng chọn lại.");
 
                     object conflictObj = DatabaseHelper.ExecuteScalar(
-                        "SELECT COUNT(*) FROM dbo.Bookings WHERE CourtID = @CourtID AND BookingID <> @BookingID AND Status <> 'Cancelled' AND StartTime < @NewEnd AND EndTime > @NewStart",
+                        $"SELECT COUNT(*) FROM dbo.Bookings WHERE CourtID = @CourtID AND BookingID <> @BookingID AND Status <> '{AppConstants.BookingStatus.Cancelled}' AND StartTime < @NewEnd AND EndTime > @NewStart",
                         new SqlParameter("@CourtID", courtId),
                         new SqlParameter("@BookingID", bookingId),
                         new SqlParameter("@NewStart", newStartTime),
@@ -430,7 +454,7 @@ ORDER BY
                 {
                     object noteDb = string.IsNullOrWhiteSpace(note) ? (object)DBNull.Value : note.Trim();
                     DatabaseHelper.ExecuteNonQuery(
-                        "UPDATE dbo.Bookings SET StartTime = @Start, EndTime = @End, Note = @Note WHERE BookingID = @Id AND Status <> 'Cancelled'",
+                        $"UPDATE dbo.Bookings SET StartTime = @Start, EndTime = @End, Note = @Note WHERE BookingID = @Id AND Status <> '{AppConstants.BookingStatus.Cancelled}'",
                         new SqlParameter("@Start", timeChanged ? newStartTime : currentStart),
                         new SqlParameter("@End", timeChanged ? newEndTime : currentEnd),
                         new SqlParameter("@Note", noteDb),
@@ -441,7 +465,7 @@ ORDER BY
                 {
                     // No Note column in DB: keep app functional by updating only time.
                     DatabaseHelper.ExecuteNonQuery(
-                        "UPDATE dbo.Bookings SET StartTime = @Start, EndTime = @End WHERE BookingID = @Id AND Status <> 'Cancelled'",
+                        $"UPDATE dbo.Bookings SET StartTime = @Start, EndTime = @End WHERE BookingID = @Id AND Status <> '{AppConstants.BookingStatus.Cancelled}'",
                         new SqlParameter("@Start", timeChanged ? newStartTime : currentStart),
                         new SqlParameter("@End", timeChanged ? newEndTime : currentEnd),
                         new SqlParameter("@Id", bookingId)
@@ -459,7 +483,7 @@ ORDER BY
 
             // Safety: do not allow deactivating a court that still has active/future bookings.
             object cntObj = DatabaseHelper.ExecuteScalar(
-                "SELECT COUNT(*) FROM dbo.Bookings WHERE CourtID = @CourtID AND Status <> 'Cancelled' AND EndTime > GETDATE()",
+                $"SELECT COUNT(*) FROM dbo.Bookings WHERE CourtID = @CourtID AND Status <> '{AppConstants.BookingStatus.Cancelled}' AND EndTime > GETDATE()",
                 new SqlParameter("@CourtID", courtId)
             );
 
@@ -470,7 +494,7 @@ ORDER BY
             }
 
             int affected = DatabaseHelper.ExecuteNonQuery(
-                "UPDATE dbo.Courts SET Status = 'Inactive' WHERE CourtID = @CourtID AND (Status = 'Active' OR Status IS NULL OR LTRIM(RTRIM(Status)) = '')",
+                $"UPDATE dbo.Courts SET Status = '{AppConstants.CourtStatus.Inactive}' WHERE CourtID = @CourtID AND (Status = '{AppConstants.CourtStatus.Active}' OR Status IS NULL OR LTRIM(RTRIM(Status)) = '')",
                 new SqlParameter("@CourtID", courtId)
             );
 
@@ -496,18 +520,18 @@ ORDER BY
 
             string status = dt.Rows[0]["Status"] == DBNull.Value ? "" : dt.Rows[0]["Status"].ToString();
 
-            if (string.Equals(status, "Cancelled", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(status, AppConstants.BookingStatus.Cancelled, StringComparison.OrdinalIgnoreCase))
             {
                 return;
             }
 
-            if (string.Equals(status, "Paid", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(status, AppConstants.BookingStatus.Paid, StringComparison.OrdinalIgnoreCase))
             {
                 throw new InvalidOperationException("Booking đã thanh toán, không thể xóa.");
             }
 
             int affected = DatabaseHelper.ExecuteNonQuery(
-                "UPDATE dbo.Bookings SET Status = 'Cancelled' WHERE BookingID = @Id AND Status <> 'Paid' AND Status <> 'Cancelled'",
+                $"UPDATE dbo.Bookings SET Status = '{AppConstants.BookingStatus.Cancelled}' WHERE BookingID = @Id AND Status <> '{AppConstants.BookingStatus.Paid}' AND Status <> '{AppConstants.BookingStatus.Cancelled}'",
                 new SqlParameter("@Id", bookingId)
             );
 

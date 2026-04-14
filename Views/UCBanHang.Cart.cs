@@ -1,5 +1,6 @@
 using System;
 using System.Windows.Forms;
+using DemoPick.Models;
 using Sunny.UI;
 
 namespace DemoPick
@@ -10,11 +11,13 @@ namespace DemoPick
         {
             public int ProductId { get; }
             public decimal UnitPrice { get; }
+            public string Category { get; }
 
-            public CartItemTag(int productId, decimal unitPrice)
+            public CartItemTag(int productId, decimal unitPrice, string category)
             {
                 ProductId = productId;
                 UnitPrice = unitPrice;
+                Category = category;
             }
         }
 
@@ -84,7 +87,7 @@ namespace DemoPick
 
             try
             {
-                var lines = new System.Collections.Generic.List<Services.PosService.CartLine>();
+                var lines = new System.Collections.Generic.List<CartLine>();
                 foreach (ListViewItem item in lstCart.Items)
                 {
                     if (!(item.Tag is CartItemTag meta))
@@ -93,7 +96,7 @@ namespace DemoPick
                     if (!int.TryParse(item.SubItems[1].Text, out int qty))
                         throw new InvalidOperationException($"Số lượng không hợp lệ cho '{item.Text}'.");
 
-                    lines.Add(new Services.PosService.CartLine(meta.ProductId, item.Text, qty, meta.UnitPrice));
+                    lines.Add(new CartLine(meta.ProductId, item.Text, qty, meta.UnitPrice, meta.Category));
                 }
 
                 Services.PosService.SavePendingOrder(_selectedCourtName, lines);
@@ -126,10 +129,10 @@ namespace DemoPick
 
         private void AddToCart(string prodName, decimal unitPrice)
         {
-            AddToCart(0, prodName, unitPrice);
+            AddToCart(0, prodName, unitPrice, category: null);
         }
 
-        private void AddToCart(int productId, string prodName, decimal unitPrice)
+        private void AddToCart(int productId, string prodName, decimal unitPrice, string category)
         {
             if (!EnsureCourtSelectedForAdd()) return;
 
@@ -158,8 +161,7 @@ namespace DemoPick
             if (!found)
             {
                 var lvi = new ListViewItem(new[] { prodName, "1", unitPrice.ToString("N0") + "đ" });
-                if (productId > 0)
-                    lvi.Tag = new CartItemTag(productId, unitPrice);
+                lvi.Tag = new CartItemTag(productId, unitPrice, category);
                 lstCart.Items.Add(lvi);
             }
         }

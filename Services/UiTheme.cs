@@ -10,8 +10,8 @@ namespace DemoPick.Services
 
         public static void ApplyPageBackground(Control root)
         {
-            if (root == null) return;
-            try { root.BackColor = PageBackground; } catch { }
+            if (root == null || root.IsDisposed) return;
+            root.BackColor = PageBackground;
         }
 
         /// <summary>
@@ -27,15 +27,20 @@ namespace DemoPick.Services
 
         private static void FixSunnyUiLabelBackColor(Control root)
         {
-            if (root == null) return;
+            if (root == null || root.IsDisposed) return;
 
-            foreach (Control child in root.Controls)
+            var children = new Control[root.Controls.Count];
+            root.Controls.CopyTo(children, 0);
+
+            foreach (Control child in children)
             {
+                if (child == null || child.IsDisposed) continue;
+
                 if (child is Label lbl && lbl.Parent is Sunny.UI.UIPanel uiPanel)
                 {
                     // Some SunnyUI containers don't blend WinForms label transparency well,
                     // causing the label to render as a gray block. Match the panel FillColor.
-                    try { lbl.BackColor = uiPanel.FillColor; } catch { }
+                    lbl.BackColor = uiPanel.FillColor;
                 }
 
                 if (child.HasChildren)

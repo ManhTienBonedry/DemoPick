@@ -21,16 +21,28 @@ namespace DemoPick
             this.TopMost = true;
             this.ShowInTaskbar = false;
             
-            pnlBorder.Paint += (s, e) => {
-                e.Graphics.DrawRectangle(new Pen(Color.FromArgb(220, 220, 220)), 0, 0, Width - 1, Height - 1);
+            pnlBorder.Paint += (s, e) => 
+            {
+                using (var pen = new Pen(Color.FromArgb(220, 220, 220)))
+                {
+                    e.Graphics.DrawRectangle(pen, 0, 0, Width - 1, Height - 1);
+                }
             };
             
-            this.Region = Region.FromHrgn(CreateRoundRectRgn(0, 0, Width, Height, 15, 15));
+            IntPtr hRgn = CreateRoundRectRgn(0, 0, Width, Height, 15, 15);
+            if (hRgn != IntPtr.Zero)
+            {
+                this.Region = Region.FromHrgn(hRgn);
+                DeleteObject(hRgn);
+            }
             this.Deactivate += FrmUserMenu_Deactivate;
         }
 
         [System.Runtime.InteropServices.DllImport("Gdi32.dll", EntryPoint = "CreateRoundRectRgn")]
         private static extern IntPtr CreateRoundRectRgn(int nLeftRect, int nTopRect, int nRightRect, int nBottomRect, int nWidthEllipse, int nHeightEllipse);
+
+        [System.Runtime.InteropServices.DllImport("gdi32.dll", SetLastError = true)]
+        private static extern bool DeleteObject(IntPtr hObject);
 
         private bool isOpeningSubForm = false;
 
@@ -46,8 +58,10 @@ namespace DemoPick
         {
             isOpeningSubForm = true;
             this.Hide();
-            var frm = new FrmDoiMatKhau();
-            frm.ShowDialog(this.Owner);
+            using (var frm = new FrmDoiMatKhau())
+            {
+                frm.ShowDialog(this.Owner);
+            }
             this.Close();
         }
 

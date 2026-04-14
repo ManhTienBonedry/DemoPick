@@ -54,6 +54,40 @@ namespace DemoPick.Services
             new RateBlock { StartTime = new TimeSpan(21, 0, 0), EndTime = new TimeSpan(23, 0, 0), RateWeekday = 180000, RateWeekend = 180000, FixedDiscountAmount = 30000, Name = "Ca Tối (21h-23h)" }
         };
 
+        public static string GuessServiceUnit(string serviceName)
+        {
+            string name = (serviceName ?? string.Empty).Trim();
+            if (name.Length == 0) return AppConstants.Units.Piece;
+
+            // Per-hour add-ons
+            if (Contains(name, "máy bắn bóng") || Contains(name, "nhặt bóng"))
+                return AppConstants.Units.Hour;
+
+            // Basket of balls
+            if (Contains(name, "bóng") && Contains(name, "rổ"))
+                return AppConstants.Units.Basket;
+
+            return AppConstants.Units.Piece;
+        }
+
+        public static decimal GetCourtRateMultiplier(string courtType, string courtName)
+        {
+            string t = (courtType ?? string.Empty).Trim();
+            string n = (courtName ?? string.Empty).Trim();
+
+            // Practice courts: 50% rate
+            if (Contains(t, "tập") || Contains(t, "practice") || Contains(n, "tập"))
+                return 0.5m;
+
+            return 1m;
+        }
+
+        private static bool Contains(string haystack, string needle)
+        {
+            if (string.IsNullOrEmpty(haystack) || string.IsNullOrEmpty(needle)) return false;
+            return haystack.IndexOf(needle, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
         public static PriceBreakdown CalculateTotal(DateTime start, DateTime end, bool isFixedCustomer, List<ServiceCharge> services = null, decimal courtRateMultiplier = 1m)
         {
             var breakdown = new PriceBreakdown();
@@ -115,7 +149,7 @@ namespace DemoPick.Services
                 foreach (var svc in services)
                 {
                     decimal svcTotal = 0;
-                    if (svc.Unit.Equals("Giờ", StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(svc.Unit, AppConstants.Units.Hour, StringComparison.OrdinalIgnoreCase))
                     {
                         svcTotal = svc.UnitPrice * svc.Quantity * totalDuration;
                     }

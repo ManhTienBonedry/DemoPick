@@ -117,24 +117,14 @@ namespace DemoPick.Services
 
         private static void EnsureMigrationsTableExists()
         {
-            DatabaseHelper.ExecuteNonQuery(@"
-IF OBJECT_ID('dbo.__Migrations','U') IS NULL
-BEGIN
-    CREATE TABLE dbo.__Migrations (
-        MigrationId NVARCHAR(260) NOT NULL,
-        AppliedAt DATETIME NOT NULL CONSTRAINT DF___Migrations_AppliedAt DEFAULT(GETDATE()),
-        Checksum VARBINARY(32) NULL,
-        CONSTRAINT PK___Migrations PRIMARY KEY (MigrationId)
-    );
-END
-");
+            DatabaseHelper.ExecuteNonQuery(SqlQueries.Migrations.EnsureMigrationsTableExists);
         }
 
         private static Dictionary<string, byte[]> LoadAppliedMigrations()
         {
             var result = new Dictionary<string, byte[]>(StringComparer.OrdinalIgnoreCase);
 
-            DataTable dt = DatabaseHelper.ExecuteQuery("SELECT MigrationId, Checksum FROM dbo.__Migrations");
+            DataTable dt = DatabaseHelper.ExecuteQuery(SqlQueries.Migrations.LoadAppliedMigrations);
             foreach (DataRow row in dt.Rows)
             {
                 string id = row["MigrationId"] as string;
@@ -151,7 +141,7 @@ END
         private static void MarkApplied(string migrationId, byte[] checksum)
         {
             DatabaseHelper.ExecuteNonQuery(
-                "INSERT INTO dbo.__Migrations (MigrationId, Checksum) VALUES (@Id, @Checksum)",
+                SqlQueries.Migrations.MarkApplied,
                 new SqlParameter("@Id", migrationId),
                 new SqlParameter("@Checksum", (object)checksum ?? DBNull.Value));
         }

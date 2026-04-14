@@ -252,7 +252,9 @@ namespace DemoPick
                         path.CloseFigure();
                     }
 
+                    var old = c.Region;
                     c.Region = new Region(path);
+                    if (old != null) old.Dispose();
                 }
             }
             catch

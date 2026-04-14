@@ -12,7 +12,7 @@ namespace DemoPick
         {
             try
             {
-                flpCourts.Controls.Clear();
+                ClearAndDisposeChildControls(flpCourts);
                 var bookCtrl = new DemoPick.Controllers.BookingController();
                 var courts = bookCtrl.GetCourts();
                 var bookings = bookCtrl.GetBookingsByDate(DateTime.Now);
@@ -21,7 +21,7 @@ namespace DemoPick
                 {
                     var currentBooking = bookings.Find(b =>
                         b.CourtID == c.CourtID &&
-                        !string.Equals(b.Status, "Maintenance", StringComparison.OrdinalIgnoreCase) &&
+                        !string.Equals(b.Status, AppConstants.BookingStatus.Maintenance, StringComparison.OrdinalIgnoreCase) &&
                         DateTime.Now >= b.StartTime && DateTime.Now <= b.EndTime);
                     bool active = currentBooking != null;
                     string statusTxt = active ? "Đang chơi" : "Trống";
@@ -31,13 +31,17 @@ namespace DemoPick
                     Panel pnlCtx = new Panel { Size = new Size(240, 80), BackColor = Color.White, Margin = new Padding(0, 0, 0, 10) };
                     pnlCtx.Paint += (s, e) =>
                     {
-                        e.Graphics.DrawRectangle(new Pen(Color.FromArgb(229, 231, 235), 1), 0, 0, pnlCtx.Width - 1, pnlCtx.Height - 1);
-                        e.Graphics.FillRectangle(new SolidBrush(lineCol), 0, 10, 4, pnlCtx.Height - 20);
+                        using (var pen = new Pen(Color.FromArgb(229, 231, 235), 1))
+                        using (var brush = new SolidBrush(lineCol))
+                        {
+                            e.Graphics.DrawRectangle(pen, 0, 0, pnlCtx.Width - 1, pnlCtx.Height - 1);
+                            e.Graphics.FillRectangle(brush, 0, 10, 4, pnlCtx.Height - 20);
+                        }
                     };
 
-                    Label cName = new Label { Text = c.Name, Font = new Font("Segoe UI", 11F, FontStyle.Bold), ForeColor = Color.FromArgb(26, 35, 50), Location = new Point(15, 15), AutoSize = true };
-                    Label badge = new Label { Text = statusTxt, Font = new Font("Segoe UI", 9F, FontStyle.Bold), ForeColor = active ? Color.White : Color.Gray, BackColor = active ? Color.FromArgb(76, 175, 80) : Color.FromArgb(243, 244, 246), Location = new Point(150, 17), AutoSize = true, Padding = new Padding(2) };
-                    Label cTime = new Label { Text = "🕒 " + timeTxt, Font = new Font("Segoe UI", 9F, FontStyle.Regular), ForeColor = Color.Gray, Location = new Point(15, 45), AutoSize = true };
+                    Label cName = new Label { Text = c.Name, Font = _posCourtNameFont, ForeColor = Color.FromArgb(26, 35, 50), Location = new Point(15, 15), AutoSize = true };
+                    Label badge = new Label { Text = statusTxt, Font = _posCourtBadgeFont, ForeColor = active ? Color.White : Color.Gray, BackColor = active ? Color.FromArgb(76, 175, 80) : Color.FromArgb(243, 244, 246), Location = new Point(150, 17), AutoSize = true, Padding = new Padding(2) };
+                    Label cTime = new Label { Text = "🕒 " + timeTxt, Font = _posCourtTimeFont, ForeColor = Color.Gray, Location = new Point(15, 45), AutoSize = true };
 
                     pnlCtx.Controls.AddRange(new Control[] { cName, badge, cTime });
                     pnlCtx.Cursor = Cursors.Hand;
@@ -75,7 +79,7 @@ namespace DemoPick
             foreach (var line in lines)
             {
                 var lvi = new ListViewItem(new[] { line.ProductName, line.Quantity.ToString(), (line.UnitPrice * line.Quantity).ToString("N0") + "đ" });
-                lvi.Tag = new CartItemTag(line.ProductId, line.UnitPrice);
+                lvi.Tag = new CartItemTag(line.ProductId, line.UnitPrice, line.Category);
                 lstCart.Items.Add(lvi);
             }
         }

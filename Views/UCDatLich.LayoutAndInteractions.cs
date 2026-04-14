@@ -154,7 +154,7 @@ namespace DemoPick
         {
             try
             {
-                bool ok = DemoPick.Services.AppSession.IsInRole("Admin");
+                bool ok = DemoPick.Services.AppSession.IsInRole(DemoPick.Services.AppConstants.Roles.Admin);
                 if (!ok)
                 {
                     MessageBox.Show("Chỉ Admin mới có quyền xóa sân.", "Không có quyền", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -162,9 +162,16 @@ namespace DemoPick
                 }
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
-                return true;
+                DemoPick.Services.DatabaseHelper.TryLogThrottled(
+                    throttleKey: "UCDatLich.CanManageCourts",
+                    eventDesc: "Role Check Error",
+                    ex: ex,
+                    context: "UCDatLich.CanManageCourts",
+                    minSeconds: 300);
+                MessageBox.Show("Không thể xác định quyền người dùng. Vui lòng đăng nhập lại.", "Không có quyền", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return false;
             }
         }
 
@@ -226,7 +233,7 @@ namespace DemoPick
             try
             {
                 // Only Staff/Admin can reschedule.
-                bool ok = DemoPick.Services.AppSession.IsInRole("Admin") || DemoPick.Services.AppSession.IsInRole("Staff");
+                bool ok = DemoPick.Services.AppSession.IsInRole(DemoPick.Services.AppConstants.Roles.Admin) || DemoPick.Services.AppSession.IsInRole(DemoPick.Services.AppConstants.Roles.Staff);
                 if (!ok)
                 {
                     MessageBox.Show("Tài khoản của bạn không có quyền đổi ca.", "Không có quyền", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -234,10 +241,16 @@ namespace DemoPick
                 }
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
-                // If roles are not available for some reason, default to allow.
-                return true;
+                DemoPick.Services.DatabaseHelper.TryLogThrottled(
+                    throttleKey: "UCDatLich.CanReschedule",
+                    eventDesc: "Role Check Error",
+                    ex: ex,
+                    context: "UCDatLich.CanReschedule",
+                    minSeconds: 300);
+                MessageBox.Show("Không thể xác định quyền người dùng. Vui lòng đăng nhập lại.", "Không có quyền", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return false;
             }
         }
 
@@ -252,12 +265,12 @@ namespace DemoPick
             }
 
             var b = _selectedBooking;
-            if (string.Equals(b.Status, "Paid", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(b.Status, DemoPick.Services.AppConstants.BookingStatus.Paid, StringComparison.OrdinalIgnoreCase))
             {
                 MessageBox.Show("Booking đã thanh toán, không thể đổi ca.", "Không thể đổi", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
-            if (string.Equals(b.Status, "Cancelled", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(b.Status, DemoPick.Services.AppConstants.BookingStatus.Cancelled, StringComparison.OrdinalIgnoreCase))
             {
                 MessageBox.Show("Booking đã bị hủy.", "Không thể đổi", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
@@ -265,13 +278,7 @@ namespace DemoPick
 
             try
             {
-                string courtName = "";
-                try
-                {
-                    var c = _cachedCourts?.Find(x => x.CourtID == b.CourtID);
-                    courtName = c?.Name ?? "";
-                }
-                catch { }
+                string courtName = _cachedCourts?.Find(x => x.CourtID == b.CourtID)?.Name ?? "";
 
                 using (var frm = new DemoPick.Views.FrmDoiCaBooking(_currentDate.Date, b.BookingID, courtName, b.GuestName, b.Status, b.StartTime, b.EndTime, b.Note))
                 {
@@ -305,24 +312,19 @@ namespace DemoPick
                     if (!hit.Rect.Contains(e.Location)) continue;
 
                     var b = hit.Booking;
-                    if (string.Equals(b.Status, "Paid", StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(b.Status, DemoPick.Services.AppConstants.BookingStatus.Paid, StringComparison.OrdinalIgnoreCase))
                     {
                         MessageBox.Show("Booking đã thanh toán, không thể đổi ca.", "Không thể đổi", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         return;
                     }
-                    if (string.Equals(b.Status, "Cancelled", StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(b.Status, DemoPick.Services.AppConstants.BookingStatus.Cancelled, StringComparison.OrdinalIgnoreCase))
                     {
                         MessageBox.Show("Booking đã bị hủy.", "Không thể đổi", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         return;
                     }
 
                     string courtName = "";
-                    try
-                    {
-                        var c = _cachedCourts?.Find(x => x.CourtID == b.CourtID);
-                        courtName = c?.Name ?? "";
-                    }
-                    catch { }
+                    courtName = _cachedCourts?.Find(x => x.CourtID == b.CourtID)?.Name ?? "";
 
                     using (var frm = new DemoPick.Views.FrmDoiCaBooking(_currentDate.Date, b.BookingID, courtName, b.GuestName, b.Status, b.StartTime, b.EndTime, b.Note))
                     {

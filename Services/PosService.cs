@@ -1,29 +1,15 @@
+using DemoPick.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Globalization;
 using System.Text;
 
 namespace DemoPick.Services
 {
     public class PosService
     {
-        public sealed class CartLine
-        {
-            public int ProductId { get; }
-            public string ProductName { get; }
-            public int Quantity { get; }
-            public decimal UnitPrice { get; }
-
-            public CartLine(int productId, string productName, int quantity, decimal unitPrice)
-            {
-                ProductId = productId;
-                ProductName = productName ?? "";
-                Quantity = quantity;
-                UnitPrice = unitPrice;
-            }
-        }
-
         // --- PENDING ORDER STATE MANAGEMENT ---
         public static Dictionary<string, List<CartLine>> PendingOrders { get; } = new Dictionary<string, List<CartLine>>(StringComparer.OrdinalIgnoreCase);
 
@@ -84,14 +70,27 @@ namespace DemoPick.Services
                         int effectiveMemberId = ResolveMemberForCheckout(conn, tran, memberId, creditedBookingId);
                         int invoiceId = InsertInvoice(conn, tran, effectiveMemberId, totalAmount, discountAmount, finalAmount, paymentMethod);
 
+                        var productCategories = LoadProductCategories(conn, tran, lines);
+
                         // 1) Insert POS product lines only (ProductId > 0)
+                        //    Note: Category "Dịch vụ" should NOT reduce stock.
                         foreach (var line in lines)
                         {
                             if (line == null) continue;
                             if (line.ProductId <= 0) continue;
                             if (line.Quantity <= 0) continue;
 
-                            EnsureStockAndMaybeReduce(conn, tran, line.ProductId, line.Quantity, line.ProductName, hasReduceStockTrigger);
+                            string category = line.Category;
+                            if (string.IsNullOrWhiteSpace(category) && productCategories.TryGetValue(line.ProductId, out var dbCat))
+                            {
+                                category = dbCat;
+                            }
+
+                            if (!IsServiceCategory(category))
+                            {
+                                EnsureStockAndMaybeReduce(conn, tran, line.ProductId, line.Quantity, line.ProductName, hasReduceStockTrigger);
+                            }
+
                             InsertInvoiceDetail(conn, tran, invoiceId, productId: line.ProductId, bookingId: null, qty: line.Quantity, unitPrice: line.UnitPrice);
                         }
 
@@ -385,9 +384,7 @@ namespace DemoPick.Services
                 object insertedObj = DatabaseHelper.ExecuteScalar(
                     conn,
                     tran,
-                    @"INSERT INTO dbo.Members (FullName, Phone, IsFixed)
-                      VALUES (@FullName, @Phone, 0);
-                      SELECT CAST(SCOPE_IDENTITY() AS INT);",
+                                        SqlQueries.Pos.InsertWalkinMemberReturnId,
                     new SqlParameter("@FullName", string.IsNullOrWhiteSpace(fullName) ? "Khach le" : fullName),
                     new SqlParameter("@Phone", phone)
                 );
@@ -456,8 +453,93 @@ namespace DemoPick.Services
             return sb.ToString();
         }
 
+        private static Dictionary<int, string> LoadProductCategories(SqlConnection conn, SqlTransaction tran, IReadOnlyList<CartLine> lines)
+        {
+            var result = new Dictionary<int, string>();
+            if (lines == null || lines.Count == 0) return result;
+
+            var ids = new List<int>();
+            var seen = new HashSet<int>();
+
+            for (int i = 0; i < lines.Count; i++)
+            {
+                var line = lines[i];
+                if (line == null) continue;
+                if (line.ProductId <= 0) continue;
+                if (!string.IsNullOrWhiteSpace(line.Category)) continue;
+
+                if (seen.Add(line.ProductId))
+                {
+                    ids.Add(line.ProductId);
+                }
+            }
+
+            if (ids.Count == 0) return result;
+
+            var sb = new StringBuilder();
+            sb.Append("SELECT ProductID, Category FROM dbo.Products WHERE ProductID IN (");
+
+            var parameters = new SqlParameter[ids.Count];
+            for (int i = 0; i < ids.Count; i++)
+            {
+                if (i > 0) sb.Append(", ");
+                string p = "@P" + i;
+                sb.Append(p);
+                parameters[i] = new SqlParameter(p, ids[i]);
+            }
+            sb.Append(");");
+
+            DataTable dt = DatabaseHelper.ExecuteQuery(conn, tran, sb.ToString(), parameters);
+            foreach (DataRow row in dt.Rows)
+            {
+                if (row["ProductID"] == DBNull.Value) continue;
+
+                int id = Convert.ToInt32(row["ProductID"]);
+                string cat = row["Category"] == DBNull.Value ? null : Convert.ToString(row["Category"]);
+                result[id] = cat;
+            }
+
+            return result;
+        }
+
+        private static bool IsServiceCategory(string category)
+        {
+            return string.Equals(NormalizeCategoryKey(category), "dichvu", StringComparison.Ordinal);
+        }
+
+        private static string NormalizeCategoryKey(string category)
+        {
+            if (string.IsNullOrWhiteSpace(category)) return "";
+
+            string s = category.Trim();
+            s = RemoveDiacritics(s);
+            s = s.Replace(" ", "");
+            return s.ToLowerInvariant();
+        }
+
+        private static string RemoveDiacritics(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return "";
+
+            string normalized = text.Normalize(NormalizationForm.FormD);
+            var sb = new StringBuilder(normalized.Length);
+
+            for (int i = 0; i < normalized.Length; i++)
+            {
+                char c = normalized[i];
+                if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+                {
+                    sb.Append(c);
+                }
+            }
+
+            return sb.ToString().Normalize(NormalizationForm.FormC);
+        }
+
         private static bool TriggerExists(SqlConnection conn, SqlTransaction tran, string triggerName)
         {
+            if (string.IsNullOrWhiteSpace(triggerName)) return false;
+
             try
             {
                 object result = DatabaseHelper.ExecuteScalar(
@@ -466,11 +548,26 @@ namespace DemoPick.Services
                     "SELECT 1 FROM sys.triggers WHERE name = @Name AND is_disabled = 0",
                     new SqlParameter("@Name", triggerName)
                 );
-                return result != null;
+                if (result != null && result != DBNull.Value) return true;
+
+                // Fallback: OBJECT_ID can succeed in some environments where sys.* metadata visibility is limited.
+                object objId = DatabaseHelper.ExecuteScalar(
+                    conn,
+                    tran,
+                    "SELECT OBJECT_ID(QUOTENAME('dbo') + '.' + QUOTENAME(@Name), 'TR')",
+                    new SqlParameter("@Name", triggerName)
+                );
+                return objId != null && objId != DBNull.Value;
             }
-            catch
+            catch (Exception ex)
             {
-                return false;
+                DatabaseHelper.TryLogThrottled(
+                    throttleKey: "PosService.TriggerExists",
+                    eventDesc: "Trigger Exists Check Error",
+                    ex: ex,
+                    context: "PosService.TriggerExists(" + triggerName + ")",
+                    minSeconds: 300);
+                throw;
             }
         }
 
@@ -482,9 +579,7 @@ namespace DemoPick.Services
             object idObj = DatabaseHelper.ExecuteScalar(
                 conn,
                 tran,
-                @"INSERT INTO Invoices (MemberID, TotalAmount, DiscountAmount, FinalAmount, PaymentMethod)
-                  VALUES (@MemberID, @TotalAmount, @DiscountAmount, @FinalAmount, @PaymentMethod);
-                  SELECT CAST(SCOPE_IDENTITY() AS INT);",
+                                SqlQueries.Pos.InsertInvoiceReturnId,
                 memberParam,
                 new SqlParameter("@TotalAmount", totalAmount),
                 new SqlParameter("@DiscountAmount", discountAmount),
@@ -567,13 +662,13 @@ namespace DemoPick.Services
             object bookingIdObj = DatabaseHelper.ExecuteScalar(
                 conn,
                 tran,
-                @"DECLARE @Now DATETIME = GETDATE();
+                                $@"DECLARE @Now DATETIME = GETDATE();
 SELECT TOP (1) b.BookingID
 FROM dbo.Bookings b
 INNER JOIN dbo.Courts c ON c.CourtID = b.CourtID
 WHERE c.Name = @CourtName
-  AND b.Status <> 'Cancelled'
-    AND b.Status <> 'Maintenance'
+    AND b.Status <> '{AppConstants.BookingStatus.Cancelled}'
+        AND b.Status <> '{AppConstants.BookingStatus.Maintenance}'
   AND b.StartTime <= @Now
   AND b.EndTime > @Now
 ORDER BY b.StartTime DESC, b.BookingID DESC;",
@@ -588,16 +683,16 @@ ORDER BY b.StartTime DESC, b.BookingID DESC;",
             int affected = DatabaseHelper.ExecuteNonQuery(
                 conn,
                 tran,
-                @"DECLARE @Now DATETIME = GETDATE();
+                                $@"DECLARE @Now DATETIME = GETDATE();
 UPDATE dbo.Bookings
 SET EndTime = @Now,
     Status = @Status
 WHERE BookingID = @BookingID
-  AND Status <> 'Cancelled'
-    AND Status <> 'Maintenance'
+    AND Status <> '{AppConstants.BookingStatus.Cancelled}'
+        AND Status <> '{AppConstants.BookingStatus.Maintenance}'
   AND StartTime <= @Now
   AND EndTime > @Now;",
-                new SqlParameter("@Status", "Paid"),
+                                new SqlParameter("@Status", AppConstants.BookingStatus.Paid),
                 new SqlParameter("@BookingID", bookingId)
             );
 
@@ -615,13 +710,13 @@ WHERE BookingID = @BookingID
             object bookingIdObj = DatabaseHelper.ExecuteScalar(
                 conn,
                 tran,
-                @"DECLARE @Now DATETIME = GETDATE();
+                                $@"DECLARE @Now DATETIME = GETDATE();
 SELECT TOP (1) b.BookingID
 FROM dbo.Bookings b
 INNER JOIN dbo.Courts c ON c.CourtID = b.CourtID
 WHERE c.Name = @CourtName
-  AND b.Status <> 'Cancelled'
-    AND b.Status <> 'Maintenance'
+    AND b.Status <> '{AppConstants.BookingStatus.Cancelled}'
+        AND b.Status <> '{AppConstants.BookingStatus.Maintenance}'
   AND b.StartTime <= @Now
   AND b.EndTime <= @Now
   AND b.EndTime >= DATEADD(HOUR, -12, @Now)
@@ -638,8 +733,8 @@ ORDER BY b.EndTime DESC, b.BookingID DESC;",
             DatabaseHelper.ExecuteNonQuery(
                 conn,
                 tran,
-                "UPDATE dbo.Bookings SET Status = @Status WHERE BookingID = @BookingID AND Status <> 'Cancelled' AND Status <> 'Maintenance'",
-                new SqlParameter("@Status", "Paid"),
+                $"UPDATE dbo.Bookings SET Status = @Status WHERE BookingID = @BookingID AND Status <> '{AppConstants.BookingStatus.Cancelled}' AND Status <> '{AppConstants.BookingStatus.Maintenance}'",
+                new SqlParameter("@Status", AppConstants.BookingStatus.Paid),
                 new SqlParameter("@BookingID", bookingId)
             );
 

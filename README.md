@@ -77,10 +77,15 @@ flowchart TD
 
 Sửa connection string `DefaultConnection` trong [App.config](App.config).
 
+Ngoài ra có thể override bằng env var `DEMOPICK_CONNECTION_STRING` (ưu tiên hơn App.config) để tránh hardcode/commit connection string.
+
 Ví dụ (SQL Express + Windows Auth):
 ```xml
 <add name="DefaultConnection" connectionString="Server=.\SQLEXPRESS;Database=PickleProDB;Integrated Security=True;" providerName="System.Data.SqlClient" />
 ```
+
+**Best-effort bảo vệ connectionStrings (opt-in)**
+- Set `DEMOPICK_PROTECT_CONNECTIONSTRINGS=1` (hoặc appSetting `ProtectConnectionStrings=true`) để app thử encrypt section `connectionStrings` trong file `.exe.config` khi chạy.
 
 ### 3) Restore packages & Build
 

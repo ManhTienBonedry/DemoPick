@@ -11,6 +11,9 @@ namespace DemoPick
     {
         private ReportService _reportService;
 
+        private Font _topCourtsViewAllNormalFont;
+        private Font _topCourtsViewAllUnderlineFont;
+
         private UCDateRangeFilter DateFilter => dateFilter;
 
         private static readonly Color KpiPositiveColor = Color.FromArgb(76, 175, 80);
@@ -50,8 +53,44 @@ namespace DemoPick
             if (lblTopCourtsViewAll != null)
             {
                 lblTopCourtsViewAll.Click += (s, e) => NavigateToDatLich();
-                lblTopCourtsViewAll.MouseEnter += (s, e) => lblTopCourtsViewAll.Font = new Font(lblTopCourtsViewAll.Font, FontStyle.Underline);
-                lblTopCourtsViewAll.MouseLeave += (s, e) => lblTopCourtsViewAll.Font = new Font(lblTopCourtsViewAll.Font, FontStyle.Regular);
+
+                _topCourtsViewAllNormalFont = lblTopCourtsViewAll.Font;
+                if (_topCourtsViewAllNormalFont != null)
+                {
+                    _topCourtsViewAllUnderlineFont = (_topCourtsViewAllNormalFont.Style & FontStyle.Underline) != 0
+                        ? _topCourtsViewAllNormalFont
+                        : new Font(_topCourtsViewAllNormalFont, _topCourtsViewAllNormalFont.Style | FontStyle.Underline);
+                }
+
+                lblTopCourtsViewAll.MouseEnter += (s, e) =>
+                {
+                    if (_topCourtsViewAllUnderlineFont != null)
+                    {
+                        lblTopCourtsViewAll.Font = _topCourtsViewAllUnderlineFont;
+                    }
+                };
+                lblTopCourtsViewAll.MouseLeave += (s, e) =>
+                {
+                    if (_topCourtsViewAllNormalFont != null)
+                    {
+                        lblTopCourtsViewAll.Font = _topCourtsViewAllNormalFont;
+                    }
+                };
+
+                this.Disposed += (s, e) =>
+                {
+                    try
+                    {
+                        if (_topCourtsViewAllUnderlineFont != null && !ReferenceEquals(_topCourtsViewAllUnderlineFont, _topCourtsViewAllNormalFont))
+                        {
+                            _topCourtsViewAllUnderlineFont.Dispose();
+                        }
+                    }
+                    catch
+                    {
+                        // Best effort.
+                    }
+                };
             }
 
             if (lstTopCourts != null)
@@ -82,25 +121,21 @@ namespace DemoPick
 
         private void TrySetFilterDates(DateTime from, DateTime to)
         {
-            try
-            {
-                if (dateFilter == null) return;
-                dateFilter.FromDate = from.Date;
-                dateFilter.ToDate = to.Date;
-            }
-            catch { }
+            if (dateFilter == null) return;
+            dateFilter.FromDate = from.Date;
+            dateFilter.ToDate = to.Date;
         }
 
         private DateTime GetFilterFromDate()
         {
-            try { return dateFilter != null ? dateFilter.FromDate.Date : DateTime.Today.AddDays(-6); }
-            catch { return DateTime.Today.AddDays(-6); }
+            if (dateFilter == null) return DateTime.Today.AddDays(-6);
+            return dateFilter.FromDate.Date;
         }
 
         private DateTime GetFilterToDate()
         {
-            try { return dateFilter != null ? dateFilter.ToDate.Date : DateTime.Today; }
-            catch { return DateTime.Today; }
+            if (dateFilter == null) return DateTime.Today;
+            return dateFilter.ToDate.Date;
         }
 
         private void NavigateToDatLich()

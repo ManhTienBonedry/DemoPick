@@ -1,3 +1,4 @@
+using DemoPick.Models;
 using System;
 using System.Data;
 using System.Data.SqlClient;
@@ -10,14 +11,6 @@ namespace DemoPick.Services
     {
         private const int MaxFailedLoginAttempts = 5;
         private const int LockoutMinutes = 5;
-
-        internal sealed class AuthUser
-        {
-            public int AccountId { get; set; }
-            public string Username { get; set; }
-            public string FullName { get; set; }
-            public string Role { get; set; }
-        }
 
         internal static bool TryLogin(string identifier, string password, out AuthUser user, out string error)
         {
@@ -35,14 +28,8 @@ namespace DemoPick.Services
             DataTable dt;
             try
             {
-                dt = DatabaseHelper.ExecuteQuery(@"
-SELECT AccountID, Username, FullName, Role, PasswordHash, PasswordSalt, IsActive,
-       FailedLoginCount, LockoutUntil
-FROM dbo.StaffAccounts
-WHERE (Username = @Id
-   OR (Email IS NOT NULL AND Email = @Id)
-   OR (Phone IS NOT NULL AND Phone = @Id)
-   OR (FullName IS NOT NULL AND LTRIM(RTRIM(FullName)) = @Id)) ",
+                dt = DatabaseHelper.ExecuteQuery(
+                    SqlQueries.Auth.LoginCandidatesByIdentifier,
                     new SqlParameter("@Id", id));
             }
             catch (Exception ex)
@@ -137,7 +124,15 @@ WHERE (Username = @Id
                         int accountId = Convert.ToInt32(dt.Rows[0]["AccountID"]);
                         RecordFailedLoginAttempt(accountId);
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        DatabaseHelper.TryLogThrottled(
+                            throttleKey: "Auth.RecordFailedLoginAttempt",
+                            eventDesc: "Auth FailedLogin Attempt Error",
+                            ex: ex,
+                            context: "AuthService.TryLogin",
+                            minSeconds: 300);
+                    }
                 }
 
                 if (anyActiveButLocked)
@@ -153,7 +148,15 @@ WHERE (Username = @Id
             {
                 ResetFailedLogin(matched.AccountId);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                DatabaseHelper.TryLogThrottled(
+                    throttleKey: "Auth.ResetFailedLogin",
+                    eventDesc: "Auth ResetFailedLogin Error",
+                    ex: ex,
+                    context: "AuthService.TryLogin",
+                    minSeconds: 300);
+            }
 
             user = matched;
             return true;
@@ -162,12 +165,8 @@ WHERE (Username = @Id
         private static void RecordFailedLoginAttempt(int accountId)
         {
             // Best-effort lockout. If the DB schema doesn't have these columns yet, ignore errors.
-            DatabaseHelper.ExecuteNonQuery(@"
-UPDATE dbo.StaffAccounts
-SET FailedLoginCount = ISNULL(FailedLoginCount, 0) + 1,
-    LockoutUntil = CASE WHEN ISNULL(FailedLoginCount, 0) + 1 >= @Max THEN DATEADD(MINUTE, @Minutes, GETDATE()) ELSE LockoutUntil END,
-    LastFailedLoginAt = GETDATE()
-WHERE AccountID = @Id;",
+            DatabaseHelper.ExecuteNonQuery(
+                SqlQueries.Auth.RecordFailedLoginAttempt,
                 new SqlParameter("@Id", accountId),
                 new SqlParameter("@Max", MaxFailedLoginAttempts),
                 new SqlParameter("@Minutes", LockoutMinutes));
@@ -175,11 +174,8 @@ WHERE AccountID = @Id;",
 
         private static void ResetFailedLogin(int accountId)
         {
-            DatabaseHelper.ExecuteNonQuery(@"
-UPDATE dbo.StaffAccounts
-SET FailedLoginCount = 0,
-    LockoutUntil = NULL
-WHERE AccountID = @Id;",
+            DatabaseHelper.ExecuteNonQuery(
+                SqlQueries.Auth.ResetFailedLogin,
                 new SqlParameter("@Id", accountId));
         }
 
@@ -215,7 +211,7 @@ WHERE AccountID = @Id;",
             try
             {
                 var exists = DatabaseHelper.ExecuteScalar(
-                    "SELECT COUNT(1) FROM dbo.StaffAccounts WHERE Username = @U OR (Email IS NOT NULL AND Email = @E)",
+                    SqlQueries.Auth.UsernameOrEmailExists,
                     new SqlParameter("@U", username),
                     new SqlParameter("@E", (object)(email ?? "") ?? DBNull.Value)
                 );
@@ -228,16 +224,15 @@ WHERE AccountID = @Id;",
                 byte[] salt = GenerateSalt(16);
                 byte[] hash = HashPassword(password, salt);
 
-                DatabaseHelper.ExecuteNonQuery(@"
-INSERT INTO dbo.StaffAccounts (Username, Email, Phone, FullName, PasswordHash, PasswordSalt, Role, IsActive)
-VALUES (@Username, @Email, @Phone, @FullName, @Hash, @Salt, @Role, 1)",
+                DatabaseHelper.ExecuteNonQuery(
+                    SqlQueries.Auth.RegisterStaffAccount,
                     new SqlParameter("@Username", username),
                     new SqlParameter("@Email", (object)email ?? DBNull.Value),
                     new SqlParameter("@Phone", (object)phone ?? DBNull.Value),
                     new SqlParameter("@FullName", (object)fullName ?? DBNull.Value),
                     new SqlParameter("@Hash", SqlDbType.VarBinary, 32) { Value = hash },
                     new SqlParameter("@Salt", SqlDbType.VarBinary, 16) { Value = salt },
-                    new SqlParameter("@Role", "Staff")
+                    new SqlParameter("@Role", AppConstants.Roles.Staff)
                 );
 
                 return true;
@@ -255,7 +250,7 @@ VALUES (@Username, @Email, @Phone, @FullName, @Hash, @Salt, @Role, 1)",
             seededUsername = null;
             seededPassword = null;
 
-            object cntObj = DatabaseHelper.ExecuteScalar("SELECT COUNT(1) FROM dbo.StaffAccounts");
+            object cntObj = DatabaseHelper.ExecuteScalar(SqlQueries.Auth.StaffAccountsCount);
             int cnt = Convert.ToInt32(cntObj);
             if (cnt > 0) return false;
 
@@ -269,9 +264,8 @@ VALUES (@Username, @Email, @Phone, @FullName, @Hash, @Salt, @Role, 1)",
             byte[] salt = GenerateSalt(16);
             byte[] hash = HashPassword(password, salt);
 
-            DatabaseHelper.ExecuteNonQuery(@"
-INSERT INTO dbo.StaffAccounts (Username, Email, Phone, FullName, PasswordHash, PasswordSalt, Role, IsActive)
-VALUES (@Username, NULL, NULL, N'Quản trị viên', @Hash, @Salt, 'Admin', 1)",
+            DatabaseHelper.ExecuteNonQuery(
+                SqlQueries.Auth.SeedAdmin,
                 new SqlParameter("@Username", username),
                 new SqlParameter("@Hash", SqlDbType.VarBinary, 32) { Value = hash },
                 new SqlParameter("@Salt", SqlDbType.VarBinary, 16) { Value = salt }
@@ -331,10 +325,8 @@ VALUES (@Username, NULL, NULL, N'Quản trị viên', @Hash, @Salt, 'Admin', 1)"
 
             try
             {
-                DataTable dt = DatabaseHelper.ExecuteQuery(@"
-SELECT TOP 1 PasswordHash, PasswordSalt
-FROM dbo.StaffAccounts
-WHERE AccountID = @Id AND IsActive = 1",
+                DataTable dt = DatabaseHelper.ExecuteQuery(
+                    SqlQueries.Auth.ChangePasswordLoadHashSalt,
                     new SqlParameter("@Id", accountId));
 
                 if (dt.Rows.Count == 0)
@@ -362,11 +354,8 @@ WHERE AccountID = @Id AND IsActive = 1",
                 byte[] newSalt = GenerateSalt(16);
                 byte[] newHash = HashPassword(newPassword, newSalt);
 
-                DatabaseHelper.ExecuteNonQuery(@"
-UPDATE dbo.StaffAccounts
-SET PasswordHash = @Hash,
-    PasswordSalt = @Salt
-WHERE AccountID = @Id",
+                DatabaseHelper.ExecuteNonQuery(
+                    SqlQueries.Auth.ChangePasswordUpdateHashSalt,
                     new SqlParameter("@Hash", SqlDbType.VarBinary, 32) { Value = newHash },
                     new SqlParameter("@Salt", SqlDbType.VarBinary, 16) { Value = newSalt },
                     new SqlParameter("@Id", accountId));

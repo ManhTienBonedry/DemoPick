@@ -10,8 +10,9 @@ namespace DemoPick
         {
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             using (Pen p = new Pen(Color.FromArgb(220, 220, 220), 1))
+            using (GraphicsPath path = RoundedRect(new Rectangle(0, 0, this.Width - 1, this.Height - 1), 20))
             {
-                e.Graphics.DrawPath(p, RoundedRect(new Rectangle(0, 0, this.Width - 1, this.Height - 1), 20));
+                e.Graphics.DrawPath(p, path);
             }
         }
 

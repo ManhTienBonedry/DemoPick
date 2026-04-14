@@ -32,11 +32,17 @@ namespace DemoPick
             lblTabNew.Click += (s, e) => FilterList("Mới", lblTabNew);
             lblTabNew.Cursor = Cursors.Hand;
 
-            this.picFilter.Paint += (s, e) => {
-                Graphics g = e.Graphics; g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-                g.DrawLine(new Pen(Color.FromArgb(107, 114, 128), 2), 5, 10, 25, 10);
-                g.DrawLine(new Pen(Color.FromArgb(107, 114, 128), 2), 10, 16, 20, 16);
-                g.DrawLine(new Pen(Color.FromArgb(107, 114, 128), 2), 13, 22, 17, 22);
+            this.picFilter.Paint += (s, e) =>
+            {
+                Graphics g = e.Graphics;
+                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+
+                using (var pen = new Pen(Color.FromArgb(107, 114, 128), 2))
+                {
+                    g.DrawLine(pen, 5, 10, 25, 10);
+                    g.DrawLine(pen, 10, 16, 20, 16);
+                    g.DrawLine(pen, 13, 22, 17, 22);
+                }
             };
 
             lstKhachHang.DrawColumnHeader += LstKhachHang_DrawColumnHeader;
@@ -91,7 +97,10 @@ namespace DemoPick
             e.DrawBackground();
             using (var brush = new SolidBrush(Color.FromArgb(156, 163, 175)))
             {
-                e.Graphics.DrawString(e.Header.Text, e.Font, brush, e.Bounds, new StringFormat { LineAlignment = StringAlignment.Center });
+                using (var sf = new StringFormat { LineAlignment = StringAlignment.Center })
+                {
+                    e.Graphics.DrawString(e.Header.Text, e.Font, brush, e.Bounds, sf);
+                }
             }
         }
 
@@ -138,13 +147,19 @@ namespace DemoPick
                 
                 using (Brush fgBrush = new SolidBrush(fgColor))
                 {
-                    StringFormat sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-                    e.Graphics.DrawString(text, new Font(e.Item.Font.FontFamily, 9F, FontStyle.Bold), fgBrush, rect, sf);
+                    using (var sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center })
+                    using (var font = new Font(e.Item.Font.FontFamily, 9F, FontStyle.Bold))
+                    {
+                        e.Graphics.DrawString(text, font, fgBrush, rect, sf);
+                    }
                 }
             }
             else if (e.ColumnIndex == 3) // Giờ tích lũy (Progress Bar)
             {
-                e.Graphics.DrawString(e.SubItem.Text, new Font(e.Item.Font, FontStyle.Bold), Brushes.Black, new Point(e.Bounds.X, e.Bounds.Y + 2));
+                using (var boldFont = new Font(e.Item.Font, FontStyle.Bold))
+                {
+                    e.Graphics.DrawString(e.SubItem.Text, boldFont, Brushes.Black, new Point(e.Bounds.X, e.Bounds.Y + 2));
+                }
                 
                 Rectangle barRect = new Rectangle(e.Bounds.X, e.Bounds.Y + 25, 100, 6);
                 using (GraphicsPath pBg = new GraphicsPath())
@@ -155,7 +170,10 @@ namespace DemoPick
                     pBg.AddArc(barRect.Right - r, barRect.Bottom - r, r, r, 0, 90);
                     pBg.AddArc(barRect.X, barRect.Bottom - r, r, r, 90, 90);
                     pBg.CloseFigure();
-                    e.Graphics.FillPath(new SolidBrush(Color.FromArgb(229, 231, 235)), pBg);
+                    using (var bgBrush = new SolidBrush(Color.FromArgb(229, 231, 235)))
+                    {
+                        e.Graphics.FillPath(bgBrush, pBg);
+                    }
                 }
 
                 float pct = (float)c.TotalHours / 30f;
@@ -176,7 +194,10 @@ namespace DemoPick
                             pFg.CloseFigure();
                             
                             Color barColor = pct >= 1f ? Color.FromArgb(16, 185, 129) : Color.FromArgb(167, 139, 250);
-                            e.Graphics.FillPath(new SolidBrush(barColor), pFg);
+                            using (var barBrush = new SolidBrush(barColor))
+                            {
+                                e.Graphics.FillPath(barBrush, pFg);
+                            }
                         }
                     }
                 }

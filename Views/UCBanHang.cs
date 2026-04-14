@@ -26,12 +26,26 @@ namespace DemoPick
 
             _inventoryService = new InventoryService();
 
-            pnlLeft.Paint += (s, e) => e.Graphics.DrawLine(new Pen(Color.FromArgb(229, 231, 235), 1), pnlLeft.Width - 1, 0, pnlLeft.Width - 1, pnlLeft.Height);
-            pnlRight.Paint += (s, e) => e.Graphics.DrawLine(new Pen(Color.FromArgb(229, 231, 235), 1), 0, 0, 0, pnlRight.Height);
+            pnlLeft.Paint += (s, e) =>
+            {
+                using (var pen = new Pen(Color.FromArgb(229, 231, 235), 1))
+                {
+                    e.Graphics.DrawLine(pen, pnlLeft.Width - 1, 0, pnlLeft.Width - 1, pnlLeft.Height);
+                }
+            };
+            pnlRight.Paint += (s, e) =>
+            {
+                using (var pen = new Pen(Color.FromArgb(229, 231, 235), 1))
+                {
+                    e.Graphics.DrawLine(pen, 0, 0, 0, pnlRight.Height);
+                }
+            };
             pnlTotals.Paint += (s, e) =>
             {
-                Pen dashPen = new Pen(Color.LightGray, 1) { DashStyle = DashStyle.Dash };
-                e.Graphics.DrawLine(dashPen, 0, 75, pnlTotals.Width, 75);
+                using (var dashPen = new Pen(Color.LightGray, 1) { DashStyle = DashStyle.Dash })
+                {
+                    e.Graphics.DrawLine(dashPen, 0, 75, pnlTotals.Width, 75);
+                }
             };
 
             SetupCartColumns();

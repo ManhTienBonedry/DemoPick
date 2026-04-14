@@ -8,11 +8,32 @@ namespace DemoPick
 {
     public partial class UCThanhToan
     {
+        private static readonly Font _checkoutCourtNameFont = new Font("Segoe UI", 11F, FontStyle.Bold);
+        private static readonly Font _checkoutCourtBadgeFont = new Font("Segoe UI", 9F, FontStyle.Bold);
+        private static readonly Font _checkoutCourtInfoFont = new Font("Segoe UI", 9F, FontStyle.Italic);
+        private static readonly Font _checkoutEmptyStateFont = new Font("Segoe UI", 11F, FontStyle.Italic);
+
+        private static void ClearAndDisposeChildControls(Control parent)
+        {
+            if (parent == null) return;
+            if (parent.Controls == null) return;
+            if (parent.Controls.Count == 0) return;
+
+            var old = new Control[parent.Controls.Count];
+            parent.Controls.CopyTo(old, 0);
+            parent.Controls.Clear();
+
+            for (int i = 0; i < old.Length; i++)
+            {
+                old[i].Dispose();
+            }
+        }
+
         private void LoadCourts()
         {
             try
             {
-                flpCourts.Controls.Clear();
+                ClearAndDisposeChildControls(flpCourts);
                 var bookCtrl = new DemoPick.Controllers.BookingController();
                 var courts = bookCtrl.GetCourts();
 
@@ -25,7 +46,7 @@ namespace DemoPick
                     var bookings = bookCtrl.GetBookingsByDate(DateTime.Now);
                     var currentBooking = bookings.Find(b =>
                         b.CourtID == c.CourtID &&
-                        !string.Equals(b.Status, "Maintenance", StringComparison.OrdinalIgnoreCase) &&
+                        !string.Equals(b.Status, AppConstants.BookingStatus.Maintenance, StringComparison.OrdinalIgnoreCase) &&
                         DateTime.Now >= b.StartTime && DateTime.Now <= b.EndTime);
                     bool active = currentBooking != null;
 
@@ -37,13 +58,17 @@ namespace DemoPick
                     Panel pnlCtx = new Panel { Size = new Size(240, 80), BackColor = Color.White, Margin = new Padding(0, 0, 0, 10), Cursor = Cursors.Hand };
                     pnlCtx.Paint += (s, e) =>
                     {
-                        e.Graphics.DrawRectangle(new Pen(Color.FromArgb(229, 231, 235), 1), 0, 0, pnlCtx.Width - 1, pnlCtx.Height - 1);
-                        e.Graphics.FillRectangle(new SolidBrush(lineCol), 0, 10, 4, pnlCtx.Height - 20);
+                        using (var pen = new Pen(Color.FromArgb(229, 231, 235), 1))
+                        using (var brush = new SolidBrush(lineCol))
+                        {
+                            e.Graphics.DrawRectangle(pen, 0, 0, pnlCtx.Width - 1, pnlCtx.Height - 1);
+                            e.Graphics.FillRectangle(brush, 0, 10, 4, pnlCtx.Height - 20);
+                        }
                     };
 
-                    Label cName = new Label { Text = c.Name, Font = new Font("Segoe UI", 11F, FontStyle.Bold), ForeColor = Color.FromArgb(26, 35, 50), Location = new Point(15, 15), AutoSize = true };
-                    Label badge = new Label { Text = statusTxt, Font = new Font("Segoe UI", 9F, FontStyle.Bold), ForeColor = Color.White, BackColor = lineCol, Location = new Point(150, 17), AutoSize = true, Padding = new Padding(2) };
-                    Label cOrderInfo = new Label { Text = $"Đỏ: {lines.Count} món đang chờ.", Font = new Font("Segoe UI", 9F, FontStyle.Italic), ForeColor = Color.Gray, Location = new Point(15, 45), AutoSize = true };
+                    Label cName = new Label { Text = c.Name, Font = _checkoutCourtNameFont, ForeColor = Color.FromArgb(26, 35, 50), Location = new Point(15, 15), AutoSize = true };
+                    Label badge = new Label { Text = statusTxt, Font = _checkoutCourtBadgeFont, ForeColor = Color.White, BackColor = lineCol, Location = new Point(150, 17), AutoSize = true, Padding = new Padding(2) };
+                    Label cOrderInfo = new Label { Text = $"Đỏ: {lines.Count} món đang chờ.", Font = _checkoutCourtInfoFont, ForeColor = Color.Gray, Location = new Point(15, 45), AutoSize = true };
 
                     pnlCtx.Controls.AddRange(new Control[] { cName, badge, cOrderInfo });
 
@@ -64,7 +89,7 @@ namespace DemoPick
 
                 if (flpCourts.Controls.Count == 0)
                 {
-                    flpCourts.Controls.Add(new Label { Text = "Không có sân nào đang cần thanh toán", Font = new Font("Segoe UI", 11F, FontStyle.Italic), AutoSize = true, Margin = new Padding(20), ForeColor = Color.Gray });
+                    flpCourts.Controls.Add(new Label { Text = "Không có sân nào đang cần thanh toán", Font = _checkoutEmptyStateFont, AutoSize = true, Margin = new Padding(20), ForeColor = Color.Gray });
                 }
             }
             catch (Exception ex)

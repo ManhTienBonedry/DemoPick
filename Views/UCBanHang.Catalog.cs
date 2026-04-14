@@ -10,6 +10,29 @@ namespace DemoPick
 {
     public partial class UCBanHang
     {
+        private static readonly Font _posProductNameFont = new Font("Segoe UI", 10F, FontStyle.Bold);
+        private static readonly Font _posProductPriceFont = new Font("Segoe UI", 10F, FontStyle.Regular);
+        private static readonly Font _posEmptyStateFont = new Font("Segoe UI", 11F, FontStyle.Italic);
+        private static readonly Font _posCourtNameFont = new Font("Segoe UI", 11F, FontStyle.Bold);
+        private static readonly Font _posCourtBadgeFont = new Font("Segoe UI", 9F, FontStyle.Bold);
+        private static readonly Font _posCourtTimeFont = new Font("Segoe UI", 9F, FontStyle.Regular);
+
+        private static void ClearAndDisposeChildControls(Control parent)
+        {
+            if (parent == null) return;
+            if (parent.Controls == null) return;
+            if (parent.Controls.Count == 0) return;
+
+            var old = new Control[parent.Controls.Count];
+            parent.Controls.CopyTo(old, 0);
+            parent.Controls.Clear();
+
+            for (int i = 0; i < old.Length; i++)
+            {
+                old[i].Dispose();
+            }
+        }
+
         private void BtnAddProduct_Click(object sender, EventArgs e)
         {
             try
@@ -128,7 +151,7 @@ namespace DemoPick
                         "UCBanHang.LoadCatalog");
                 }
 
-                flpProducts.Controls.Clear();
+                ClearAndDisposeChildControls(flpProducts);
                 var products = await _inventoryService.GetProductsAsync();
                 int totalProds = 0;
 
@@ -141,24 +164,30 @@ namespace DemoPick
                     string priceTxt = priceVal.ToString("N0") + "đ";
 
                     Panel pnlProd = new Panel { Size = new Size(150, 180), BackColor = Color.White, Margin = new Padding(10), Cursor = Cursors.Hand, Tag = prod.Category ?? "" };
-                    pnlProd.Paint += (s, e) => e.Graphics.DrawRectangle(new Pen(Color.FromArgb(229, 231, 235), 1), 0, 0, pnlProd.Width - 1, pnlProd.Height - 1);
+                    pnlProd.Paint += (s, e) =>
+                    {
+                        using (var pen = new Pen(Color.FromArgb(229, 231, 235), 1))
+                        {
+                            e.Graphics.DrawRectangle(pen, 0, 0, pnlProd.Width - 1, pnlProd.Height - 1);
+                        }
+                    };
 
                     PictureBox pic = new PictureBox { Size = new Size(130, 100), Location = new Point(10, 10), BackColor = Color.FromArgb(243, 244, 246) };
                     pic.Enabled = false;
-                    Label nameLbl = new Label { Text = nameTxt, Font = new Font("Segoe UI", 10F, FontStyle.Bold), ForeColor = Color.FromArgb(26, 35, 50), Location = new Point(10, 120), AutoSize = true };
+                    Label nameLbl = new Label { Text = nameTxt, Font = _posProductNameFont, ForeColor = Color.FromArgb(26, 35, 50), Location = new Point(10, 120), AutoSize = true };
                     nameLbl.Enabled = false;
-                    Label priceLbl = new Label { Text = priceTxt, Font = new Font("Segoe UI", 10F, FontStyle.Regular), ForeColor = Color.FromArgb(76, 175, 80), Location = new Point(10, 145), AutoSize = true };
+                    Label priceLbl = new Label { Text = priceTxt, Font = _posProductPriceFont, ForeColor = Color.FromArgb(76, 175, 80), Location = new Point(10, 145), AutoSize = true };
                     priceLbl.Enabled = false;
 
                     pnlProd.Controls.AddRange(new Control[] { pic, nameLbl, priceLbl });
-                    pnlProd.Click += (s, e) => AddToCart(prodId, nameTxt, priceVal);
+                    pnlProd.Click += (s, e) => AddToCart(prodId, nameTxt, priceVal, prod.Category);
 
                     flpProducts.Controls.Add(pnlProd);
                 }
 
                 if (totalProds == 0)
                 {
-                    flpProducts.Controls.Add(new Label { Name = "lblEmptyProd", Text = "Toàn bộ Máy tính tiền đang trống vãn. Sếp nhập hàng vào Kho trước nhé!", Font = new Font("Segoe UI", 11F, FontStyle.Italic), AutoSize = true, Margin = new Padding(20), ForeColor = Color.Gray });
+                    flpProducts.Controls.Add(new Label { Name = "lblEmptyProd", Text = "Toàn bộ Máy tính tiền đang trống vãn. Sếp nhập hàng vào Kho trước nhé!", Font = _posEmptyStateFont, AutoSize = true, Margin = new Padding(20), ForeColor = Color.Gray });
                 }
             }
             catch (Exception ex)
@@ -189,7 +218,7 @@ namespace DemoPick
             {
                 if (!flpProducts.Controls.ContainsKey("lblEmptyProd"))
                 {
-                    flpProducts.Controls.Add(new Label { Name = "lblEmptyProd", Text = "Chưa có món hàng nào thuộc mục này.", Font = new Font("Segoe UI", 11F, FontStyle.Italic), AutoSize = true, Margin = new Padding(20), ForeColor = Color.Gray });
+                    flpProducts.Controls.Add(new Label { Name = "lblEmptyProd", Text = "Chưa có món hàng nào thuộc mục này.", Font = _posEmptyStateFont, AutoSize = true, Margin = new Padding(20), ForeColor = Color.Gray });
                 }
                 flpProducts.Controls["lblEmptyProd"].Visible = true;
             }

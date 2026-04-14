@@ -1,5 +1,6 @@
 using System;
 using System.Windows.Forms;
+using DemoPick.Services;
 
 namespace DemoPick
 {
@@ -132,9 +133,17 @@ namespace DemoPick
                 {
                     memberId = _controller.GetOrCreateMemberId(txtName.Text, txtPhone.Text);
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    DatabaseHelper.TryLogThrottled(
+                        throttleKey: "FrmDatSan.GetOrCreateMemberId",
+                        eventDesc: "Member Upsert Error",
+                        ex: ex,
+                        context: "FrmDatSan.BtnConfirm_Click",
+                        minSeconds: 300);
+                }
 
-                _controller.SubmitBooking(courtId, memberId, txtName.Text + " - " + txtPhone.Text, note, start, end, status: "Confirmed");
+                _controller.SubmitBooking(courtId, memberId, txtName.Text + " - " + txtPhone.Text, note, start, end, status: AppConstants.BookingStatus.Confirmed);
                 MessageBox.Show($"Đã chốt sân thành công!\n- {txtName.Text}\n- Mốc: Từ {start:HH:mm} đến {end:HH:mm} ngày {start:dd/MM/yyyy}", " Đặt sân hoàn tất", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 this.DialogResult = DialogResult.OK; 
                 this.Close();
