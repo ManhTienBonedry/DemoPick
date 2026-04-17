@@ -110,12 +110,17 @@ namespace DemoPick
                 string logoUri = File.Exists(logoPath) ? new Uri(logoPath).AbsoluteUri : "";
 
                 string qrUri = TryGetExternalImageUriFromResources("qr");
+                if (string.IsNullOrWhiteSpace(qrUri))
+                {
+                    // Fallback to logo when a dedicated QR image is not provisioned.
+                    qrUri = logoUri;
+                }
 
                 reportViewer.LocalReport.SetParameters(new[]
                 {
-                    new ReportParameter("LogoPath", logoUri, true),
-                    new ReportParameter("QrPath", qrUri, true),
-                    new ReportParameter("CourtName", _courtName ?? "", true)
+                    new ReportParameter("LogoPath", logoUri ?? string.Empty),
+                    new ReportParameter("QrPath", qrUri ?? string.Empty),
+                    new ReportParameter("CourtName", _courtName ?? string.Empty)
                 });
 
                 reportViewer.RefreshReport();
