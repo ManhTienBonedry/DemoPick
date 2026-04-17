@@ -63,24 +63,7 @@ namespace DemoPick
                         courtsById.Add(c.CourtID, c);
                 }
 
-                var bookingsToday = bookCtrl.GetBookingsByDate(now);
-                var unpaidBookings = new List<DemoPick.Models.BookingModel>();
-                foreach (var b in bookingsToday)
-                {
-                    if (ShouldIgnoreForCheckout(b.Status))
-                        continue;
-
-                    unpaidBookings.Add(b);
-                }
-
-                unpaidBookings.Sort((a, b) =>
-                {
-                    int cmp = a.StartTime.CompareTo(b.StartTime);
-                    if (cmp != 0) return cmp;
-                    cmp = a.CourtID.CompareTo(b.CourtID);
-                    if (cmp != 0) return cmp;
-                    return a.BookingID.CompareTo(b.BookingID);
-                });
+                var unpaidBookings = bookCtrl.GetUnpaidBookingsUntil(now);
 
                 var rows = new List<CheckoutCourtRow>();
                 var courtsWithBookingRow = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -103,7 +86,7 @@ namespace DemoPick
                         courtsWithBookingRow.Add(court.Name.Trim());
                 }
 
-                // Keep compatibility: still show pending POS orders even when no booking today.
+                // Keep compatibility: still show pending POS orders even when no booking debt exists until today.
                 foreach (var court in courts)
                 {
                     string name = (court.Name ?? string.Empty).Trim();
@@ -129,7 +112,7 @@ namespace DemoPick
                 {
                     flpCourts.Controls.Add(new Label
                     {
-                        Text = "Không có booking chưa thanh toán trong ngày",
+                        Text = "Không có booking chưa thanh toán đến hôm nay",
                         Font = _checkoutEmptyStateFont,
                         AutoSize = true,
                         Margin = new Padding(20),
@@ -189,9 +172,18 @@ namespace DemoPick
                 Padding = new Padding(3, 1, 3, 1)
             };
 
-            string timeText = row.Booking == null
-                ? "Không có booking hôm nay"
-                : $"Ca: {row.Booking.StartTime:HH:mm} - {row.Booking.EndTime:HH:mm}";
+            string timeText;
+            if (row.Booking == null)
+            {
+                timeText = "Không có booking đến hôm nay";
+            }
+            else
+            {
+                string dayText = row.Booking.StartTime.Date == now.Date
+                    ? "Hôm nay"
+                    : row.Booking.StartTime.ToString("dd/MM");
+                timeText = $"Ca: {dayText} {row.Booking.StartTime:HH:mm} - {row.Booking.EndTime:HH:mm}";
+            }
 
             Label lblTime = new Label
             {
@@ -345,6 +337,9 @@ namespace DemoPick
         {
             if (booking == null) return BookingDisplayState.OrderOnly;
 
+            if (now > booking.EndTime)
+                return BookingDisplayState.Overdue;
+
             string status = (booking.Status ?? string.Empty).Trim();
             if (string.Equals(status, AppConstants.BookingStatus.Pending, StringComparison.OrdinalIgnoreCase))
                 return BookingDisplayState.Active;
@@ -352,10 +347,7 @@ namespace DemoPick
             if (now < booking.StartTime)
                 return BookingDisplayState.Upcoming;
 
-            if (now <= booking.EndTime)
-                return BookingDisplayState.Active;
-
-            return BookingDisplayState.Overdue;
+            return BookingDisplayState.Active;
         }
 
         private static string GetStateText(CheckoutCourtRow row)
@@ -418,6 +410,9 @@ namespace DemoPick
             _cartTotal = 0;
             _currentDiscountPct = 0;
             _currentCustomerId = 0;
+            _isFixedCustomer = false;
+            _currentBooking = null;
+            _selectedCourt = null;
             txtCustomerPhone.Text = "";
             lblCustomerInfo.Text = "Khách lẻ (Không áp dụng thẻ)";
             lblCustomerInfo.ForeColor = Color.Gray;
