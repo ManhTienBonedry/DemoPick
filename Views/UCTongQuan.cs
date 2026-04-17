@@ -99,8 +99,9 @@ namespace DemoPick
             PaintEventHandler drawBorder = (s, e) => {
                 var pnl = s as Panel;
                 if (pnl == null) return;
-                using (var pen = new Pen(Color.FromArgb(229, 231, 235), 1))
+                using (var pen = new Pen(UiTheme.CardBorder, UiTheme.CardBorderWidth))
                 {
+                    pen.Alignment = System.Drawing.Drawing2D.PenAlignment.Inset;
                     e.Graphics.DrawRectangle(pen, 0, 0, pnl.Width - 1, pnl.Height - 1);
                 }
             };
