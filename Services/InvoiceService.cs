@@ -29,6 +29,16 @@ namespace DemoPick.Services
             public decimal LineTotal { get; set; }
         }
 
+        public sealed class InvoiceHistoryItem
+        {
+            public int InvoiceID { get; set; }
+            public DateTime CreatedAt { get; set; }
+            public string CustomerName { get; set; }
+            public string CourtName { get; set; }
+            public decimal FinalAmount { get; set; }
+            public string PaymentMethod { get; set; }
+        }
+
         public static InvoiceHeader GetInvoiceHeader(int invoiceId)
         {
             return GetInvoiceHeader(invoiceId, null);
@@ -78,6 +88,33 @@ namespace DemoPick.Services
                     Quantity = Convert.ToInt32(r["Quantity"]),
                     UnitPrice = Convert.ToDecimal(r["UnitPrice"]),
                     LineTotal = Convert.ToDecimal(r["LineTotal"])
+                });
+            }
+
+            return list;
+        }
+
+        public static List<InvoiceHistoryItem> GetInvoiceHistory(int take, string keyword)
+        {
+            if (take <= 0) take = 50;
+
+            var list = new List<InvoiceHistoryItem>();
+            var dt = DatabaseHelper.ExecuteQuery(
+                SqlQueries.Invoice.InvoiceHistory,
+                new SqlParameter("@Take", take),
+                new SqlParameter("@Keyword", string.IsNullOrWhiteSpace(keyword) ? (object)DBNull.Value : keyword.Trim())
+            );
+
+            foreach (DataRow r in dt.Rows)
+            {
+                list.Add(new InvoiceHistoryItem
+                {
+                    InvoiceID = Convert.ToInt32(r["InvoiceID"]),
+                    CreatedAt = Convert.ToDateTime(r["CreatedAt"]),
+                    CustomerName = r["CustomerName"] == DBNull.Value ? "Khách lẻ" : r["CustomerName"].ToString(),
+                    CourtName = r["CourtName"] == DBNull.Value ? string.Empty : r["CourtName"].ToString(),
+                    FinalAmount = r["FinalAmount"] == DBNull.Value ? 0m : Convert.ToDecimal(r["FinalAmount"]),
+                    PaymentMethod = r["PaymentMethod"] == DBNull.Value ? string.Empty : r["PaymentMethod"].ToString()
                 });
             }
 
