@@ -58,8 +58,12 @@ DECLARE @courtRev DECIMAL(18,2) = ISNULL((
     SELECT SUM((DATEDIFF(minute, B.StartTime, B.EndTime) / 60.0) * C.HourlyRate)
     FROM Bookings B
     JOIN Courts C ON B.CourtID = C.CourtID
-    WHERE B.Status != 'Cancelled'
-      AND B.Status != 'Maintenance'
+    WHERE B.Status = 'Paid'
+      AND NOT EXISTS (
+          SELECT 1
+          FROM InvoiceDetails D
+          WHERE D.BookingID = B.BookingID
+      )
 ), 0);
 DECLARE @totalRev DECIMAL(18,2) = @posRev + @courtRev;
 DECLARE @totalCust INT = (SELECT COUNT(*) FROM Members);
@@ -97,8 +101,12 @@ LEFT JOIN (
         SUM((DATEDIFF(minute, B.StartTime, B.EndTime) / 60.0) * C.HourlyRate) as CourtRevenue
     FROM Bookings B
     JOIN Courts C ON B.CourtID = C.CourtID
-    WHERE B.Status != 'Cancelled'
-      AND B.Status != 'Maintenance'
+    WHERE B.Status = 'Paid'
+      AND NOT EXISTS (
+          SELECT 1
+          FROM InvoiceDetails D
+          WHERE D.BookingID = B.BookingID
+      )
     GROUP BY CAST(B.StartTime AS DATE)
 ) BR ON BR.Dt = D.Dt
 GROUP BY D.Dt
@@ -109,10 +117,19 @@ SELECT TOP 4
     C.Name,
     ISNULL(SUM(CASE
         WHEN B.BookingID IS NULL THEN 0
+        WHEN IB.BookingRevenue IS NOT NULL THEN IB.BookingRevenue
         ELSE (DATEDIFF(minute, B.StartTime, B.EndTime) / 60.0) * C.HourlyRate
     END), 0) as Rev
 FROM Courts C
-LEFT JOIN Bookings B ON C.CourtID = B.CourtID AND B.Status != 'Cancelled' AND B.Status != 'Maintenance'
+LEFT JOIN Bookings B ON C.CourtID = B.CourtID AND B.Status = 'Paid'
+LEFT JOIN (
+    SELECT
+        D.BookingID,
+        SUM(ISNULL(D.Quantity, 1) * ISNULL(D.UnitPrice, 0)) as BookingRevenue
+    FROM InvoiceDetails D
+    WHERE D.BookingID IS NOT NULL
+    GROUP BY D.BookingID
+) IB ON IB.BookingID = B.BookingID
 GROUP BY C.Name
 ORDER BY Rev DESC";
 
@@ -123,10 +140,18 @@ SELECT TOP (@Take)
     COALESCE(M.FullName, NULLIF(LTRIM(RTRIM(B.GuestName)), ''), N'Khách lẻ') as CustomerName,
     FORMAT(B.StartTime, 'dd/MM/yyyy HH:mm') as TimeText,
     B.Status as Status,
-    CAST(ISNULL((DATEDIFF(minute, B.StartTime, B.EndTime) / 60.0) * C.HourlyRate, 0) AS DECIMAL(18,2)) as Amount
+    CAST(ISNULL(IB.BookingRevenue, (DATEDIFF(minute, B.StartTime, B.EndTime) / 60.0) * C.HourlyRate) AS DECIMAL(18,2)) as Amount
 FROM Bookings B
 JOIN Courts C ON B.CourtID = C.CourtID
 LEFT JOIN Members M ON B.MemberID = M.MemberID
+LEFT JOIN (
+    SELECT
+        D.BookingID,
+        SUM(ISNULL(D.Quantity, 1) * ISNULL(D.UnitPrice, 0)) as BookingRevenue
+    FROM InvoiceDetails D
+    WHERE D.BookingID IS NOT NULL
+    GROUP BY D.BookingID
+) IB ON IB.BookingID = B.BookingID
 WHERE B.Status = 'Paid'
   AND ISNULL(LTRIM(RTRIM(B.GuestName)), '') NOT LIKE 'SMOKE%'
   AND ISNULL(LTRIM(RTRIM(M.FullName)), '') NOT LIKE 'SMOKE%'
@@ -233,7 +258,12 @@ SELECT
     c.Name as CourtName, 
     c.CourtType as CourtType,
     ISNULL(SUM(DATEDIFF(minute, b.StartTime, b.EndTime)), 0) as BookedMinutes,
-    ISNULL(SUM(DATEDIFF(minute, b.StartTime, b.EndTime) / 60.0 * c.HourlyRate), 0) as Revenue
+    ISNULL(SUM(CASE
+        WHEN b.BookingID IS NULL THEN 0
+        WHEN ib.BookingRevenue IS NOT NULL THEN ib.BookingRevenue
+        WHEN b.Status = 'Paid' THEN (DATEDIFF(minute, b.StartTime, b.EndTime) / 60.0) * c.HourlyRate
+        ELSE 0
+    END), 0) as Revenue
 FROM Courts c
 LEFT JOIN Bookings b 
     ON c.CourtID = b.CourtID
@@ -241,6 +271,14 @@ LEFT JOIN Bookings b
     AND b.Status != 'Maintenance'
     AND (@From IS NULL OR b.StartTime >= @From)
     AND (@To IS NULL OR b.StartTime < @To)
+LEFT JOIN (
+    SELECT
+        D.BookingID,
+        SUM(ISNULL(D.Quantity, 1) * ISNULL(D.UnitPrice, 0)) as BookingRevenue
+    FROM InvoiceDetails D
+    WHERE D.BookingID IS NOT NULL
+    GROUP BY D.BookingID
+) ib ON ib.BookingID = b.BookingID
 GROUP BY c.CourtID, c.Name, c.CourtType
 ORDER BY Revenue DESC";
 
@@ -260,17 +298,25 @@ DECLARE @currCourtRev DECIMAL(18,2) = ISNULL((
     SELECT SUM((DATEDIFF(minute, B.StartTime, B.EndTime) / 60.0) * C.HourlyRate)
     FROM Bookings B
     JOIN Courts C ON B.CourtID = C.CourtID
-    WHERE B.Status != 'Cancelled'
-      AND B.Status != 'Maintenance'
+        WHERE B.Status = 'Paid'
       AND B.StartTime >= @currStart AND B.StartTime < @currEnd
+            AND NOT EXISTS (
+                    SELECT 1
+                    FROM InvoiceDetails D
+                    WHERE D.BookingID = B.BookingID
+            )
 ), 0);
 DECLARE @prevCourtRev DECIMAL(18,2) = ISNULL((
     SELECT SUM((DATEDIFF(minute, B.StartTime, B.EndTime) / 60.0) * C.HourlyRate)
     FROM Bookings B
     JOIN Courts C ON B.CourtID = C.CourtID
-    WHERE B.Status != 'Cancelled'
-      AND B.Status != 'Maintenance'
+        WHERE B.Status = 'Paid'
       AND B.StartTime >= @prevStart AND B.StartTime < @prevEnd
+            AND NOT EXISTS (
+                    SELECT 1
+                    FROM InvoiceDetails D
+                    WHERE D.BookingID = B.BookingID
+            )
 ), 0);
 
 DECLARE @currRev DECIMAL(18,2) = @currPosRev + @currCourtRev;
@@ -336,9 +382,13 @@ LEFT JOIN (
         SUM((DATEDIFF(minute, B.StartTime, B.EndTime) / 60.0) * C.HourlyRate) as CourtRevenue
     FROM Bookings B
     JOIN Courts C ON B.CourtID = C.CourtID
-    WHERE B.Status != 'Cancelled'
-      AND B.Status != 'Maintenance'
+    WHERE B.Status = 'Paid'
       AND B.StartTime >= @FromStart AND B.StartTime < @ToExclusive
+      AND NOT EXISTS (
+          SELECT 1
+          FROM InvoiceDetails D
+          WHERE D.BookingID = B.BookingID
+      )
     GROUP BY CAST(B.StartTime AS DATE)
 ) BR ON BR.Dt = D.Dt
 GROUP BY D.Dt
@@ -350,7 +400,9 @@ SELECT TOP 4
     C.Name,
     ISNULL(SUM(CASE
         WHEN B.BookingID IS NULL THEN 0
-        ELSE (DATEDIFF(minute, B.StartTime, B.EndTime) / 60.0) * C.HourlyRate
+        WHEN IB.BookingRevenue IS NOT NULL THEN IB.BookingRevenue
+        WHEN B.Status = 'Paid' THEN (DATEDIFF(minute, B.StartTime, B.EndTime) / 60.0) * C.HourlyRate
+        ELSE 0
     END), 0) as Rev
 FROM Courts C
 LEFT JOIN Bookings B 
@@ -358,12 +410,49 @@ LEFT JOIN Bookings B
     AND B.Status != 'Cancelled'
     AND B.Status != 'Maintenance'
     AND B.StartTime >= @FromStart AND B.StartTime < @ToExclusive
+LEFT JOIN (
+    SELECT
+        D.BookingID,
+        SUM(ISNULL(D.Quantity, 1) * ISNULL(D.UnitPrice, 0)) as BookingRevenue
+    FROM InvoiceDetails D
+    WHERE D.BookingID IS NOT NULL
+    GROUP BY D.BookingID
+) IB ON IB.BookingID = B.BookingID
 GROUP BY C.Name
 ORDER BY Rev DESC";
         }
 
         internal static class Invoice
         {
+            internal const string InvoiceHistory = @"
+SELECT TOP (@Take)
+    i.InvoiceID,
+    i.CreatedAt,
+    ISNULL(NULLIF(LTRIM(RTRIM(m.FullName)), ''), N'Khách lẻ') AS CustomerName,
+    ISNULL(ca.CourtName, N'') AS CourtName,
+    i.FinalAmount,
+    ISNULL(i.PaymentMethod, N'') AS PaymentMethod
+FROM dbo.Invoices i
+LEFT JOIN dbo.Members m ON m.MemberID = i.MemberID
+OUTER APPLY (
+    SELECT TOP (1) c.Name AS CourtName
+    FROM dbo.InvoiceDetails d
+    LEFT JOIN dbo.Bookings b ON b.BookingID = d.BookingID
+    LEFT JOIN dbo.Courts c ON c.CourtID = b.CourtID
+    WHERE d.InvoiceID = i.InvoiceID
+      AND d.BookingID IS NOT NULL
+    ORDER BY d.DetailID ASC
+) ca
+WHERE (
+    @Keyword IS NULL
+    OR LTRIM(RTRIM(@Keyword)) = ''
+    OR CAST(i.InvoiceID AS NVARCHAR(20)) LIKE N'%' + @Keyword + N'%'
+    OR ISNULL(m.FullName, N'') LIKE N'%' + @Keyword + N'%'
+    OR ISNULL(m.Phone, N'') LIKE N'%' + @Keyword + N'%'
+    OR ISNULL(ca.CourtName, N'') LIKE N'%' + @Keyword + N'%'
+)
+ORDER BY i.CreatedAt DESC, i.InvoiceID DESC";
+
             internal const string InvoiceHeader = @";WITH Inv AS (
     SELECT TOP (1)
         i.InvoiceID,
