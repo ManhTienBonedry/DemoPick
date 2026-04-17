@@ -294,6 +294,58 @@ ORDER BY
             return list;
         }
 
+        public List<BookingModel> GetUnpaidBookingsUntil(DateTime toDateInclusive)
+        {
+            var list = new List<BookingModel>();
+
+            // Best-effort ensure schema once. Even if it fails, we must not crash the UI.
+            TryEnsureBookingNoteSchema();
+
+            bool hasNote = HasBookingNoteColumn();
+            DateTime toDateExclusive = toDateInclusive.Date.AddDays(1);
+
+            string query = hasNote
+                ? $@"
+                                SELECT BookingID, CourtID, GuestName, Note, StartTime, EndTime, Status
+                                FROM Bookings
+                                WHERE StartTime < @ToDateExclusive
+                                    AND Status <> '{AppConstants.BookingStatus.Cancelled}'
+                                    AND Status <> '{AppConstants.BookingStatus.Maintenance}'
+                                    AND Status <> '{AppConstants.BookingStatus.Paid}'
+                                ORDER BY StartTime ASC, CourtID ASC, BookingID ASC"
+                : $@"
+                                SELECT BookingID, CourtID, GuestName, CAST(NULL AS NVARCHAR(200)) AS Note, StartTime, EndTime, Status
+                                FROM Bookings
+                                WHERE StartTime < @ToDateExclusive
+                                    AND Status <> '{AppConstants.BookingStatus.Cancelled}'
+                                    AND Status <> '{AppConstants.BookingStatus.Maintenance}'
+                                    AND Status <> '{AppConstants.BookingStatus.Paid}'
+                                ORDER BY StartTime ASC, CourtID ASC, BookingID ASC";
+
+            var dt = DatabaseHelper.ExecuteQuery(query, new SqlParameter("@ToDateExclusive", toDateExclusive));
+            foreach (DataRow row in dt.Rows)
+            {
+                string guest = row["GuestName"] != DBNull.Value ? row["GuestName"].ToString() : null;
+                if (string.IsNullOrWhiteSpace(guest))
+                {
+                    guest = "Khách lẻ";
+                }
+
+                list.Add(new BookingModel
+                {
+                    BookingID = Convert.ToInt32(row["BookingID"]),
+                    CourtID = Convert.ToInt32(row["CourtID"]),
+                    GuestName = guest,
+                    Note = row["Note"] != DBNull.Value ? row["Note"].ToString() : "",
+                    StartTime = Convert.ToDateTime(row["StartTime"]),
+                    EndTime = Convert.ToDateTime(row["EndTime"]),
+                    Status = row["Status"].ToString()
+                });
+            }
+
+            return list;
+        }
+
         public void SubmitBooking(int courtId, string guestName, DateTime startTime, DateTime endTime)
         {
             SubmitBooking(courtId, guestName, note: null, startTime: startTime, endTime: endTime, status: AppConstants.BookingStatus.Confirmed);
