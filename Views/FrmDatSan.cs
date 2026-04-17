@@ -90,7 +90,7 @@ namespace DemoPick
                 MessageBox.Show("Lỗi Data Sân: " + ex.Message);
             }
 
-            cbTime.SelectedIndex = 11; // 17:00
+            cbTime.SelectedIndex = 22; // 17:00 (30-minute slots)
             cbDuration.SelectedIndex = 1; // 90 phút
             cbPayment.SelectedIndex = 0; // Trực tiếp
         }
@@ -110,9 +110,10 @@ namespace DemoPick
             int mins = int.Parse(timeParts[1]);
             DateTime start = selectedDate.AddHours(hours).AddMinutes(mins);
             
-            if (start < DateTime.Now)
+            bool isToday = start.Date == DateTime.Today;
+            if (isToday && start < DateTime.Now)
             {
-                MessageBox.Show("Thời gian bắt đầu đã qua hãy chọn lại thời gian.", "Lỗi chọn giờ", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Không thể đặt sân trong quá khứ. Vui lòng chọn giờ khác.", "Lỗi chọn giờ", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 

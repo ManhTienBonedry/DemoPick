@@ -37,7 +37,7 @@ namespace DemoPick.Views
             NewNote = string.Empty;
             if (txtNote != null) txtNote.Text = string.Empty;
 
-            if (cbTime.Items.Count > 0 && cbTime.SelectedIndex < 0) cbTime.SelectedIndex = Math.Min(11, cbTime.Items.Count - 1);
+            if (cbTime.Items.Count > 0 && cbTime.SelectedIndex < 0) cbTime.SelectedIndex = Math.Min(22, cbTime.Items.Count - 1);
             if (cbDuration.Items.Count > 0 && cbDuration.SelectedIndex < 0) cbDuration.SelectedIndex = 1;
         }
 
@@ -52,9 +52,9 @@ namespace DemoPick.Views
             lblCurrent.Text = $"Hiện tại: {currentStart:dd/MM/yyyy HH:mm} - {currentEnd:HH:mm}";
 
             // Preselect current values
-            string startStr = currentStart.ToString("HH:00");
+            string startStr = currentStart.ToString("HH:mm");
             int idxTime = cbTime.Items.IndexOf(startStr);
-            cbTime.SelectedIndex = idxTime >= 0 ? idxTime : Math.Min(11, cbTime.Items.Count - 1);
+            cbTime.SelectedIndex = idxTime >= 0 ? idxTime : Math.Min(22, cbTime.Items.Count - 1);
 
             int durMins = (int)Math.Round((currentEnd - currentStart).TotalMinutes);
             if (durMins <= 60) cbDuration.SelectedIndex = 0;
@@ -141,9 +141,10 @@ namespace DemoPick.Views
 
             bool isTimeUnchanged = _currentStart.HasValue && _currentEnd.HasValue && start == _currentStart.Value && end == _currentEnd.Value;
 
-            if (start < DateTime.Now && !isTimeUnchanged)
+            bool isToday = start.Date == DateTime.Today;
+            if (isToday && start < DateTime.Now && !isTimeUnchanged)
             {
-                MessageBox.Show("Giờ bắt đầu đã qua, vui lòng chọn lại.", "Giờ không hợp lệ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Không thể đặt sân trong quá khứ. Vui lòng chọn giờ khác.", "Giờ không hợp lệ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 

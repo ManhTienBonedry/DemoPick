@@ -104,6 +104,16 @@ namespace DemoPick
         {
             if (string.IsNullOrEmpty(_selectedCourtName)) return;
 
+            if (_currentBooking != null && DateTime.Now < _currentBooking.StartTime)
+            {
+                MessageBox.Show(
+                    "Booking chưa tới giờ chơi. Hãy bấm 'Nhận sân' để check-in, rồi thanh toán khi ca đã bắt đầu.",
+                    "Chưa tới giờ thanh toán",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+                return;
+            }
+
             // Prompt user with yes/no dialog equivalent.
             // In a pro UI, we'd use Sunny UI Form.
             var diagRet = MessageBox.Show($"Xác nhận Thu tiền và In Hóa Đơn cho {_selectedCourtName}?", "Thanh toán", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
@@ -124,6 +134,10 @@ namespace DemoPick
                 }
 
                 var pos = new PosService();
+                int? preferredBookingId = (_currentBooking != null && _currentBooking.BookingID > 0)
+                    ? (int?)_currentBooking.BookingID
+                    : null;
+
                 int invoiceId = pos.Checkout(
                     _currentCustomerId,
                     lines,
@@ -131,7 +145,8 @@ namespace DemoPick
                     discountAmt,
                     finalTotal,
                     "Cash",
-                    _selectedCourtName
+                    _selectedCourtName,
+                    preferredBookingId
                 );
 
                 try

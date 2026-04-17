@@ -95,6 +95,7 @@ namespace DemoPick
             DateTime from = fromDate.Date;
             DateTime to = toDate.Date;
             DateTime now = DateTime.Now;
+            DateTime today = now.Date;
 
             for (DateTime d = from; d <= to; d = d.AddDays(1))
             {
@@ -105,8 +106,15 @@ namespace DemoPick
                 DateTime end = start.AddMinutes(durationMins);
                 if (end <= start) continue;
 
-                // Skip occurrences in the past to reduce accidental spam.
-                if (end <= now)
+                // Past dates are never valid for recurring creation.
+                if (d.Date < today)
+                {
+                    skippedPast++;
+                    continue;
+                }
+
+                bool isToday = start.Date == today;
+                if (isToday && start < now)
                 {
                     skippedPast++;
                     continue;

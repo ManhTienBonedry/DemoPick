@@ -504,6 +504,27 @@ ORDER BY
             }
         }
 
+        public void MarkBookingAsPending(int bookingId)
+        {
+            if (bookingId <= 0) throw new ArgumentException("BookingID không hợp lệ.");
+
+            int affected = DatabaseHelper.ExecuteNonQuery(
+                $@"UPDATE dbo.Bookings
+SET Status = @Status
+WHERE BookingID = @Id
+  AND Status <> '{AppConstants.BookingStatus.Cancelled}'
+  AND Status <> '{AppConstants.BookingStatus.Maintenance}'
+  AND Status <> '{AppConstants.BookingStatus.Paid}'",
+                new SqlParameter("@Status", AppConstants.BookingStatus.Pending),
+                new SqlParameter("@Id", bookingId)
+            );
+
+            if (affected <= 0)
+            {
+                throw new InvalidOperationException("Không thể nhận sân cho booking ở trạng thái hiện tại.");
+            }
+        }
+
         public void CancelBooking(int bookingId)
         {
             if (bookingId <= 0) throw new ArgumentException("BookingID không hợp lệ.");

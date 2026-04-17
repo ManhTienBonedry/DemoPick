@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using DemoPick.Services;
@@ -8,6 +9,22 @@ namespace DemoPick
 {
     public partial class UCThanhToan
     {
+        private enum BookingDisplayState
+        {
+            Upcoming,
+            Active,
+            Overdue,
+            OrderOnly
+        }
+
+        private sealed class CheckoutCourtRow
+        {
+            public DemoPick.Models.CourtModel Court;
+            public DemoPick.Models.BookingModel Booking;
+            public BookingDisplayState State;
+            public int PendingOrderCount;
+        }
+
         private static readonly Font _checkoutCourtNameFont = new Font("Segoe UI", 11F, FontStyle.Bold);
         private static readonly Font _checkoutCourtBadgeFont = new Font("Segoe UI", 9F, FontStyle.Bold);
         private static readonly Font _checkoutCourtInfoFont = new Font("Segoe UI", 9F, FontStyle.Italic);
@@ -34,62 +51,90 @@ namespace DemoPick
             try
             {
                 ClearAndDisposeChildControls(flpCourts);
-                var bookCtrl = new DemoPick.Controllers.BookingController();
-                var courts = bookCtrl.GetCourts();
 
+                var bookCtrl = new DemoPick.Controllers.BookingController();
+                DateTime now = DateTime.Now;
+
+                var courts = bookCtrl.GetCourts();
+                var courtsById = new Dictionary<int, DemoPick.Models.CourtModel>();
                 foreach (var c in courts)
                 {
-                    // Check if court has pending order or is actively playing.
-                    var lines = PosService.GetPendingOrder(c.Name);
-                    bool hasOrder = lines.Count > 0;
+                    if (!courtsById.ContainsKey(c.CourtID))
+                        courtsById.Add(c.CourtID, c);
+                }
 
-                    var bookings = bookCtrl.GetBookingsByDate(DateTime.Now);
-                    var currentBooking = bookings.Find(b =>
-                        b.CourtID == c.CourtID &&
-                        !string.Equals(b.Status, AppConstants.BookingStatus.Maintenance, StringComparison.OrdinalIgnoreCase) &&
-                        DateTime.Now >= b.StartTime && DateTime.Now <= b.EndTime);
-                    bool active = currentBooking != null;
+                var bookingsToday = bookCtrl.GetBookingsByDate(now);
+                var unpaidBookings = new List<DemoPick.Models.BookingModel>();
+                foreach (var b in bookingsToday)
+                {
+                    if (ShouldIgnoreForCheckout(b.Status))
+                        continue;
 
-                    if (!hasOrder && !active) continue; // Only show courts that need to be checked out
+                    unpaidBookings.Add(b);
+                }
 
-                    string statusTxt = hasOrder ? "Có order" : (active ? "Đang chơi" : "");
-                    Color lineCol = hasOrder ? Color.FromArgb(231, 76, 60) : Color.FromArgb(76, 175, 80);
+                unpaidBookings.Sort((a, b) =>
+                {
+                    int cmp = a.StartTime.CompareTo(b.StartTime);
+                    if (cmp != 0) return cmp;
+                    cmp = a.CourtID.CompareTo(b.CourtID);
+                    if (cmp != 0) return cmp;
+                    return a.BookingID.CompareTo(b.BookingID);
+                });
 
-                    Panel pnlCtx = new Panel { Size = new Size(240, 80), BackColor = Color.White, Margin = new Padding(0, 0, 0, 10), Cursor = Cursors.Hand };
-                    pnlCtx.Paint += (s, e) =>
+                var rows = new List<CheckoutCourtRow>();
+                var courtsWithBookingRow = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+                foreach (var booking in unpaidBookings)
+                {
+                    if (!courtsById.TryGetValue(booking.CourtID, out var court))
+                        continue;
+
+                    int pendingOrderCount = PosService.GetPendingOrder(court.Name).Count;
+                    rows.Add(new CheckoutCourtRow
                     {
-                        using (var pen = new Pen(Color.FromArgb(229, 231, 235), 1))
-                        using (var brush = new SolidBrush(lineCol))
-                        {
-                            e.Graphics.DrawRectangle(pen, 0, 0, pnlCtx.Width - 1, pnlCtx.Height - 1);
-                            e.Graphics.FillRectangle(brush, 0, 10, 4, pnlCtx.Height - 20);
-                        }
-                    };
+                        Court = court,
+                        Booking = booking,
+                        State = ResolveBookingState(booking, now),
+                        PendingOrderCount = pendingOrderCount
+                    });
 
-                    Label cName = new Label { Text = c.Name, Font = _checkoutCourtNameFont, ForeColor = Color.FromArgb(26, 35, 50), Location = new Point(15, 15), AutoSize = true };
-                    Label badge = new Label { Text = statusTxt, Font = _checkoutCourtBadgeFont, ForeColor = Color.White, BackColor = lineCol, Location = new Point(150, 17), AutoSize = true, Padding = new Padding(2) };
-                    Label cOrderInfo = new Label { Text = $"Đỏ: {lines.Count} món đang chờ.", Font = _checkoutCourtInfoFont, ForeColor = Color.Gray, Location = new Point(15, 45), AutoSize = true };
+                    if (!string.IsNullOrWhiteSpace(court.Name))
+                        courtsWithBookingRow.Add(court.Name.Trim());
+                }
 
-                    pnlCtx.Controls.AddRange(new Control[] { cName, badge, cOrderInfo });
+                // Keep compatibility: still show pending POS orders even when no booking today.
+                foreach (var court in courts)
+                {
+                    string name = (court.Name ?? string.Empty).Trim();
+                    int pendingOrderCount = PosService.GetPendingOrder(court.Name).Count;
+                    if (pendingOrderCount <= 0) continue;
+                    if (courtsWithBookingRow.Contains(name)) continue;
 
-                    EventHandler selectCourt = (s, e) =>
+                    rows.Add(new CheckoutCourtRow
                     {
-                        foreach (Control p in flpCourts.Controls) { if (p is Panel panel) panel.BackColor = Color.White; }
-                        pnlCtx.BackColor = Color.FromArgb(235, 248, 235);
-                        SelectCourtToCheckout(c, currentBooking);
-                    };
+                        Court = court,
+                        Booking = null,
+                        State = BookingDisplayState.OrderOnly,
+                        PendingOrderCount = pendingOrderCount
+                    });
+                }
 
-                    pnlCtx.Click += selectCourt;
-                    cName.Click += selectCourt;
-                    badge.Click += selectCourt;
-                    cOrderInfo.Click += selectCourt;
-
-                    flpCourts.Controls.Add(pnlCtx);
+                foreach (var row in rows)
+                {
+                    AddCheckoutCourtPanel(row, unpaidBookings, now);
                 }
 
                 if (flpCourts.Controls.Count == 0)
                 {
-                    flpCourts.Controls.Add(new Label { Text = "Không có sân nào đang cần thanh toán", Font = _checkoutEmptyStateFont, AutoSize = true, Margin = new Padding(20), ForeColor = Color.Gray });
+                    flpCourts.Controls.Add(new Label
+                    {
+                        Text = "Không có booking chưa thanh toán trong ngày",
+                        Font = _checkoutEmptyStateFont,
+                        AutoSize = true,
+                        Margin = new Padding(20),
+                        ForeColor = Color.Gray
+                    });
                 }
             }
             catch (Exception ex)
@@ -98,11 +143,268 @@ namespace DemoPick
             }
         }
 
+        private void AddCheckoutCourtPanel(CheckoutCourtRow row, List<DemoPick.Models.BookingModel> unpaidBookings, DateTime now)
+        {
+            if (row == null || row.Court == null) return;
+
+            Color lineColor = GetStateColor(row.State);
+            string statusText = GetStateText(row);
+            bool showReceiveButton = row.Booking != null && row.State == BookingDisplayState.Upcoming;
+
+            Panel pnlCtx = new Panel
+            {
+                Size = new Size(240, showReceiveButton ? 112 : 96),
+                BackColor = Color.White,
+                Margin = new Padding(0, 0, 0, 10),
+                Cursor = Cursors.Hand
+            };
+            pnlCtx.Paint += (s, e) =>
+            {
+                using (var pen = new Pen(Color.FromArgb(229, 231, 235), 1))
+                using (var brush = new SolidBrush(lineColor))
+                {
+                    e.Graphics.DrawRectangle(pen, 0, 0, pnlCtx.Width - 1, pnlCtx.Height - 1);
+                    e.Graphics.FillRectangle(brush, 0, 10, 4, pnlCtx.Height - 20);
+                }
+            };
+
+            string courtName = string.IsNullOrWhiteSpace(row.Court.Name) ? "(Không tên sân)" : row.Court.Name;
+            Label lblCourt = new Label
+            {
+                Text = courtName,
+                Font = _checkoutCourtNameFont,
+                ForeColor = Color.FromArgb(26, 35, 50),
+                Location = new Point(15, 10),
+                AutoSize = true
+            };
+
+            Label lblBadge = new Label
+            {
+                Text = statusText,
+                Font = _checkoutCourtBadgeFont,
+                ForeColor = Color.White,
+                BackColor = lineColor,
+                Location = new Point(130, 12),
+                AutoSize = true,
+                Padding = new Padding(3, 1, 3, 1)
+            };
+
+            string timeText = row.Booking == null
+                ? "Không có booking hôm nay"
+                : $"Ca: {row.Booking.StartTime:HH:mm} - {row.Booking.EndTime:HH:mm}";
+
+            Label lblTime = new Label
+            {
+                Text = timeText,
+                Font = _checkoutCourtInfoFont,
+                ForeColor = Color.FromArgb(75, 85, 99),
+                Location = new Point(15, 38),
+                AutoSize = true
+            };
+
+            string guest = row.Booking == null
+                ? ""
+                : (string.IsNullOrWhiteSpace(row.Booking.GuestName) ? "Khách lẻ" : row.Booking.GuestName);
+
+            string orderInfo = row.PendingOrderCount > 0
+                ? $"Order chờ: {row.PendingOrderCount} món"
+                : "Chưa có order";
+
+            string detail = row.Booking == null
+                ? orderInfo
+                : $"{guest} • {orderInfo}";
+
+            Label lblDetail = new Label
+            {
+                Text = detail,
+                Font = _checkoutCourtInfoFont,
+                ForeColor = Color.Gray,
+                Location = new Point(15, 58),
+                AutoSize = true
+            };
+
+            pnlCtx.Controls.Add(lblCourt);
+            pnlCtx.Controls.Add(lblBadge);
+            pnlCtx.Controls.Add(lblTime);
+            pnlCtx.Controls.Add(lblDetail);
+
+            EventHandler selectCourt = (s, e) =>
+            {
+                foreach (Control p in flpCourts.Controls)
+                {
+                    if (p is Panel panel) panel.BackColor = Color.White;
+                }
+
+                pnlCtx.BackColor = Color.FromArgb(235, 248, 235);
+                SelectCourtToCheckout(row.Court, row.Booking);
+            };
+
+            pnlCtx.Click += selectCourt;
+            lblCourt.Click += selectCourt;
+            lblBadge.Click += selectCourt;
+            lblTime.Click += selectCourt;
+            lblDetail.Click += selectCourt;
+
+            if (showReceiveButton)
+            {
+                var btnReceive = new Button
+                {
+                    Text = "Nhận sân",
+                    FlatStyle = FlatStyle.Flat,
+                    BackColor = Color.FromArgb(34, 197, 94),
+                    ForeColor = Color.White,
+                    Font = new Font("Segoe UI", 8.5F, FontStyle.Bold),
+                    Size = new Size(90, 24),
+                    Location = new Point(136, 82),
+                    Cursor = Cursors.Hand
+                };
+                btnReceive.FlatAppearance.BorderSize = 0;
+
+                btnReceive.Click += (s, e) =>
+                {
+                    TryReceiveCourt(row, unpaidBookings, now);
+                };
+
+                pnlCtx.Controls.Add(btnReceive);
+            }
+
+            flpCourts.Controls.Add(pnlCtx);
+        }
+
+        private void TryReceiveCourt(CheckoutCourtRow row, List<DemoPick.Models.BookingModel> unpaidBookings, DateTime now)
+        {
+            if (row == null || row.Court == null || row.Booking == null)
+                return;
+
+            bool hasOverdue = HasOverdueUnpaidBookingOnSameCourt(unpaidBookings, row.Court.CourtID, row.Booking.BookingID, now);
+            if (hasOverdue)
+            {
+                var confirm = MessageBox.Show(
+                    "Sân này còn booking chưa thanh toán. Xác nhận tiếp tục?",
+                    "Xác nhận nhận sân",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning
+                );
+
+                if (confirm != DialogResult.Yes)
+                    return;
+            }
+
+            try
+            {
+                var ctrl = new DemoPick.Controllers.BookingController();
+                ctrl.MarkBookingAsPending(row.Booking.BookingID);
+
+                MessageBox.Show(
+                    "Đã nhận sân thành công. Booking cũ chưa thu vẫn được giữ lại để thanh toán sau.",
+                    "Nhận sân thành công",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+                );
+
+                LoadCourts();
+
+                var refreshed = ctrl.GetBookingsByDate(DateTime.Now)
+                    .Find(b => b.BookingID == row.Booking.BookingID);
+                SelectCourtToCheckout(row.Court, refreshed);
+            }
+            catch (Exception ex)
+            {
+                DatabaseHelper.TryLog("ThanhToan ReceiveCourt Error", ex, "UCThanhToan.TryReceiveCourt");
+                MessageBox.Show("Không thể nhận sân: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private static bool HasOverdueUnpaidBookingOnSameCourt(List<DemoPick.Models.BookingModel> bookings, int courtId, int exceptBookingId, DateTime now)
+        {
+            if (bookings == null || bookings.Count == 0) return false;
+
+            for (int i = 0; i < bookings.Count; i++)
+            {
+                var b = bookings[i];
+                if (b == null) continue;
+                if (b.CourtID != courtId) continue;
+                if (b.BookingID == exceptBookingId) continue;
+                if (ShouldIgnoreForCheckout(b.Status)) continue;
+
+                if (now > b.EndTime)
+                    return true;
+            }
+
+            return false;
+        }
+
+        private static bool ShouldIgnoreForCheckout(string status)
+        {
+            return string.Equals(status, AppConstants.BookingStatus.Paid, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(status, AppConstants.BookingStatus.Cancelled, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(status, AppConstants.BookingStatus.Maintenance, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static BookingDisplayState ResolveBookingState(DemoPick.Models.BookingModel booking, DateTime now)
+        {
+            if (booking == null) return BookingDisplayState.OrderOnly;
+
+            string status = (booking.Status ?? string.Empty).Trim();
+            if (string.Equals(status, AppConstants.BookingStatus.Pending, StringComparison.OrdinalIgnoreCase))
+                return BookingDisplayState.Active;
+
+            if (now < booking.StartTime)
+                return BookingDisplayState.Upcoming;
+
+            if (now <= booking.EndTime)
+                return BookingDisplayState.Active;
+
+            return BookingDisplayState.Overdue;
+        }
+
+        private static string GetStateText(CheckoutCourtRow row)
+        {
+            switch (row.State)
+            {
+                case BookingDisplayState.Upcoming:
+                    return "Chưa tới giờ";
+                case BookingDisplayState.Active:
+                    if (row.Booking != null && string.Equals(row.Booking.Status, AppConstants.BookingStatus.Pending, StringComparison.OrdinalIgnoreCase))
+                        return "Đã nhận sân";
+                    return "Đang chơi";
+                case BookingDisplayState.Overdue:
+                    return "Quá giờ chưa thu";
+                case BookingDisplayState.OrderOnly:
+                default:
+                    return "Có order";
+            }
+        }
+
+        private static Color GetStateColor(BookingDisplayState state)
+        {
+            switch (state)
+            {
+                case BookingDisplayState.Upcoming:
+                    return Color.FromArgb(34, 197, 94);   // Green
+                case BookingDisplayState.Active:
+                    return Color.FromArgb(245, 158, 11);  // Yellow/Amber
+                case BookingDisplayState.Overdue:
+                    return Color.FromArgb(239, 68, 68);   // Red
+                case BookingDisplayState.OrderOnly:
+                default:
+                    return Color.FromArgb(59, 130, 246);  // Blue
+            }
+        }
+
         private void SelectCourtToCheckout(DemoPick.Models.CourtModel court, DemoPick.Models.BookingModel booking)
         {
             string courtName = court.Name;
             _selectedCourtName = courtName;
-            lblRightTitle.Text = "Hóa đơn - " + courtName;
+
+            if (booking != null)
+            {
+                lblRightTitle.Text = $"Hóa đơn - {courtName} ({booking.StartTime:HH:mm}-{booking.EndTime:HH:mm})";
+            }
+            else
+            {
+                lblRightTitle.Text = "Hóa đơn - " + courtName;
+            }
 
             _currentBooking = booking;
             _selectedCourt = court;

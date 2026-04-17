@@ -40,7 +40,8 @@ namespace DemoPick.Services
             decimal discountAmount,
             decimal finalAmount,
             string paymentMethod,
-            string courtNameForLog)
+            string courtNameForLog,
+            int? preferredBookingId = null)
         {
             // Allow court-only checkouts (no POS products) so we can close bookings and issue invoices.
             if (lines == null)
@@ -57,14 +58,30 @@ namespace DemoPick.Services
                         bool hasReduceStockTrigger = TriggerExists(conn, tran, "trg_ReduceStock");
                         bool hasUpdateMemberTrigger = TriggerExists(conn, tran, "trg_UpdateMemberTier");
 
-                        int closedBookingId = TryCloseActiveBookingByCourtName(conn, tran, courtNameForLog);
-                        int creditedBookingId = closedBookingId;
+                        int closedBookingId = 0;
+                        int creditedBookingId = 0;
 
-                        if (creditedBookingId == 0)
+                        if (preferredBookingId.HasValue && preferredBookingId.Value > 0)
                         {
-                            // Fallback: if booking already ended (EndTime <= now), still credit the member's hours
-                            // using the most recent booking for this court (typically "khách chơi trễ" scenario).
-                            creditedBookingId = TryMarkMostRecentEndedBookingPaidByCourtName(conn, tran, courtNameForLog);
+                            creditedBookingId = TrySetSpecificBookingPaid(conn, tran, preferredBookingId.Value);
+                            closedBookingId = creditedBookingId;
+
+                            if (creditedBookingId == 0)
+                            {
+                                throw new InvalidOperationException("Booking đã chọn chưa thể thanh toán hoặc không còn hợp lệ.");
+                            }
+                        }
+                        else
+                        {
+                            closedBookingId = TryCloseActiveBookingByCourtName(conn, tran, courtNameForLog);
+                            creditedBookingId = closedBookingId;
+
+                            if (creditedBookingId == 0)
+                            {
+                                // Fallback: if booking already ended (EndTime <= now), still credit the member's hours
+                                // using the most recent booking for this court (typically "khách chơi trễ" scenario).
+                                creditedBookingId = TryMarkMostRecentEndedBookingPaidByCourtName(conn, tran, courtNameForLog);
+                            }
                         }
 
                         int effectiveMemberId = ResolveMemberForCheckout(conn, tran, memberId, creditedBookingId);
@@ -651,6 +668,76 @@ namespace DemoPick.Services
 
             if (affected == 0)
                 throw new InvalidOperationException($"Sản phẩm '{prodName}' không đủ hàng để trừ kho.");
+        }
+
+        private static int TrySetSpecificBookingPaid(SqlConnection conn, SqlTransaction tran, int bookingId)
+        {
+            if (bookingId <= 0)
+                return 0;
+
+            var dt = DatabaseHelper.ExecuteQuery(
+                conn,
+                tran,
+                "SELECT TOP (1) BookingID, StartTime, EndTime, Status FROM dbo.Bookings WHERE BookingID = @BookingID",
+                new SqlParameter("@BookingID", bookingId)
+            );
+
+            if (dt.Rows.Count <= 0)
+                return 0;
+
+            var row = dt.Rows[0];
+            string status = row["Status"] == DBNull.Value ? string.Empty : Convert.ToString(row["Status"]);
+
+            if (string.Equals(status, AppConstants.BookingStatus.Cancelled, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(status, AppConstants.BookingStatus.Maintenance, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(status, AppConstants.BookingStatus.Paid, StringComparison.OrdinalIgnoreCase))
+            {
+                return 0;
+            }
+
+            DateTime start = Convert.ToDateTime(row["StartTime"]);
+            DateTime end = Convert.ToDateTime(row["EndTime"]);
+            DateTime now = DateTime.Now;
+
+            // Do not pay a booking that has not started yet.
+            if (start > now)
+                return 0;
+
+            int affected;
+            if (end > now)
+            {
+                affected = DatabaseHelper.ExecuteNonQuery(
+                    conn,
+                    tran,
+                    $@"UPDATE dbo.Bookings
+SET EndTime = @Now,
+    Status = @Status
+WHERE BookingID = @BookingID
+  AND Status <> '{AppConstants.BookingStatus.Cancelled}'
+  AND Status <> '{AppConstants.BookingStatus.Maintenance}'
+  AND Status <> '{AppConstants.BookingStatus.Paid}'",
+                    new SqlParameter("@Now", now),
+                    new SqlParameter("@Status", AppConstants.BookingStatus.Paid),
+                    new SqlParameter("@BookingID", bookingId)
+                );
+            }
+            else
+            {
+                affected = DatabaseHelper.ExecuteNonQuery(
+                    conn,
+                    tran,
+                    $@"UPDATE dbo.Bookings
+SET Status = @Status
+WHERE BookingID = @BookingID
+  AND Status <> '{AppConstants.BookingStatus.Cancelled}'
+  AND Status <> '{AppConstants.BookingStatus.Maintenance}'
+  AND Status <> '{AppConstants.BookingStatus.Paid}'",
+                    new SqlParameter("@Status", AppConstants.BookingStatus.Paid),
+                    new SqlParameter("@BookingID", bookingId)
+                );
+            }
+
+            return affected > 0 ? bookingId : 0;
         }
 
         private static int TryCloseActiveBookingByCourtName(SqlConnection conn, SqlTransaction tran, string courtName)

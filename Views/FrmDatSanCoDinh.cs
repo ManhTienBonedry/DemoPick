@@ -30,7 +30,7 @@ namespace DemoPick
             btnConfirm.Click += BtnConfirm_Click;
 
             this.Load += FrmDatSanCoDinh_Load;
-            cbTime.SelectedIndex = 11; // 17:00
+            cbTime.SelectedIndex = 22; // 17:00 (30-minute slots)
             cbDuration.SelectedIndex = 1; // 90 phút
             
             // Default dates
