@@ -47,6 +47,8 @@ namespace DemoPick.Services
             // We only allow login if the password matches exactly one ACTIVE account.
             AuthUser matched = null;
             int matchCount = 0;
+            int matchedAccountId = 0;
+            bool shouldUpgradeLegacyPasswordHash = false;
 
             DateTime now = DateTime.Now;
             bool anyActiveButLocked = false;
@@ -93,9 +95,18 @@ namespace DemoPick.Services
                 if (storedHash == null || storedSalt == null)
                     continue;
 
+                int accountId = Convert.ToInt32(row["AccountID"]);
                 byte[] computed = AuthPasswordCrypto.HashPassword(password, storedSalt);
-                if (!AuthPasswordCrypto.FixedTimeEquals(storedHash, computed))
-                    continue;
+                bool matchedCurrentHash = AuthPasswordCrypto.FixedTimeEquals(storedHash, computed);
+
+                bool matchedLegacyHash = false;
+                if (!matchedCurrentHash)
+                {
+                    byte[] legacyComputed = AuthPasswordCrypto.HashPasswordLegacySha1(password, storedSalt);
+                    matchedLegacyHash = AuthPasswordCrypto.FixedTimeEquals(storedHash, legacyComputed);
+                    if (!matchedLegacyHash)
+                        continue;
+                }
 
                 matchCount++;
                 if (matchCount > 1)
@@ -111,6 +122,8 @@ namespace DemoPick.Services
                     FullName = row["FullName"] == DBNull.Value ? "" : row["FullName"].ToString(),
                     Role = row["Role"] == DBNull.Value ? "" : row["Role"].ToString(),
                 };
+                matchedAccountId = accountId;
+                shouldUpgradeLegacyPasswordHash = matchedLegacyHash;
             }
 
             if (matched == null)
@@ -156,8 +169,37 @@ namespace DemoPick.Services
                     minSeconds: 300);
             }
 
+            if (shouldUpgradeLegacyPasswordHash && matchedAccountId > 0)
+            {
+                try
+                {
+                    UpgradeLegacyPasswordHash(matchedAccountId, password);
+                }
+                catch (Exception ex)
+                {
+                    DatabaseHelper.TryLogThrottled(
+                        throttleKey: "Auth.UpgradeLegacyPasswordHash",
+                        eventDesc: "Auth Legacy Password Hash Upgrade Error",
+                        ex: ex,
+                        context: "AuthService.TryLogin",
+                        minSeconds: 300);
+                }
+            }
+
             user = matched;
             return true;
+        }
+
+        private static void UpgradeLegacyPasswordHash(int accountId, string rawPassword)
+        {
+            byte[] newSalt = AuthPasswordCrypto.GenerateSalt(16);
+            byte[] newHash = AuthPasswordCrypto.HashPassword(rawPassword, newSalt);
+
+            DatabaseHelper.ExecuteNonQuery(
+                SqlQueries.Auth.ChangePasswordUpdateHashSalt,
+                new SqlParameter("@Hash", SqlDbType.VarBinary, 32) { Value = newHash },
+                new SqlParameter("@Salt", SqlDbType.VarBinary, 16) { Value = newSalt },
+                new SqlParameter("@Id", accountId));
         }
 
         private static void RecordFailedLoginAttempt(int accountId)

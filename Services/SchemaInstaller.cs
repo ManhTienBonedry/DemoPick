@@ -54,6 +54,9 @@ namespace DemoPick.Services
             {
                 if (AuthService.TrySeedAdminIfEmpty(out string seededUser, out string seededPass))
                 {
+                    bool hasBootstrapPassword = !string.IsNullOrWhiteSpace(
+                        Environment.GetEnvironmentVariable("DEMOPICK_BOOTSTRAP_ADMIN_PASSWORD"));
+
                     bool suppressUi = string.Equals(
                         Environment.GetEnvironmentVariable("DEMOPICK_SUPPRESS_UI"),
                         "1",
@@ -61,9 +64,13 @@ namespace DemoPick.Services
 
                     if (!suppressUi)
                     {
+                        string passHint = hasBootstrapPassword
+                            ? "Password: [HIDDEN - set via DEMOPICK_BOOTSTRAP_ADMIN_PASSWORD]"
+                            : "Password: [HIDDEN - random generated for DEBUG; set DEMOPICK_BOOTSTRAP_ADMIN_PASSWORD for deterministic bootstrap]";
+
                         MessageBox.Show(
-                            $"[DEBUG] Đã tạo tài khoản Admin mặc định.\n\nUser: {seededUser}\nPass: {seededPass}\n\n" +
-                            "Gợi ý: set env var DEMOPICK_BOOTSTRAP_ADMIN_PASSWORD để dùng pass cố định khi dev.",
+                            $"[DEBUG] Đã tạo tài khoản Admin mặc định.\n\nUser: {seededUser}\n{passHint}\n\n" +
+                            "Vì lý do bảo mật, mật khẩu không hiển thị trên UI.",
                             "Bootstrap Admin (DEBUG)",
                             MessageBoxButtons.OK,
                             MessageBoxIcon.Information);

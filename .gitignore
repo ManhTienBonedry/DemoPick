@@ -16,6 +16,7 @@
 # NuGet
 packages/
 *.nupkg
+nuget.exe
 
 # Logs
 *.log

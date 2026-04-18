@@ -6,6 +6,9 @@ namespace DemoPick.Services
 {
     internal static class AuthPasswordCrypto
     {
+        private const int Pbkdf2Iterations = 100_000;
+        private const int PasswordHashBytes = 32;
+
         internal static byte[] GenerateSalt(int size)
         {
             var salt = new byte[size];
@@ -18,9 +21,17 @@ namespace DemoPick.Services
 
         internal static byte[] HashPassword(string password, byte[] salt)
         {
-            using (var pbkdf2 = new Rfc2898DeriveBytes(password ?? string.Empty, salt, 100_000))
+            using (var pbkdf2 = new Rfc2898DeriveBytes(password ?? string.Empty, salt, Pbkdf2Iterations, HashAlgorithmName.SHA256))
             {
-                return pbkdf2.GetBytes(32);
+                return pbkdf2.GetBytes(PasswordHashBytes);
+            }
+        }
+
+        internal static byte[] HashPasswordLegacySha1(string password, byte[] salt)
+        {
+            using (var pbkdf2 = new Rfc2898DeriveBytes(password ?? string.Empty, salt, Pbkdf2Iterations))
+            {
+                return pbkdf2.GetBytes(PasswordHashBytes);
             }
         }
 
