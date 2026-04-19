@@ -32,7 +32,7 @@ VALUES (@Username, @Email, @Phone, @FullName, @Hash, @Salt, @Role, 1)";
 
             internal const string SeedAdmin = @"
 INSERT INTO dbo.StaffAccounts (Username, Email, Phone, FullName, PasswordHash, PasswordSalt, Role, IsActive)
-VALUES (@Username, NULL, NULL, N'Quản trị viên', @Hash, @Salt, 'Admin', 1)";
+VALUES (@Username, @Email, NULL, N'Quản trị viên', @Hash, @Salt, 'Admin', 1)";
 
             internal const string ChangePasswordLoadHashSalt = @"
 SELECT TOP 1 PasswordHash, PasswordSalt

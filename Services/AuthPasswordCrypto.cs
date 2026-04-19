@@ -52,18 +52,23 @@ namespace DemoPick.Services
             const string alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%";
             if (length < 8) length = 8;
 
-            byte[] bytes = new byte[length];
+            int n = alphabet.Length;
+            int maxValid = 256 - (256 % n);
+
+            byte[] singleByte = new byte[1];
             using (var rng = RandomNumberGenerator.Create())
             {
-                rng.GetBytes(bytes);
+                var sb = new StringBuilder(length);
+                while (sb.Length < length)
+                {
+                    rng.GetBytes(singleByte);
+                    if (singleByte[0] < maxValid)
+                    {
+                        sb.Append(alphabet[singleByte[0] % n]);
+                    }
+                }
+                return sb.ToString();
             }
-
-            var sb = new StringBuilder(length);
-            for (int i = 0; i < length; i++)
-            {
-                sb.Append(alphabet[bytes[i] % alphabet.Length]);
-            }
-            return sb.ToString();
         }
     }
 }

@@ -12,7 +12,11 @@ namespace DemoPick
         [STAThread]
         static void Main(string[] args)
         {
+#if DEBUG
             bool smoke = args != null && Array.Exists(args, a => string.Equals(a, "--smoke", StringComparison.OrdinalIgnoreCase));
+#else
+            bool smoke = false;
+#endif
             if (smoke)
             {
                 // Best-effort: suppress bootstrap UI prompts during automated runs.

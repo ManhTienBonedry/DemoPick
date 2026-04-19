@@ -11,6 +11,7 @@ namespace DemoPick
     {
         private UCLogin _ucLogin;
         private UCRegister _ucRegister;
+        private UCBasicLogin _ucBasicLogin;
         private Control _currentCard;
 
         private Image _rootBackgroundImage;
@@ -58,6 +59,7 @@ namespace DemoPick
 
             _ucLogin = new UCLogin();
             _ucRegister = new UCRegister();
+            _ucBasicLogin = new UCBasicLogin();
 
             _ucLogin.Authenticated += (s, e) => CompleteOk();
             _ucLogin.RequestRegister += (s, e) => ShowRegister();
@@ -65,6 +67,8 @@ namespace DemoPick
 
             _ucRegister.Authenticated += (s, e) => CompleteOk();
             _ucRegister.RequestLogin += (s, e) => ShowLogin();
+
+            _ucBasicLogin.Authenticated += (s, e) => CompleteOk();
 
             ShowLogin();
         }
@@ -129,7 +133,7 @@ namespace DemoPick
 
         private void ShowLogin()
         {
-            ShowCard(_ucLogin);
+            ShowCard(_ucBasicLogin);
         }
 
         private void ShowRegister()
@@ -149,11 +153,13 @@ namespace DemoPick
             {
                 EnsureCardAdded(_ucLogin);
                 EnsureCardAdded(_ucRegister);
+                EnsureCardAdded(_ucBasicLogin);
 
                 _currentCard = card;
 
                 if (_ucLogin != null) _ucLogin.Visible = ReferenceEquals(card, _ucLogin);
                 if (_ucRegister != null) _ucRegister.Visible = ReferenceEquals(card, _ucRegister);
+                if (_ucBasicLogin != null) _ucBasicLogin.Visible = ReferenceEquals(card, _ucBasicLogin);
 
                 card.Visible = true;
                 card.BringToFront();

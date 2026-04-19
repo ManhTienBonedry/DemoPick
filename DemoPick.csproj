@@ -157,6 +157,12 @@
     <Compile Include="Views\FrmAuthHost.Designer.cs">
       <DependentUpon>FrmAuthHost.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\UCBasicLogin.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\UCBasicLogin.Designer.cs">
+      <DependentUpon>UCBasicLogin.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\UCLogin.cs">
       <SubType>UserControl</SubType>
     </Compile>

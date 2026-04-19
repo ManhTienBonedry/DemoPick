@@ -296,11 +296,8 @@ namespace DemoPick.Services
             if (cnt > 0) return false;
 
             string username = "admin";
-            string password = Environment.GetEnvironmentVariable("DEMOPICK_BOOTSTRAP_ADMIN_PASSWORD");
-            if (string.IsNullOrWhiteSpace(password))
-            {
-                password = AuthPasswordCrypto.GenerateRandomPassword(14);
-            }
+            string password = "12345678";
+            string email = "admin@gmail.com";
 
             byte[] salt = AuthPasswordCrypto.GenerateSalt(16);
             byte[] hash = AuthPasswordCrypto.HashPassword(password, salt);
@@ -308,6 +305,7 @@ namespace DemoPick.Services
             DatabaseHelper.ExecuteNonQuery(
                 SqlQueries.Auth.SeedAdmin,
                 new SqlParameter("@Username", username),
+                new SqlParameter("@Email", email),
                 new SqlParameter("@Hash", SqlDbType.VarBinary, 32) { Value = hash },
                 new SqlParameter("@Salt", SqlDbType.VarBinary, 16) { Value = salt }
             );
