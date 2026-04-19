@@ -14,7 +14,7 @@ namespace DemoPick
         {
             "Thức uống",
             "Đồ ăn nhẹ",
-            "Thuê Dụng cụ",
+            "Dịch vụ",
             "Khác"
         };
 

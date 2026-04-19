@@ -14,6 +14,14 @@ namespace DemoPick
                 return;
             }
 
+            string phoneDigits = PhoneNumberValidator.NormalizeDigits(txtPhone.Text);
+            if (rbKhachThue.Checked && phoneDigits.Length != 10)
+            {
+                MessageBox.Show("Số điện thoại phải đúng 10 chữ số.", "Sai số điện thoại", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtPhone.Focus();
+                return;
+            }
+
             // Check if at least one day is checked
             if (!chkMon.Checked && !chkTue.Checked && !chkWed.Checked && !chkThu.Checked &&
                 !chkFri.Checked && !chkSat.Checked && !chkSun.Checked)
@@ -66,7 +74,7 @@ namespace DemoPick
             bool dSun = chkSun.Checked;
 
             string status = rbBaoTri.Checked ? AppConstants.BookingStatus.Maintenance : AppConstants.BookingStatus.Confirmed;
-            string guestName = rbBaoTri.Checked ? (txtName.Text ?? "Ban Quản Lý (Bảo Trì)") : (txtName.Text.Trim() + " - " + txtPhone.Text.Trim());
+            string guestName = rbBaoTri.Checked ? (txtName.Text ?? "Ban Quản Lý (Bảo Trì)") : (txtName.Text.Trim() + " - " + phoneDigits);
             string note = (txtNote.Text ?? "").Trim();
 
             int? memberId = null;
@@ -74,7 +82,7 @@ namespace DemoPick
             {
                 try
                 {
-                    memberId = _controller.GetOrCreateMemberId(txtName.Text, txtPhone.Text);
+                    memberId = _controller.GetOrCreateMemberId(txtName.Text, phoneDigits);
                 }
                 catch (Exception ex)
                 {

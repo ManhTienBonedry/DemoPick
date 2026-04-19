@@ -46,6 +46,26 @@ namespace DemoPick
             if (btnClose != null) btnClose.Click += btnClose_Click;
             if (btnRegister != null) btnRegister.Click += btnRegister_Click;
             if (lblLoginNow != null) lblLoginNow.Click += lblLoginNow_Click;
+            if (txtPhone != null)
+            {
+                txtPhone.TextChanged += (s, e) => UpdatePhoneValidationUi();
+            }
+        }
+
+        private void UpdatePhoneValidationUi()
+        {
+            if (txtPhone == null) return;
+
+            string raw = txtPhone.Text ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(raw))
+            {
+                txtPhone.RectColor = Color.LightGray;
+                return;
+            }
+
+            txtPhone.RectColor = PhoneNumberValidator.IsValidTenDigits(raw)
+                ? Color.LightGray
+                : Color.FromArgb(231, 76, 60);
         }
 
         [System.Runtime.InteropServices.DllImport("Gdi32.dll", EntryPoint = "CreateRoundRectRgn")]

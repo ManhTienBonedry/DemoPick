@@ -246,17 +246,6 @@ namespace DemoPick.Services
                     string eventRaw = row["EventDesc"]?.ToString() ?? "";
                     string subRaw = row["SubDesc"] != DBNull.Value ? (row["SubDesc"]?.ToString() ?? "") : "";
 
-                    // Skip orphan POS logs (typically from automated tests) that reference an invoice
-                    // which no longer exists. These confuse the Inventory UI.
-                    if (string.Equals(eventRaw?.Trim(), "POS Checkout", StringComparison.OrdinalIgnoreCase))
-                    {
-                        int invoiceId = InventoryTransactionFormatter.TryExtractInvoiceId(subRaw);
-                        if (invoiceId > 0 && !InvoiceExists(invoiceId))
-                        {
-                            continue;
-                        }
-                    }
-
                     string eventUi = InventoryTransactionFormatter.MapEventForUi(eventRaw);
                     string subUi = InventoryTransactionFormatter.FormatSubDescForUi(eventRaw, subRaw);
 
@@ -269,23 +258,6 @@ namespace DemoPick.Services
                 }
             });
             return list;
-        }
-
-        private static bool InvoiceExists(int invoiceId)
-        {
-            if (invoiceId <= 0) return false;
-            try
-            {
-                object obj = DatabaseHelper.ExecuteScalar(
-                    SqlQueries.Inventory.InvoiceExistsCount,
-                    new SqlParameter("@Id", invoiceId));
-                int count = obj == null || obj == DBNull.Value ? 0 : Convert.ToInt32(obj);
-                return count > 0;
-            }
-            catch
-            {
-                return true; // Fail open: do not hide log if we cannot verify.
-            }
         }
     }
 }

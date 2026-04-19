@@ -144,11 +144,9 @@
     </Compile>
     <Compile Include="Views\FrmDatSanCoDinh.Booking.cs">
       <DependentUpon>FrmDatSanCoDinh.cs</DependentUpon>
-      <SubType>Form</SubType>
     </Compile>
     <Compile Include="Views\FrmDatSanCoDinh.WindowChrome.cs">
       <DependentUpon>FrmDatSanCoDinh.cs</DependentUpon>
-      <SubType>Form</SubType>
     </Compile>
     <Compile Include="Views\FrmDatSanCoDinh.Designer.cs">
       <DependentUpon>FrmDatSanCoDinh.cs</DependentUpon>
@@ -335,6 +333,13 @@
     <Compile Include="Services\DatabaseMaintenanceService.cs" />
     <Compile Include="Services\InventoryService.cs" />
     <Compile Include="Services\InventoryTransactionFormatter.cs" />
+    <Compile Include="Services\BookingCourtCommandService.cs" />
+    <Compile Include="Services\BookingCourtQueryService.cs" />
+    <Compile Include="Services\BookingMemberService.cs" />
+    <Compile Include="Services\BookingMemberCleanupService.cs" />
+    <Compile Include="Services\BookingQueryService.cs" />
+    <Compile Include="Services\BookingWriteService.cs" />
+    <Compile Include="Services\PhoneNumberValidator.cs" />
     <Compile Include="Services\PosService.cs" />
     <Compile Include="Services\PosBookingPaymentStateService.cs" />
     <Compile Include="Services\PosInventoryValidator.cs" />

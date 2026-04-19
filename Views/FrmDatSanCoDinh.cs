@@ -25,6 +25,10 @@ namespace DemoPick
             // Logic for switching modes
             rbKhachThue.CheckedChanged += RbMode_CheckedChanged;
             rbBaoTri.CheckedChanged += RbMode_CheckedChanged;
+            if (txtPhone != null)
+            {
+                txtPhone.TextChanged += (s, e) => UpdatePhoneValidationUi();
+            }
 
             // Save logic
             btnConfirm.Click += BtnConfirm_Click;
@@ -61,6 +65,30 @@ namespace DemoPick
                 if (old != null) old.Dispose();
             }
             this.Paint += Frm_Paint;
+
+            UpdatePhoneValidationUi();
+        }
+
+        private void UpdatePhoneValidationUi()
+        {
+            if (txtPhone == null) return;
+
+            if (!txtPhone.Enabled)
+            {
+                txtPhone.RectColor = Color.LightGray;
+                return;
+            }
+
+            string raw = txtPhone.Text ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(raw))
+            {
+                txtPhone.RectColor = Color.LightGray;
+                return;
+            }
+
+            txtPhone.RectColor = PhoneNumberValidator.IsValidTenDigits(raw)
+                ? Color.LightGray
+                : Color.FromArgb(231, 76, 60);
         }
     }
 }

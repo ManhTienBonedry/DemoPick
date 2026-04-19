@@ -1,4 +1,5 @@
 using System;
+using System.Drawing;
 using System.Windows.Forms;
 using DemoPick.Services;
 
@@ -33,9 +34,30 @@ namespace DemoPick
             btnCancelTop.Click += (s, e) => this.Close();
             
             btnConfirm.Click += BtnConfirm_Click;
+
+            if (txtPhone != null)
+            {
+                txtPhone.TextChanged += (s, e) => UpdatePhoneValidationUi();
+            }
             
             pnlTop.MouseDown += Form_MouseDown;
             lblHeaderTop.MouseDown += Form_MouseDown;
+        }
+
+        private void UpdatePhoneValidationUi()
+        {
+            if (txtPhone == null) return;
+
+            string raw = txtPhone.Text ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(raw))
+            {
+                txtPhone.RectColor = Color.LightGray;
+                return;
+            }
+
+            txtPhone.RectColor = PhoneNumberValidator.IsValidTenDigits(raw)
+                ? Color.LightGray
+                : Color.FromArgb(231, 76, 60);
         }
 
         private static void TryClampComboDropDownToScreen(ComboBox combo, int maxHeight, int minHeight)
@@ -103,6 +125,14 @@ namespace DemoPick
                 return;
             }
 
+            string phoneDigits = PhoneNumberValidator.NormalizeDigits(txtPhone.Text);
+            if (phoneDigits.Length != 10)
+            {
+                MessageBox.Show("Số điện thoại phải đúng 10 chữ số.", "Sai số điện thoại", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtPhone.Focus();
+                return;
+            }
+
             DateTime selectedDate = ucDate.SelectedDate;
             string timeStr = cbTime.SelectedItem?.ToString() ?? "17:00"; 
             string[] timeParts = timeStr.Split(':');
@@ -132,7 +162,7 @@ namespace DemoPick
                 int? memberId = null;
                 try
                 {
-                    memberId = _controller.GetOrCreateMemberId(txtName.Text, txtPhone.Text);
+                    memberId = _controller.GetOrCreateMemberId(txtName.Text, phoneDigits);
                 }
                 catch (Exception ex)
                 {
@@ -145,7 +175,7 @@ namespace DemoPick
                 }
 
                     string paymentState = MapPaymentSelectionToState();
-                    _controller.SubmitBooking(courtId, memberId, txtName.Text + " - " + txtPhone.Text, note, start, end, status: AppConstants.BookingStatus.Confirmed, paymentState: paymentState);
+                    _controller.SubmitBooking(courtId, memberId, txtName.Text + " - " + phoneDigits, note, start, end, status: AppConstants.BookingStatus.Confirmed, paymentState: paymentState);
                 MessageBox.Show($"Đã chốt sân thành công!\n- {txtName.Text}\n- Mốc: Từ {start:HH:mm} đến {end:HH:mm} ngày {start:dd/MM/yyyy}", " Đặt sân hoàn tất", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 this.DialogResult = DialogResult.OK; 
                 this.Close();

@@ -32,6 +32,8 @@ namespace DemoPick
         public System.Windows.Forms.Panel pnlRight;
         public System.Windows.Forms.Label lblRightTitle;
         public System.Windows.Forms.ListView lstCart;
+        public UIButton btnQtyPlus;
+        public UIButton btnQtyMinus;
         
         public System.Windows.Forms.Panel pnlTotals;
         public UIButton btnClearOrder;
@@ -69,6 +71,8 @@ namespace DemoPick
             this.chipCatExtra6 = new DemoPick.UCCategoryChip();
             this.pnlRight = new System.Windows.Forms.Panel();
             this.lblRightTitle = new System.Windows.Forms.Label();
+            this.btnQtyPlus = new Sunny.UI.UIButton();
+            this.btnQtyMinus = new Sunny.UI.UIButton();
             this.lstCart = new System.Windows.Forms.ListView();
             this.pnlTotals = new System.Windows.Forms.Panel();
             this.btnCheckout = new Sunny.UI.UIButton();
@@ -205,7 +209,7 @@ namespace DemoPick
             this.chipCatTool.Name = "chipCatTool";
             this.chipCatTool.Size = new System.Drawing.Size(140, 35);
             this.chipCatTool.TabIndex = 5;
-            this.chipCatTool.Text = "Thuê Dụng cụ";
+            this.chipCatTool.Text = "Dịch vụ";
 
             // 
             // chipCatExtra1
@@ -306,6 +310,8 @@ namespace DemoPick
             // pnlRight
             // 
             this.pnlRight.BackColor = System.Drawing.Color.White;
+            this.pnlRight.Controls.Add(this.btnQtyPlus);
+            this.pnlRight.Controls.Add(this.btnQtyMinus);
             this.pnlRight.Controls.Add(this.lblRightTitle);
             this.pnlRight.Controls.Add(this.lstCart);
             this.pnlRight.Controls.Add(this.pnlTotals);
@@ -325,6 +331,40 @@ namespace DemoPick
             this.lblRightTitle.Size = new System.Drawing.Size(244, 32);
             this.lblRightTitle.TabIndex = 0;
             this.lblRightTitle.Text = "Sản phẩm chờ - Sân VIP 1";
+            // 
+            // btnQtyPlus
+            // 
+            this.btnQtyPlus.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnQtyPlus.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(204)))), ((int)(((byte)(113)))));
+            this.btnQtyPlus.FillHoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(56)))), ((int)(((byte)(214)))), ((int)(((byte)(123)))));
+            this.btnQtyPlus.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnQtyPlus.Location = new System.Drawing.Point(295, 20);
+            this.btnQtyPlus.MinimumSize = new System.Drawing.Size(1, 1);
+            this.btnQtyPlus.Name = "btnQtyPlus";
+            this.btnQtyPlus.Radius = 14;
+            this.btnQtyPlus.RectColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(204)))), ((int)(((byte)(113)))));
+            this.btnQtyPlus.RectHoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(56)))), ((int)(((byte)(214)))), ((int)(((byte)(123)))));
+            this.btnQtyPlus.Size = new System.Drawing.Size(35, 30);
+            this.btnQtyPlus.TabIndex = 4;
+            this.btnQtyPlus.Text = "+";
+            this.btnQtyPlus.TipsFont = new System.Drawing.Font("Segoe UI", 9F);
+            // 
+            // btnQtyMinus
+            // 
+            this.btnQtyMinus.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnQtyMinus.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(231)))), ((int)(((byte)(76)))), ((int)(((byte)(60)))));
+            this.btnQtyMinus.FillHoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(241)))), ((int)(((byte)(86)))), ((int)(((byte)(70)))));
+            this.btnQtyMinus.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnQtyMinus.Location = new System.Drawing.Point(254, 20);
+            this.btnQtyMinus.MinimumSize = new System.Drawing.Size(1, 1);
+            this.btnQtyMinus.Name = "btnQtyMinus";
+            this.btnQtyMinus.Radius = 14;
+            this.btnQtyMinus.RectColor = System.Drawing.Color.FromArgb(((int)(((byte)(231)))), ((int)(((byte)(76)))), ((int)(((byte)(60)))));
+            this.btnQtyMinus.RectHoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(241)))), ((int)(((byte)(86)))), ((int)(((byte)(70)))));
+            this.btnQtyMinus.Size = new System.Drawing.Size(35, 30);
+            this.btnQtyMinus.TabIndex = 5;
+            this.btnQtyMinus.Text = "-";
+            this.btnQtyMinus.TipsFont = new System.Drawing.Font("Segoe UI", 9F);
             // 
             // lstCart
             // 

@@ -216,6 +216,8 @@ namespace DemoPick.Services
         {
             error = null;
 
+            string normalizedPhone = PhoneNumberValidator.NormalizeDigits(phone);
+
             string username = (email ?? "").Trim();
             if (string.IsNullOrWhiteSpace(username))
             {
@@ -241,6 +243,12 @@ namespace DemoPick.Services
                 return false;
             }
 
+            if (normalizedPhone.Length != 10)
+            {
+                error = "Số điện thoại phải đúng 10 chữ số.";
+                return false;
+            }
+
             try
             {
                 var exists = DatabaseHelper.ExecuteScalar(
@@ -261,7 +269,7 @@ namespace DemoPick.Services
                     SqlQueries.Auth.RegisterStaffAccount,
                     new SqlParameter("@Username", username),
                     new SqlParameter("@Email", (object)email ?? DBNull.Value),
-                    new SqlParameter("@Phone", (object)phone ?? DBNull.Value),
+                    new SqlParameter("@Phone", normalizedPhone),
                     new SqlParameter("@FullName", (object)fullName ?? DBNull.Value),
                     new SqlParameter("@Hash", SqlDbType.VarBinary, 32) { Value = hash },
                     new SqlParameter("@Salt", SqlDbType.VarBinary, 16) { Value = salt },

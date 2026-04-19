@@ -48,6 +48,8 @@ namespace DemoPick
                 btnConfirm.FillHoverColor = Color.FromArgb(56, 214, 123);
                 btnConfirm.Text = "Tạo Lịch Cố Định";
             }
+
+            UpdatePhoneValidationUi();
         }
     }
 }

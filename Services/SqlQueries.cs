@@ -66,7 +66,26 @@ DECLARE @courtRev DECIMAL(18,2) = ISNULL((
       )
 ), 0);
 DECLARE @totalRev DECIMAL(18,2) = @posRev + @courtRev;
-DECLARE @totalCust INT = (SELECT COUNT(*) FROM Members);
+DECLARE @totalCust INT = (
+    SELECT COUNT(*)
+    FROM Members m
+    WHERE NOT (
+        ISNULL(m.IsFixed, 0) = 0
+        AND ISNULL(m.TotalSpent, 0) = 0
+        AND ISNULL(m.TotalHoursPurchased, 0) = 0
+        AND NOT EXISTS (
+            SELECT 1
+            FROM Bookings b
+            WHERE b.MemberID = m.MemberID
+              AND b.Status <> 'Cancelled'
+        )
+        AND NOT EXISTS (
+            SELECT 1
+            FROM Invoices i
+            WHERE i.MemberID = m.MemberID
+        )
+    )
+);
 DECLARE @total INT = (SELECT COUNT(*) * 18 FROM Courts WHERE (Status = 'Active' OR Status IS NULL OR LTRIM(RTRIM(Status)) = ''));
 DECLARE @booked DECIMAL(18,2) = (
     SELECT ISNULL(SUM(DATEDIFF(minute, StartTime, EndTime) / 60.0), 0)
@@ -134,43 +153,120 @@ GROUP BY C.Name
 ORDER BY Rev DESC";
 
             internal const string RecentActivity = @"
-SELECT TOP (@Take)
-    '#BK' + CAST(B.BookingID as VARCHAR) as Code,
-    C.Name as CourtName,
-    COALESCE(M.FullName, NULLIF(LTRIM(RTRIM(B.GuestName)), ''), N'Khách lẻ') as CustomerName,
-    FORMAT(B.StartTime, 'dd/MM/yyyy HH:mm') as TimeText,
-    B.Status as Status,
-    CAST(ISNULL(IB.BookingRevenue, (DATEDIFF(minute, B.StartTime, B.EndTime) / 60.0) * C.HourlyRate) AS DECIMAL(18,2)) as Amount
-FROM Bookings B
-JOIN Courts C ON B.CourtID = C.CourtID
-LEFT JOIN Members M ON B.MemberID = M.MemberID
-LEFT JOIN (
+;WITH ActivityFeed AS (
     SELECT
-        D.BookingID,
-        SUM(ISNULL(D.Quantity, 1) * ISNULL(D.UnitPrice, 0)) as BookingRevenue
-    FROM InvoiceDetails D
-    WHERE D.BookingID IS NOT NULL
-    GROUP BY D.BookingID
-) IB ON IB.BookingID = B.BookingID
-WHERE B.Status = 'Paid'
-  AND ISNULL(LTRIM(RTRIM(B.GuestName)), '') NOT LIKE 'SMOKE%'
-  AND ISNULL(LTRIM(RTRIM(M.FullName)), '') NOT LIKE 'SMOKE%'
-ORDER BY B.StartTime DESC";
+        '#BK' + CAST(B.BookingID as VARCHAR) as Code,
+        C.Name as CourtName,
+        COALESCE(M.FullName, NULLIF(LTRIM(RTRIM(B.GuestName)), ''), N'Khách lẻ') as CustomerName,
+        FORMAT(B.StartTime, 'dd/MM/yyyy HH:mm') as TimeText,
+        B.Status as Status,
+        CAST(ISNULL(IB.BookingRevenue, (DATEDIFF(minute, B.StartTime, B.EndTime) / 60.0) * C.HourlyRate) AS DECIMAL(18,2)) as Amount,
+        B.StartTime as ActivityAt
+    FROM Bookings B
+    JOIN Courts C ON B.CourtID = C.CourtID
+    LEFT JOIN Members M ON B.MemberID = M.MemberID
+    LEFT JOIN (
+        SELECT
+            D.BookingID,
+            SUM(ISNULL(D.Quantity, 1) * ISNULL(D.UnitPrice, 0)) as BookingRevenue
+        FROM InvoiceDetails D
+        WHERE D.BookingID IS NOT NULL
+        GROUP BY D.BookingID
+    ) IB ON IB.BookingID = B.BookingID
+    WHERE B.Status = 'Paid'
+      AND ISNULL(LTRIM(RTRIM(B.GuestName)), '') NOT LIKE 'SMOKE%'
+      AND ISNULL(LTRIM(RTRIM(M.FullName)), '') NOT LIKE 'SMOKE%'
+
+    UNION ALL
+
+    SELECT
+        '#INV' as Code,
+        N'Kho hàng' as CourtName,
+        ISNULL(NULLIF(LTRIM(RTRIM(S.SubDesc)), ''), N'-') as CustomerName,
+        FORMAT(S.CreatedAt, 'dd/MM/yyyy HH:mm') as TimeText,
+        S.EventDesc as Status,
+        CAST(0 AS DECIMAL(18,2)) as Amount,
+        S.CreatedAt as ActivityAt
+    FROM dbo.SystemLogs S
+    WHERE S.EventDesc IN (N'Nhập Kho Trực Tiếp', N'Xóa Sản phẩm Kho')
+)
+SELECT TOP (@Take)
+    Code,
+    CourtName,
+    CustomerName,
+    TimeText,
+    Status,
+    Amount
+FROM ActivityFeed
+ORDER BY ActivityAt DESC";
         }
 
         internal static class Customer
         {
-            internal const string AllCustomers = "SELECT MemberID, FullName, Phone, TotalHoursPurchased, IsFixed, TotalSpent, CreatedAt FROM Members ORDER BY CreatedAt DESC";
+            internal const string AllCustomers = @"
+SELECT MemberID, FullName, Phone, TotalHoursPurchased, IsFixed, TotalSpent, CreatedAt
+FROM Members m
+WHERE NOT (
+    ISNULL(m.IsFixed, 0) = 0
+    AND ISNULL(m.TotalSpent, 0) = 0
+    AND ISNULL(m.TotalHoursPurchased, 0) = 0
+    AND NOT EXISTS (
+        SELECT 1
+        FROM Bookings b
+        WHERE b.MemberID = m.MemberID
+          AND b.Status <> 'Cancelled'
+    )
+    AND NOT EXISTS (
+        SELECT 1
+        FROM Invoices i
+        WHERE i.MemberID = m.MemberID
+    )
+)
+ORDER BY CreatedAt DESC";
 
-            internal const string RevenueSummary = "SELECT COUNT(*) AS Cnt, ISNULL(SUM(TotalSpent), 0) as Rev FROM Members";
+            internal const string RevenueSummary = @"
+SELECT COUNT(*) AS Cnt, ISNULL(SUM(m.TotalSpent), 0) as Rev
+FROM Members m
+WHERE NOT (
+    ISNULL(m.IsFixed, 0) = 0
+    AND ISNULL(m.TotalSpent, 0) = 0
+    AND ISNULL(m.TotalHoursPurchased, 0) = 0
+    AND NOT EXISTS (
+        SELECT 1
+        FROM Bookings b
+        WHERE b.MemberID = m.MemberID
+          AND b.Status <> 'Cancelled'
+    )
+    AND NOT EXISTS (
+        SELECT 1
+        FROM Invoices i
+        WHERE i.MemberID = m.MemberID
+    )
+)";
 
             internal const string FindCheckoutCustomer = "SELECT TOP 1 MemberID, FullName, Tier, IsFixed FROM Members WHERE Phone = @Phone OR CAST(MemberID as VARCHAR(20)) = @Qid";
 
             internal const string TierCounts = @"
 SELECT 
-    SUM(CASE WHEN IsFixed = 1 THEN 1 ELSE 0 END) as CntFixed,
-    SUM(CASE WHEN IsFixed = 0 OR IsFixed IS NULL THEN 1 ELSE 0 END) as CntWalkin
-FROM Members";
+    SUM(CASE WHEN m.IsFixed = 1 THEN 1 ELSE 0 END) as CntFixed,
+    SUM(CASE WHEN m.IsFixed = 0 OR m.IsFixed IS NULL THEN 1 ELSE 0 END) as CntWalkin
+FROM Members m
+WHERE NOT (
+    ISNULL(m.IsFixed, 0) = 0
+    AND ISNULL(m.TotalSpent, 0) = 0
+    AND ISNULL(m.TotalHoursPurchased, 0) = 0
+    AND NOT EXISTS (
+        SELECT 1
+        FROM Bookings b
+        WHERE b.MemberID = m.MemberID
+          AND b.Status <> 'Cancelled'
+    )
+    AND NOT EXISTS (
+        SELECT 1
+        FROM Invoices i
+        WHERE i.MemberID = m.MemberID
+    )
+)";
 
             internal const string TodayOccupancyPct = @"
 DECLARE @total INT = (SELECT COUNT(*) * 18 FROM Courts WHERE (Status = 'Active' OR Status IS NULL OR LTRIM(RTRIM(Status)) = ''));
@@ -217,14 +313,17 @@ SELECT
     (SELECT COUNT(*) FROM Products WHERE StockQuantity <= MinThreshold AND Category != N'Dịch vụ đi kèm') as CriticalItems,
     (SELECT ISNULL(SUM(Quantity), 0) FROM InvoiceDetails) as Sales,
     (SELECT COUNT(*) FROM Invoices) as InvoicesCount
-FROM Products WHERE Category != N'Dịch vụ đi kèm'";
+FROM Products
+WHERE Category != N'Dịch vụ đi kèm'
+    AND SKU NOT LIKE N'SVC-%'
+    AND SKU NOT LIKE N'DV_%'";
 
             internal const string InventoryItems = "SELECT ProductID, SKU, Name, Category, StockQuantity, MinThreshold, Price FROM Products WHERE Category != N'Dịch vụ đi kèm'";
 
             internal const string RecentTransactions = @"
 SELECT TOP 10 EventDesc, SubDesc, CreatedAt
 FROM dbo.SystemLogs
-WHERE EventDesc IN (N'Nhập Kho Trực Tiếp', N'POS Checkout')
+WHERE EventDesc IN (N'Nhập Kho Trực Tiếp', N'Xóa Sản phẩm Kho')
 ORDER BY CreatedAt DESC";
 
                 internal const string InsertSystemLog = "INSERT INTO SystemLogs (EventDesc, SubDesc) VALUES (@EventDesc, @SubDesc)";

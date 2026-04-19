@@ -33,6 +33,20 @@ namespace DemoPick
             }
         }
 
+        private static string NormalizePosCategory(string category)
+        {
+            string c = (category ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(c)) return string.Empty;
+
+            if (string.Equals(c, "Thuê Dụng cụ", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(c, "Thuê dụng cụ", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Dịch vụ";
+            }
+
+            return c;
+        }
+
         private void BtnAddProduct_Click(object sender, EventArgs e)
         {
             try
@@ -102,7 +116,7 @@ namespace DemoPick
                 var baseCats = chips
                     .Select(c => (c.Tag ?? c.Text)?.ToString())
                     .Where(s => !string.IsNullOrWhiteSpace(s))
-                    .Select(s => s.Trim())
+                    .Select(s => NormalizePosCategory(s))
                     .ToList();
 
                 var catList = new System.Collections.Generic.List<string> { "Tất cả" };
@@ -115,7 +129,7 @@ namespace DemoPick
                 var dbCats = await _inventoryService.GetProductCategoriesAsync();
                 foreach (var catRaw in dbCats)
                 {
-                    string cat = (catRaw ?? "").Trim();
+                    string cat = NormalizePosCategory(catRaw);
                     if (string.IsNullOrWhiteSpace(cat)) continue;
                     if (string.Equals(cat, "Tất cả", StringComparison.OrdinalIgnoreCase)) continue;
                     if (!catList.Contains(cat)) catList.Add(cat);
@@ -161,9 +175,10 @@ namespace DemoPick
                     int prodId = prod.ProductId;
                     string nameTxt = prod.Name ?? "";
                     decimal priceVal = prod.Price;
+                    string catNorm = NormalizePosCategory(prod.Category);
                     string priceTxt = priceVal.ToString("N0") + "đ";
 
-                    Panel pnlProd = new Panel { Size = new Size(150, 180), BackColor = Color.White, Margin = new Padding(10), Cursor = Cursors.Hand, Tag = prod.Category ?? "" };
+                    Panel pnlProd = new Panel { Size = new Size(150, 180), BackColor = Color.White, Margin = new Padding(10), Cursor = Cursors.Hand, Tag = catNorm };
                     pnlProd.Paint += (s, e) =>
                     {
                         using (var pen = new Pen(Color.FromArgb(229, 231, 235), 1))
@@ -180,7 +195,7 @@ namespace DemoPick
                     priceLbl.Enabled = false;
 
                     pnlProd.Controls.AddRange(new Control[] { pic, nameLbl, priceLbl });
-                    pnlProd.Click += (s, e) => AddToCart(prodId, nameTxt, priceVal, prod.Category);
+                    pnlProd.Click += (s, e) => AddToCart(prodId, nameTxt, priceVal, catNorm);
 
                     flpProducts.Controls.Add(pnlProd);
                 }

@@ -54,8 +54,56 @@ namespace DemoPick
             btnDeleteProduct.Click += BtnDeleteProduct_Click;
             btnCheckout.Click += BtnSaveOrder_Click;
             btnClearOrder.Click += BtnClearOrder_Click;
+            btnQtyPlus.Click += BtnQtyPlus_Click;
+            btnQtyMinus.Click += BtnQtyMinus_Click;
+            lstCart.KeyDown += LstCart_KeyDown;
 
             LoadAllData(resetCart: true);
+        }
+
+        private void BtnQtyPlus_Click(object sender, EventArgs e)
+        {
+            if (lstCart.SelectedItems.Count <= 0)
+            {
+                new UIPage().ShowInfoTip("Chọn sản phẩm trong giỏ để tăng số lượng.");
+                return;
+            }
+
+            AdjustSelectedCartItemQuantity(+1);
+        }
+
+        private void BtnQtyMinus_Click(object sender, EventArgs e)
+        {
+            if (lstCart.SelectedItems.Count <= 0)
+            {
+                new UIPage().ShowInfoTip("Chọn sản phẩm trong giỏ để giảm số lượng.");
+                return;
+            }
+
+            AdjustSelectedCartItemQuantity(-1);
+        }
+
+        private void LstCart_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (lstCart.SelectedItems.Count <= 0) return;
+
+            bool plusPressed = e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus;
+            bool minusPressed = e.KeyCode == Keys.Subtract || e.KeyCode == Keys.OemMinus;
+
+            if (plusPressed)
+            {
+                AdjustSelectedCartItemQuantity(+1);
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+                return;
+            }
+
+            if (minusPressed)
+            {
+                AdjustSelectedCartItemQuantity(-1);
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+            }
         }
 
         public void RefreshOnActivated()
