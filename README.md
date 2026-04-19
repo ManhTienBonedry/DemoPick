@@ -1,10 +1,21 @@
-# DemoPick
-
-Ứng dụng WinForms (.NET Framework 4.8) phục vụ quản lý sân pickleball theo luồng **Đặt lịch → Bán hàng/Thanh toán → Báo cáo**, kèm cơ chế **tự khởi tạo CSDL + apply migrations** khi chạy.
+<div align="center">
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/csharp/csharp-original.svg" alt="C# Icon" width="80" height="80">
+  <h1>🎾 DemoPick</h1>
+  <p><i>Nền tảng quản lý sân Pickleball chuyên nghiệp, vận hành khép kín và tự động hóa</i></p>
+  
+  [![.NET Framework](https://img.shields.io/badge/Framework-.NET_4.8-512BD4?logo=dotnet&logoColor=white)](#)
+  [![WinForms](https://img.shields.io/badge/UI-WinForms-0078D4?logo=windows&logoColor=white)](#)
+  [![C#](https://img.shields.io/badge/Language-C%23-239120?logo=c-sharp&logoColor=white)](#)
+  [![SQL Server](https://img.shields.io/badge/Database-SQL_Server-CC2927?logo=microsoft-sql-server&logoColor=white)](#)
+</div>
 
 ---
 
-## Nội dung
+**DemoPick** là nền tảng quản lý sân Pickleball chuyên nghiệp được xây dựng trên .NET Framework 4.8 (WinForms). Ứng dụng tối ưu hóa những quy trình vận hành cốt lõi nhất: từ **đặt lịch, quản lý bán hàng (POS)**, đến **quy trình thanh toán** và **phân tích báo cáo**, mang lại trải nghiệm quản trị mượt mà, chính xác và hiệu suất cao. Đặc biệt, hệ thống tích hợp sẵn cơ chế **tự khởi tạo Cơ sở dữ liệu và xử lý Migrations** tự động vô cùng linh hoạt.
+
+---
+
+## 📑 Nội dung
 
 - [DemoPick là gì?](#demopick-là-gì)
 - [Tính năng chính](#tính-năng-chính)
@@ -18,15 +29,15 @@
 
 ---
 
-## DemoPick là gì?
+## 🌟 DemoPick là gì?
 
-DemoPick tập trung vào các nghiệp vụ thường gặp tại sân pickleball:
+DemoPick được thiết kế chuyên biệt để giải quyết trọn vẹn bài toán vận hành tại các tổ hợp sân Pickleball hiện đại. Dự án tập trung mang tới giá trị thực tiễn qua các nhóm nghiệp vụ then chốt:
 
-- **Đặt lịch** theo sân/khung giờ, tránh trùng lịch.
-- **Đặt cố định / Bảo trì (Maintenance)** để block lịch, *không* đi vào doanh thu/occupancy.
-- **POS/Bán hàng**: thêm sản phẩm vào giỏ theo sân/booking.
-- **Thanh toán**: tạo hóa đơn gồm **tiền sân** + **sản phẩm**, cập nhật tồn kho (nếu bật trigger/logic trừ kho).
-- **Báo cáo/Dashboard**: tổng quan KPI, top sân, xu hướng.
+- 📅 **Hệ thống đặt lịch thông minh:** Hiển thị trực quan lịch trống/đã đặt theo từng sân và khung giờ. Cơ sở dữ liệu giám sát chặt chẽ, loại bỏ hoàn toàn rủi ro trùng lịch (conflict booking).
+- 🛠️ **Quản lý cố định & Bảo trì:** Cho phép khóa lịch (block) với các lịch chơi cố định của hội nhóm hoặc lịch bảo trì sân bãi. Trạng thái bảo trì được bóc tách hoàn toàn nhằm đảm bảo tính chính xác cho báo cáo doanh thu và tỷ lệ lấp đầy.
+- 🛒 **Trạm bán hàng (POS):** Thao tác linh hoạt, giúp nhân viên dễ dàng order các sản phẩm/dịch vụ (như nước uống, thuê bóng...) gắn trực tiếp vào ca sân hiện tại của khách.
+- 💳 **Thanh toán hợp nhất:** Ghép nối tiền giờ thuê sân và danh sách dịch vụ bán lẻ vào chung một hóa đơn, đồng thời tự động kích hoạt tiến trình giảm trừ tồn kho mượt mà.
+- 📊 **Báo cáo & Dashboard:** Phân tích trực quan thông qua biểu đồ và số liệu cung cấp thông tin về KPI vận hành, công suất khai thác, xếp hạng top sân và xu hướng tăng trưởng.
 
 ---
 
