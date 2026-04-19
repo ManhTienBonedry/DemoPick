@@ -1,180 +1,264 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/csharp/csharp-original.svg" alt="C# Icon" width="80" height="80">
   <h1>🎾 DemoPick</h1>
-  <p><i>Nền tảng quản lý sân Pickleball chuyên nghiệp, vận hành khép kín và tự động hóa</i></p>
-  
-  [![.NET Framework](https://img.shields.io/badge/Framework-.NET_4.8-512BD4?logo=dotnet&logoColor=white)](#)
-  [![WinForms](https://img.shields.io/badge/UI-WinForms-0078D4?logo=windows&logoColor=white)](#)
-  [![C#](https://img.shields.io/badge/Language-C%23-239120?logo=c-sharp&logoColor=white)](#)
-  [![SQL Server](https://img.shields.io/badge/Database-SQL_Server-CC2927?logo=microsoft-sql-server&logoColor=white)](#)
+  <p><b>Nền tảng quản lý sân Pickleball chuyên nghiệp — Vận hành khép kín & Tự động hóa</b></p>
+  <p><i>Đặt lịch · Bán hàng (POS) · Thanh toán · Báo cáo — Tất cả trong một ứng dụng duy nhất</i></p>
+
+  [![.NET Framework](https://img.shields.io/badge/Framework-.NET_4.8-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)](#)
+  [![WinForms](https://img.shields.io/badge/UI-WinForms-0078D4?style=for-the-badge&logo=windows&logoColor=white)](#)
+  [![C#](https://img.shields.io/badge/Language-C%23-239120?style=for-the-badge&logo=c-sharp&logoColor=white)](#)
+  [![SQL Server](https://img.shields.io/badge/Database-SQL_Server-CC2927?style=for-the-badge&logo=microsoft-sql-server&logoColor=white)](#)
+
+  <br>
+
+  [![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](#)
+  [![Status](https://img.shields.io/badge/Status-Active-brightgreen?style=flat-square)](#)
+  [![PRs Welcome](https://img.shields.io/badge/PRs-Welcome-ff69b4?style=flat-square)](#)
 </div>
 
----
-
-**DemoPick** là nền tảng quản lý sân Pickleball chuyên nghiệp được xây dựng trên .NET Framework 4.8 (WinForms). Ứng dụng tối ưu hóa những quy trình vận hành cốt lõi nhất: từ **đặt lịch, quản lý bán hàng (POS)**, đến **quy trình thanh toán** và **phân tích báo cáo**, mang lại trải nghiệm quản trị mượt mà, chính xác và hiệu suất cao. Đặc biệt, hệ thống tích hợp sẵn cơ chế **tự khởi tạo Cơ sở dữ liệu và xử lý Migrations** tự động vô cùng linh hoạt.
+<br>
 
 ---
 
-## 📑 Nội dung
+## 📑 Mục lục
 
-- [DemoPick là gì?](#demopick-là-gì)
-- [Tính năng chính](#tính-năng-chính)
-- [Kiến trúc nhanh](#kiến-trúc-nhanh)
-- [Chạy nhanh (Dev)](#chạy-nhanh-dev)
-- [Database workflow (script-first)](#database-workflow-script-first)
-- [Cấu trúc thư mục](#cấu-trúc-thư-mục)
-- [Tài liệu trong repo](#tài-liệu-trong-repo)
-- [Smoke test](#smoke-test)
-- [Ghi chú bảo mật](#ghi-chú-bảo-mật)
+<details>
+<summary>Bấm để xem mục lục đầy đủ</summary>
 
----
+- [🌟 Giới thiệu](#-giới-thiệu)
+- [✨ Tính năng chính](#-tính-năng-chính)
+- [🏗️ Kiến trúc hệ thống](#️-kiến-trúc-hệ-thống)
+- [🚀 Bắt đầu nhanh](#-bắt-đầu-nhanh)
+- [🗄️ Database Workflow](#️-database-workflow)
+- [📁 Cấu trúc thư mục](#-cấu-trúc-thư-mục)
+- [📚 Tài liệu kỹ thuật](#-tài-liệu-kỹ-thuật)
+- [🔒 Bảo mật](#-bảo-mật)
 
-## 🌟 DemoPick là gì?
-
-DemoPick được thiết kế chuyên biệt để giải quyết trọn vẹn bài toán vận hành tại các tổ hợp sân Pickleball hiện đại. Dự án tập trung mang tới giá trị thực tiễn qua các nhóm nghiệp vụ then chốt:
-
-- 📅 **Hệ thống đặt lịch thông minh:** Hiển thị trực quan lịch trống/đã đặt theo từng sân và khung giờ. Cơ sở dữ liệu giám sát chặt chẽ, loại bỏ hoàn toàn rủi ro trùng lịch (conflict booking).
-- 🛠️ **Quản lý cố định & Bảo trì:** Cho phép khóa lịch (block) với các lịch chơi cố định của hội nhóm hoặc lịch bảo trì sân bãi. Trạng thái bảo trì được bóc tách hoàn toàn nhằm đảm bảo tính chính xác cho báo cáo doanh thu và tỷ lệ lấp đầy.
-- 🛒 **Trạm bán hàng (POS):** Thao tác linh hoạt, giúp nhân viên dễ dàng order các sản phẩm/dịch vụ (như nước uống, thuê bóng...) gắn trực tiếp vào ca sân hiện tại của khách.
-- 💳 **Thanh toán hợp nhất:** Ghép nối tiền giờ thuê sân và danh sách dịch vụ bán lẻ vào chung một hóa đơn, đồng thời tự động kích hoạt tiến trình giảm trừ tồn kho mượt mà.
-- 📊 **Báo cáo & Dashboard:** Phân tích trực quan thông qua biểu đồ và số liệu cung cấp thông tin về KPI vận hành, công suất khai thác, xếp hạng top sân và xu hướng tăng trưởng.
+</details>
 
 ---
 
-## Tính năng chính
+## 🌟 Giới thiệu
 
-| Nhóm | Mô tả | UI/Thành phần tiêu biểu |
-|---|---|---|
-| Xác thực | Đăng nhập, đăng ký, đổi mật khẩu | `FrmLogin`, `FrmRegister`, `FrmDoiMatKhau`, `AuthService` |
-| Đặt lịch | Tạo booking, hiển thị lịch theo ngày | `UCDatLich`, `FrmDatSan`, `BookingController` |
-| Cố định/Bảo trì | Tạo block lặp (recurring), dùng cho cố định hoặc bảo trì | `FrmDatSanCoDinh` |
-| POS/Bán hàng | Chọn sản phẩm, giảm giá, tạo giỏ | `UCBanHang`, `PosService`, `InventoryService` |
-| Thanh toán | Checkout tiền sân + sản phẩm, sinh invoice | `UCThanhToan`, `InvoiceService` |
-| Báo cáo | Lọc theo thời gian, xem KPI/Top | `UCBaoCao`, `ReportService`, `Reports/Bill.rdlc` |
+> *Kiến tạo giải pháp quản lý sân Pickleball toàn diện — từ đặt lịch đến báo cáo doanh thu, chỉ trong một nền tảng duy nhất.*
+
+**DemoPick** được thiết kế chuyên biệt để giải quyết trọn vẹn bài toán vận hành tại các tổ hợp sân Pickleball hiện đại. Xây dựng trên **.NET Framework 4.8 (WinForms)**, ứng dụng tối ưu hóa mọi quy trình cốt lõi và tích hợp sẵn cơ chế **tự khởi tạo Cơ sở dữ liệu + Migrations tự động** — sẵn sàng chạy ngay mà không cần setup thủ công.
+
+### 💡 Điểm nổi bật
+
+| | Giá trị | Mô tả |
+|:---:|:---|:---|
+| ⚡ | **Zero-config Database** | App tự tạo DB, chạy schema và apply migrations khi khởi động |
+| 🔐 | **Bảo mật đa lớp** | Mã hóa mật khẩu, bảo vệ connection string, audit Zero Trust |
+| 📐 | **Kiến trúc rõ ràng** | Phân tách Controller → Service → Database, dễ bảo trì & mở rộng |
+| 📊 | **Báo cáo trực quan** | Dashboard KPI, biểu đồ xu hướng, xuất hóa đơn RDLC |
 
 ---
 
-## Kiến trúc nhanh
+## ✨ Tính năng chính
+
+<table>
+  <tr>
+    <th>📦 Nhóm chức năng</th>
+    <th>📝 Mô tả</th>
+    <th>🧩 Thành phần</th>
+  </tr>
+  <tr>
+    <td>🔐 <b>Xác thực</b></td>
+    <td>Đăng nhập · Đăng ký · Đổi mật khẩu · Auto-seed Admin (DEBUG)</td>
+    <td><code>FrmLogin</code> · <code>FrmRegister</code> · <code>AuthService</code></td>
+  </tr>
+  <tr>
+    <td>📅 <b>Đặt lịch</b></td>
+    <td>Booking theo sân/khung giờ · Hiển thị lịch trực quan · Chống trùng lịch</td>
+    <td><code>UCDatLich</code> · <code>FrmDatSan</code> · <code>BookingController</code></td>
+  </tr>
+  <tr>
+    <td>🛠️ <b>Cố định & Bảo trì</b></td>
+    <td>Block lịch recurring · Tách biệt khỏi doanh thu/occupancy</td>
+    <td><code>FrmDatSanCoDinh</code></td>
+  </tr>
+  <tr>
+    <td>🛒 <b>POS / Bán hàng</b></td>
+    <td>Order sản phẩm/dịch vụ · Gắn vào ca sân · Giảm giá linh hoạt</td>
+    <td><code>UCBanHang</code> · <code>PosService</code> · <code>InventoryService</code></td>
+  </tr>
+  <tr>
+    <td>💳 <b>Thanh toán</b></td>
+    <td>Hóa đơn hợp nhất (tiền sân + sản phẩm) · Tự động trừ tồn kho</td>
+    <td><code>UCThanhToan</code> · <code>InvoiceService</code></td>
+  </tr>
+  <tr>
+    <td>📊 <b>Báo cáo</b></td>
+    <td>Dashboard KPI · Top sân · Xu hướng · Lọc theo thời gian</td>
+    <td><code>UCBaoCao</code> · <code>ReportService</code> · <code>Bill.rdlc</code></td>
+  </tr>
+</table>
+
+---
+
+## 🏗️ Kiến trúc hệ thống
 
 ```mermaid
 flowchart TD
-  A[Program.cs] --> B[SchemaInstaller.EnsureDatabaseAndSchema]
-  B --> C[MigrationsRunner.ApplyPendingMigrations]
-  C --> D[FrmLogin]
-  D -->|OK| E[FrmChinh]
-  D -->|Cancel| Z[Exit]
+  A[🚀 Program.cs] --> B[🗄️ SchemaInstaller.EnsureDatabaseAndSchema]
+  B --> C[📦 MigrationsRunner.ApplyPendingMigrations]
+  C --> D[🔐 FrmLogin]
+  D -->|✅ Đăng nhập thành công| E[🏠 FrmChinh]
+  D -->|❌ Hủy| Z[🚪 Exit]
 
-  E --> F[Modules: UCTongQuan / UCDatLich / UCBanHang / UCThanhToan / UCBaoCao / ...]
-  F --> G[Services: Auth/Booking/Inventory/Invoice/Report]
-  G --> H[(SQL Server)]
+  E --> F[📋 Modules]
+  F --> F1[UCTongQuan]
+  F --> F2[UCDatLich]
+  F --> F3[UCBanHang]
+  F --> F4[UCThanhToan]
+  F --> F5[UCBaoCao]
+
+  F1 & F2 & F3 & F4 & F5 --> G[⚙️ Services Layer]
+  G --> G1[AuthService]
+  G --> G2[BookingService]
+  G --> G3[InventoryService]
+  G --> G4[InvoiceService]
+  G --> G5[ReportService]
+
+  G1 & G2 & G3 & G4 & G5 --> H[(🗃️ SQL Server)]
 ```
 
-**Điểm nhấn**
-- Database được dựng theo kiểu **script-first**: schema + seed + migrations nằm trong thư mục `Database/`.
-- App khởi động sẽ cố gắng đảm bảo DB tồn tại, chạy schema, rồi apply migrations trước khi vào UI.
+> **📌 Kiến trúc script-first:** Schema + Seed + Migrations nằm trong thư mục `Database/`. App sẽ đảm bảo DB tồn tại, chạy schema, rồi apply migrations trước khi mở giao diện.
 
 ---
 
-## Chạy nhanh (Dev)
+## 🚀 Bắt đầu nhanh
 
-### 1) Yêu cầu môi trường
+### 📋 Yêu cầu môi trường
 
-- Windows
-- Visual Studio (hoặc MSBuild) hỗ trợ .NET Framework
-- .NET Framework 4.8
-- SQL Server / SQL Server Express
+| Thành phần | Phiên bản |
+|:---|:---|
+| 🖥️ Hệ điều hành | Windows 10+ |
+| 🔧 IDE | Visual Studio 2019+ (hoặc MSBuild) |
+| 📦 Framework | .NET Framework 4.8 |
+| 🗄️ Database | SQL Server / SQL Server Express |
 
-### 2) Cấu hình kết nối DB
+### 1️⃣ Cấu hình kết nối Database
 
-Sửa connection string `DefaultConnection` trong [App.config](App.config).
+Sửa connection string `DefaultConnection` trong [App.config](App.config):
 
-Ngoài ra có thể override bằng env var `DEMOPICK_CONNECTION_STRING` (ưu tiên hơn App.config) để tránh hardcode/commit connection string.
-
-Ví dụ (SQL Express + Windows Auth):
 ```xml
-<add name="DefaultConnection" connectionString="Server=.\SQLEXPRESS;Database=PickleProDB;Integrated Security=True;" providerName="System.Data.SqlClient" />
+<add name="DefaultConnection"
+     connectionString="Server=.\SQLEXPRESS;Database=PickleProDB;Integrated Security=True;"
+     providerName="System.Data.SqlClient" />
 ```
 
-**Best-effort bảo vệ connectionStrings (opt-in)**
-- Set `DEMOPICK_PROTECT_CONNECTIONSTRINGS=1` (hoặc appSetting `ProtectConnectionStrings=true`) để app thử encrypt section `connectionStrings` trong file `.exe.config` khi chạy.
+> **💡 Mẹo:** Có thể override bằng biến môi trường `DEMOPICK_CONNECTION_STRING` để tránh hardcode connection string.
 
-### 3) Restore packages & Build
+<details>
+<summary>🔐 Bảo vệ connectionStrings (opt-in)</summary>
 
-Repo dùng `packages.config` và restore theo cấu hình ở [NuGet.Config](NuGet.Config) (mặc định restore ra thư mục `..\packages`).
+Set `DEMOPICK_PROTECT_CONNECTIONSTRINGS=1` (hoặc appSetting `ProtectConnectionStrings=true`) để app tự động mã hóa section `connectionStrings` trong file `.exe.config` khi khởi chạy.
 
-Gợi ý:
-- Nếu bạn dùng VS Code, có thể chạy task build (kèm restore) theo cấu hình `tasks.json` của workspace.
-- Nếu build bằng CLI, có thể chạy `nuget restore` rồi build `.sln`.
+</details>
 
-### 4) Run
+### 2️⃣ Restore packages & Build
 
-Chạy app sẽ tự:
-1) Tạo DB (nếu chưa có)
-2) Chạy schema script (embedded resource)
-3) Apply migrations
-4) Mở màn hình đăng nhập
+```bash
+# Restore NuGet packages
+nuget restore DemoPick.sln
 
-**DEBUG-only bootstrap Admin**
-- Ở build DEBUG, app có thể seed 1 tài khoản `admin` nếu bảng `StaffAccounts` đang rỗng.
-- Mật khẩu bootstrap sẽ lấy từ env var `DEMOPICK_BOOTSTRAP_ADMIN_PASSWORD` hoặc tự sinh ngẫu nhiên và hiển thị 1 lần.
+# Build solution
+msbuild DemoPick.sln /p:Configuration=Release
+```
+
+> Repo sử dụng `packages.config`, restore theo cấu hình [NuGet.Config](NuGet.Config) (mặc định ra thư mục `../packages`).
+
+### 3️⃣ Chạy ứng dụng
+
+App sẽ tự động thực hiện pipeline khởi tạo:
+
+```
+1) ✅ Tạo Database (nếu chưa tồn tại)
+2) ✅ Chạy schema script (embedded resource)
+3) ✅ Apply pending migrations
+4) ✅ Mở màn hình đăng nhập → Sẵn sàng sử dụng!
+```
+
+<details>
+<summary>🛠️ DEBUG-only: Bootstrap tài khoản Admin</summary>
+
+Ở build **DEBUG**, app có thể seed 1 tài khoản `admin` nếu bảng `StaffAccounts` đang rỗng:
+- Mật khẩu lấy từ env var `DEMOPICK_BOOTSTRAP_ADMIN_PASSWORD`
+- Hoặc tự sinh ngẫu nhiên và hiển thị **1 lần duy nhất** trên console
+
+</details>
 
 ---
 
-## Database workflow (script-first)
+## 🗄️ Database Workflow
 
-Tài liệu chi tiết: [Docs/DB-WORKFLOW.md](Docs/DB-WORKFLOW.md)
+> 📖 Tài liệu chi tiết: [Docs/DB-WORKFLOW.md](Docs/DB-WORKFLOW.md)
 
-### Schema script
-- File chính: [Database/PickleProDB_Complete.sql](Database/PickleProDB_Complete.sql)
-- Được chạy từ embedded resources khi app khởi động (giảm rủi ro bị sửa `.sql` cạnh file chạy).
+| Thành phần | Đường dẫn | Mô tả |
+|:---|:---|:---|
+| 📄 **Schema** | [Database/PickleProDB_Complete.sql](Database/PickleProDB_Complete.sql) | Schema chính, chạy từ embedded resources khi khởi động |
+| 📦 **Migrations** | [Database/Migrations/](Database/Migrations) | Quy ước `NNNN__Description.sql` · Có checksum chống drift |
+| 🧪 **Seed data** | [Database/TesterData_Seed.sql](Database/TesterData_Seed.sql) | Dữ liệu test cho môi trường dev (placeholder) |
 
-### Migrations
-- Thư mục: [Database/Migrations](Database/Migrations)
-- Quy ước tên: `NNNN__Description.sql`
-- App lưu checksum để chống “drift” (sửa migration đã apply sẽ bị báo lỗi).
-
-### Seed dữ liệu test
-- File: [Database/TesterData_Seed.sql](Database/TesterData_Seed.sql)
-- Chỉ nên chạy trong môi trường dev/test. File này dùng dữ liệu placeholder để phục vụ test màn hình/biểu đồ.
+> ⚠️ **Lưu ý:** File `TesterData_Seed.sql` chỉ nên chạy trong môi trường **dev/test**. Không sử dụng cho production.
 
 ---
 
-## Cấu trúc thư mục
+## 📁 Cấu trúc thư mục
 
-```text
+```
 DemoPick/
-  Controllers/        # Controller-level orchestration (vd: booking)
-  Database/           # Schema + seed + migrations
-  Docs/               # Tài liệu kỹ thuật / checklist / smoke test
-  Models/             # Model/DTO
-  Reports/            # RDLC (ReportViewer)
-  Resources/          # Assets
-  Services/           # Data access + business logic
-  Tools/              # Script/tiện ích nội bộ
-  Views/              # WinForms + UserControl
-  App.config          # Connection string & runtime config
-  DemoPick.sln        # Solution
-  DemoPick.csproj     # Project (.NET Framework 4.8)
+│
+├── 🎮 Controllers/        # Controller-level orchestration (booking, ...)
+├── 🗄️ Database/            # Schema + Seed + Migrations
+├── 📚 Docs/                # Tài liệu kỹ thuật, checklist, smoke test
+├── 📐 Models/              # Model / DTO
+├── 📊 Reports/             # RDLC templates (ReportViewer)
+├── 🎨 Resources/           # Assets (icons, images)
+├── ⚙️ Services/            # Data access + Business logic
+├── 🔧 Tools/               # Script & tiện ích nội bộ
+├── 🖥️ Views/               # WinForms + UserControls
+│
+├── ⚙️ App.config           # Connection string & runtime config
+├── 📦 DemoPick.csproj      # Project file (.NET Framework 4.8)
+└── 📦 DemoPick.sln         # Solution file
 ```
 
 ---
 
-## Tài liệu trong repo
+## 📚 Tài liệu kỹ thuật
 
-- Click/event wiring map: [Docs/README.md](Docs/README.md)
-- Checklist chống double-wiring: [Docs/CLICK-WIRING-CHECKLIST.md](Docs/CLICK-WIRING-CHECKLIST.md)
-- Database workflow: [Docs/DB-WORKFLOW.md](Docs/DB-WORKFLOW.md)
-
----
-
-## Smoke test
-
-- Test Maintenance booking không ảnh hưởng doanh thu/occupancy + không đi vào checkout: [Docs/SMOKE_TEST.md](Docs/SMOKE_TEST.md)
+| 📑 Tài liệu | 📝 Mô tả |
+|:---|:---|
+| 🗺️ [Event Wiring Map](Docs/README.md) | Sơ đồ kết nối sự kiện Click/Event trong toàn bộ ứng dụng |
+| ✅ [Double-wiring Checklist](Docs/CLICK-WIRING-CHECKLIST.md) | Checklist chống đăng ký trùng sự kiện |
+| 🗄️ [Database Workflow](Docs/DB-WORKFLOW.md) | Quy trình vận hành schema, migrations & seed |
+| 🧪 [Smoke Test](Docs/SMOKE_TEST.md) | Test Maintenance booking vs doanh thu/occupancy |
+| 🔒 [Security Audit](Docs/SECURITY-AUDIT.md) | Báo cáo kiểm toán bảo mật theo mô hình Zero Trust |
 
 ---
 
-## Ghi chú bảo mật
+## 🔒 Bảo mật
 
-- Báo cáo audit (Zero Trust): [Docs/SECURITY-AUDIT.md](Docs/SECURITY-AUDIT.md)
+Dự án tuân thủ các nguyên tắc bảo mật nghiêm ngặt:
 
-Lưu ý: một số nội dung trong audit là theo trạng thái tại thời điểm viết; nếu bạn vừa thay đổi logic seed admin/lockout, hãy rà lại để đồng bộ tài liệu.
+- 🔐 **Mã hóa mật khẩu** — Không lưu plaintext, sử dụng hash an toàn
+- 🛡️ **Bảo vệ Connection String** — Hỗ trợ mã hóa section trong config (opt-in)
+- 🔑 **Biến môi trường** — Ưu tiên env var thay vì hardcode thông tin nhạy cảm
+- 📋 **Audit toàn diện** — Báo cáo Zero Trust tại [Docs/SECURITY-AUDIT.md](Docs/SECURITY-AUDIT.md)
+
+> ⚠️ Một số nội dung trong audit phản ánh trạng thái tại thời điểm viết. Nếu bạn thay đổi logic seed admin/lockout, hãy rà soát lại để đồng bộ tài liệu.
+
+---
+
+<div align="center">
+
+  **🎾 DemoPick** — *Quản lý sân Pickleball chưa bao giờ dễ dàng đến thế*
+
+  <br>
+
+  Made with ❤️ by [ManhTienBonedry](https://github.com/ManhTienBonedry)
+
+</div>
