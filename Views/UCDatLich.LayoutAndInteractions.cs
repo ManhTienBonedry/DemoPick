@@ -357,23 +357,6 @@ namespace DemoPick
         {
             if (court == null) return;
 
-            bool secondClick = _armedCourtId == court.CourtID && (DateTime.UtcNow - _armedCourtClickUtc).TotalSeconds <= 8;
-            _armedCourtId = court.CourtID;
-            _armedCourtClickUtc = DateTime.UtcNow;
-
-            if (!secondClick)
-            {
-                string courtName = string.IsNullOrWhiteSpace(court.Name) ? "(không tên)" : court.Name;
-                MessageBox.Show(
-                    $"Bạn muốn chọn sân số {courtName}.\nBấm lại 1 lần để mở form Đặt Sân Chơi.",
-                    "Chọn sân",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
-                return;
-            }
-
-            _armedCourtId = -1;
-
             DateTime now = DateTime.Now;
             DateTime suggestedStart = _currentDate.Date.Add(now.TimeOfDay);
 
