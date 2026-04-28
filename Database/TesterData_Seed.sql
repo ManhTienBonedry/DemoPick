@@ -1,11 +1,11 @@
 /*
 TesterData_Seed.sql
-Mục tiêu: Bơm dữ liệu (Mock Data) chuẩn xác vào CSDL PicklePro phục vụ mục đích Testing (Sản phẩm, Hội viên, Lịch đặt sân, Giao dịch).
+Mục tiêu: Bơm dữ liệu (Mock Data) chuẩn xác vào CSDL PickleBall phục vụ mục đích Testing (Sản phẩm, Hội viên, Lịch đặt sân, Giao dịch).
 Yêu cầu: Dữ liệu này tuân thủ cấu trúc của phiên bản mới nhất, đặc biệt là bảng Members dùng "IsFixed" và "TotalHoursPurchased" thay vì Tier cũ.
-Hướng dẫn chạy: Tester mở tab query trong SSMS và chạy file này vào DB "PickleProDB", hoặc chạy bằng sqlcmd.
+Hướng dẫn chạy: Tester mở tab query trong SSMS và chạy file này vào DB "PickleBallDB", hoặc chạy bằng sqlcmd.
 */
 
-USE [PickleProDB];
+USE [PickleBallDB];
 GO
 
 SET NOCOUNT ON;

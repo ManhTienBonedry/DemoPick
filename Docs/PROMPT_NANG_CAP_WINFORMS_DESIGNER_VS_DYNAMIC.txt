@@ -1,0 +1,189 @@
+MUC TIEU
+- Nang cap du an WinForms .NET Framework 4.8 theo yeu cau mon hoc:
+  1) Chay muot, giam giat/lag
+  2) Chuyen dong dep, hien dai nhung khong ton tai nguyen
+  3) Tach ro trang nao uu tien Designer (keo-tha), trang nao uu tien code dong
+  4) Van de an toan: khong pha vo luong nghiep vu hien tai
+
+PHAM VI DU AN
+- Du an hien co: DemoPick (WinForms + SQL Server)
+- Kien truc hien co da co nhieu module: Tong quan, Dat lich, Ban hang, Khach hang, Kho, Bao cao, Thanh toan.
+- Uu tien giu nguyen nghiep vu dang chay on dinh; chi toi uu theo tung lop.
+
+QUY TAC CHON DESIGNER VS DYNAMIC
+- NEN DE DESIGNER (keo-tha) khi:
+  - Cac thanh phan khung tinh: Form chinh, Sidebar, Header, Footer
+  - Cac layout panel co cau truc co dinh: GroupBox, SplitContainer, ToolStrip, StatusStrip
+  - Cac dialog CRUD don gian (Form them/sua co truong co dinh)
+
+- NEN CODE DYNAMIC khi:
+  - Danh sach lap lai theo du lieu: card san pham, booking block, timeline, list item tuy bien
+  - UI phu thuoc vai tro/trang thai: an-hien nut, doi mau theo status, badge canh bao
+  - Animation/chuyen trang/chuyen trang thai
+  - Cac widget can cap nhat realtime (so lieu KPI, countdown, activity feed)
+
+- NEN HYBRID (khuyen nghi manh):
+  - Designer tao khung + placeholder panel
+  - Code dong sinh control vao placeholder panel
+  - Chuan hoa bang helper/component tai su dung
+
+GOI Y PHAN LOAI CHO DU AN HIEN TAI
+- Designer uu tien:
+  - FrmChinh (khung tong)
+  - FrmAuthHost / FrmDoiMatKhau / FrmDoiCaBooking / FrmThemSP (dialog truong co dinh)
+
+- Dynamic uu tien:
+  - UCDatLich (timeline ve booking, zoom, status color, note)
+  - UCBanHang (catalog card, cart line, tang/gi am so luong, filter)
+  - UCThanhToan (tong tien theo payment state, canh bao thao tac)
+  - UCTongQuan (feed hoat dong, KPI cap nhat)
+
+- Hybrid:
+  - UCKhachHang, UCKhoHang, UCBaoCao (khung Designer + luoi/list render dong)
+
+MUC TIEU HIEU NANG DE CAM NHAN MUOT
+- FPS cam nhan: 55-60 cho animation ngan
+- Phan hoi thao tac chinh: < 100ms
+- Chuyen module: < 300ms voi du lieu cache
+- Truy van nang/bao cao: async + loading skeleton, khong khoa UI thread
+
+CHECKLIST TOI UU MUOT (BAT BUOC)
+[x] 1) UI Thread Safety
+- Moi truy van DB/chuyen doi du lieu nang chay background (Task.Run/async), chi Invoke ve UI khi can.
+- Cam long-running query tren event Click/Paint.
+
+[x] 2) Giam flicker
+- Bat DoubleBuffered cho panel/list custom draw.
+- Dung buffered drawing voi timeline/list ve tay.
+- Tranh Invalidate toan bo form khi chi doi 1 khu vuc nho.
+
+[x] 3) Giam tao moi object khi render
+- Cache Font/Brush/Pen tai cap control, dispose dung luc.
+- Han che string format lap lai trong vong lap lon.
+
+[x] 4) Debounce/Throttle su kien
+- Debounce tim kiem, loc, reload cung module.
+- Throttle repaint khi zoom/scroll de tranh redraw qua muc.
+
+[x] 5) Du lieu
+- Them cache ngan han cho dashboard/tong hop.
+- Tien xu ly du lieu roi moi bind UI.
+- Tranh N+1 query.
+
+CHUYEN DONG XIN NHUNG NHE
+- Su dung 3 nhom animation ngan (120-240ms):
+  [ ] 1) Fade in khi mo module
+  [ ] 2) Slide nhe cho panel noi dung
+  [x] 3) Hover micro-interaction cho button/card
+
+- Quy tac animation
+  - Easing: EaseOutCubic
+  - Khong animation cho thao tac can toc do cao lien tuc (nhap lieu nhanh, cuon luoi du lieu lon)
+  - Co co che tat animation khi may yeu (feature flag)
+
+DE XUAT KIEN TRUC NHO DE BAO TRI
+[x] - Tao lop UiMotionService:
+  - AnimateOpacity(control, from, to, duration)
+  - AnimateX(control, from, to, duration)
+  - Pulse(control, scale/time ngan)
+
+[x] - Tao UiRenderPolicy:
+  - Co hieu luc theo module: timeline, cart, dashboard
+  - Cho phep bat/tat hieu ung + muc do chat luong
+
+[x] - Tao ModuleLoadPipeline:
+  - BeforeLoad: show skeleton
+  - LoadDataAsync: background
+  - BindView: UI thread
+  - AfterLoad: play animation nhe
+
+SUA MOT SO CHUC NANG
+[x] 1) Can loai bo button dat lich co dinh va dat lich nhanh, thay vao do thiet ke gop ca hai from lai thanh 1 mang ten "Dat San Choi"
+    co the tham khao from "dat san co dinh" co hai nut "khach thue" va "bao tri", neu bam vao nut "san co dinh" thi hien thi du, con neu bam vao
+    "san nhanh" thi dong nhung phan khong can thiet.THAM KHAO FEM_DAT_SAN_CO_DINH.
+    Giải pháp Hybrid: Bạn nên dùng một Panel chính làm vùng chứa (Container). Khi nhấn nút "Sân nhanh", bạn dùng code để ẩn các GroupBox/Control liên quan đến "Hợp đồng dài hạn" hoặc "Khách thuê cố định".
+    Khi đã loại bỏ các button trên đi, thay vào đó hãy làm sao để khi click vào phần from sân ở giữa màn hình, bạn bấm vào sân số bao nhiêu thì hãy hiển thị "bạn muốn chọn sân số ...".
+    Sau đó click vô sẽ hiển thị from "Dat San Choi" như trên.
+    Lưu ý: Vẫn cần có xóa thân nhé. bấm hai lần sẽ xóa sân, bấm 1 lần sẽ hiển thị như trên "bạn muốn chọn sân số ...".
+
+[x] 1.1) Vì form lịch sân to có kèm time bạn hãy code UI sao cho khi click - + sẽ hiển thị đủ time từ "0,1,2,3,4..", vì nếu khách đặt những giờ như 2:13 thì sao, vậy nên điểm này cần bổ sung
+    Phần đặt sân cũng nên có thêm giờ khách bắt đầu chơi, lấy thời gian thực. Phần số giờ chơi thì vẫn vậy "60 phút, 90 phút, ..." .
+    -) Logic nghiệp vụ "Đặt sân Choi"
+Khi click vào một sân trống trên sơ đồ:
+Form sẽ mặc định lấy giờ hiện tại (ví dụ 19:21) làm Giờ bắt đầu.
+Cho phép người dùng chỉnh tay nếu muốn đặt trước (ví dụ 02:13 sáng hôm sau).
+Kiểm tra trùng lịch (Conflict Check): Nếu giờ bắt đầu nằm trong khoảng thời gian của một Booking đã tồn tại trên sân đó, phải hiển thị cảnh báo đỏ ngay lập tức.
+    -) Tối ưu hiệu năng & Thẩm mỹ
+DoubleBuffered: Phải được bật cho Form để khi đồng hồ nhảy giây không gây giật lag khi vẫn mở from "đặt sân chơi".
+Các Button hover phải có hiệu ứng đổi màu nhẹ (Transition).
+Trạng thái sân: Khi một sân đang ở trạng thái "Chờ" (Sắp đến giờ), hãy cho icon hoặc viền sân nháy nhẹ (Blinking animation).
+
+[x] 2) KHONG CAN THIET XOA HAN CAC FILE ,NEU KHONG DUNG DEN HAY DE NO VAO 1 FOLDER RIENG, chi can xoa duong dan den no thoi.
+    Lưu ý Folder: Tạo một folder đặt tên là _Legacy hoặc _Deprecated để cất các file cũ. Trong WinForms, khi di chuyển file, hãy cẩn thận với namespace để tránh lỗi build.
+
+[x] 3) Sap xep cac file cua du an sao cho chuan mo hinh nghiep vu.
+
+[x] 4) Su dung cac bo skill de ho tro du an.
+
+[x] 5) Chinh sua navbar and thanh healer có mau sac xanh la dam.
+
+[x] 6) Thiet ke them che do bat tat sang, toi.
+
+[x] 7) Thiet ke bieu do dong nho len, nho xuong, hien dai o cac trang co bieu do.
+
+GOI Y THEM CHUC NANG (DE DUOC DIEM MON HOC)
+[x] 1) Dat lich thong minh
+- Goi y khung gio trong theo lich su khach
+- Canh bao trung lich theo thoi gian thuc
+
+[x] 2) Check-in QR
+- Tao QR cho booking, quet check-in tai quay
+
+[x] 3) Cac goi membership
+- Goi Basic/Silver/Gold, uu dai theo hang
+
+[x] 4) Dynamic pricing
+- Gia gio cao diem/thap diem, ngay le/cuoi tuan
+
+[x] 5) Auto nhac lich
+- Nhac truoc gio dat 30/60 phut (popup/noi bo)
+
+[x] 6) Kho thong minh
+- Canh bao sap het hang theo nguong
+- De xuat nhap hang theo toc do ban
+
+[x] 7) Dashboard nang cao
+- Top san theo khung gio
+- Heatmap gio dat san
+- Ty le huy/chuyen ca
+
+[x] 8) Thanh toan an toan
+- Lich su giao dich theo booking
+- Co che doi soat cuoi ca
+
+[x] 9) Nhat ky thao tac (Audit log)
+- Ai sua gi, luc nao, tren booking/hoa don/kho
+
+[ ] 10) Che do trinh chieu cho quan ly
+- Man hinh TV tong hop KPI realtime
+
+KE HOACH TRIEN KHAI DE KHONG VO DU AN
+[x] - Phase 1 (Da lam): Toi uu layout hybrid (DatSanChoi), Navbar xanh la, Dark/Light mode, hieu chinh bieu do
+[x] - Phase 2 (Da lam): Tao folder _Legacy de don dep file cu. Chuan hoa kien truc (UiMotionService, UiRenderPolicy) cho muot ma
+[x] - Phase 3 (Da lam): Them cac tinh nang diem cong (QR check-in, dynamic pricing, audit log)
+[ ] - Phase 4 (Ket thuc): Smoke test, doc code, bao cao + quay video
+
+DINH NGHIA HOAN THANH (DoD)
+[x] - Build Debug/Release pass (Da test pass o phase 1)
+[x] - Khong phat sinh regression nghiep vu cu (Da kiem tra)
+[ ] - Co video demo 3 phan: do muot, do dep, tinh nang moi
+[ ] - Co benchmark truoc/sau (thoi gian load, FPS cam nhan, do tre thao tac)
+
+PROMPT MAU CHO AI/TEAM THUC THI (COPY DUNG NGAY)
+"Ban dong vai tro Tech Lead WinForms .NET Framework 4.8. 
+Hay nang cap du an DemoPick theo huong hybrid Designer + Dynamic. 
+Giu nguyen nghiep vu hien tai, uu tien on dinh va hieu nang. 
+Thuc hien theo thu tu: (1) Danh gia module va phan loai Designer/Dynamic, (2) toi uu repaint + async data loading + debounce, (3) bo sung animation nhe va co feature flag bat/tat, (4) them 3 tinh nang moi: QR check-in, dynamic pricing, audit log.
+ Moi buoc phai co checklist test va rollback plan. Khong sua vo van cac file Designer cua form dang on dinh neu khong can thiet. 
+ Bao cao ket qua theo dang: thay doi -> ly do -> tac dong -> cach test. Lưu ý khi viết Code UI động, hãy sử dụng FlowLayoutPanel hoặc TableLayoutPanel 
+ để đảm bảo tính Responsive (co giãn màn hình) và luôn đặt code trong khối SuspendLayout() / ResumeLayout() để tránh hiện tượng control bị giật hình khi đang khởi tạo."

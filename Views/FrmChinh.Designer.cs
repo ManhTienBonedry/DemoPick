@@ -491,7 +491,6 @@ namespace DemoPick
             this.MinimumSize = new System.Drawing.Size(1280, 800);
             this.Name = "FrmChinh";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "CourtPro Management";
             this.pnlSidebar.ResumeLayout(false);
             this.pnlLogo.ResumeLayout(false);
             this.pnlLogo.PerformLayout();

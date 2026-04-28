@@ -4,6 +4,7 @@ using System.Text;
 using System.Windows.Forms;
 using DemoPick.Models;
 using DemoPick.Services;
+
 using Sunny.UI;
 
 namespace DemoPick
@@ -37,80 +38,34 @@ namespace DemoPick
             lstCart.Items.Clear();
             _cartTotal = 0;
 
-            decimal fixedDiscountAmtAmount = 0;
+            var result = _controller.CalculateBreakdown(
+                _selectedCourtName, 
+                _currentBooking, 
+                _selectedCourt, 
+                _isFixedCustomer, 
+                _currentDiscountPct
+            );
 
-            if (_currentBooking != null)
+            foreach (var line in result.DisplayLines)
             {
-                // Run PriceCalculator
-                var services = new System.Collections.Generic.List<DemoPick.Services.ServiceCharge>();
-                var pendingLines = PosService.GetPendingOrder(_selectedCourtName);
-
-                foreach (var pl in pendingLines)
+                var lvi = new ListViewItem(new[] { line.DisplayName, line.DisplayQuantity, line.DisplayTotal });
+                lvi.Tag = line.CartLine;
+                if (line.IsCourt)
                 {
-                    // By default: quantity-based services. Some add-ons are per-hour.
-                    string name = pl.ProductName ?? "";
-                    string unit = PriceCalculator.GuessServiceUnit(name);
-
-                    services.Add(new DemoPick.Services.ServiceCharge
-                    {
-                        ProductID = pl.ProductId,
-                        ServiceName = name,
-                        Quantity = pl.Quantity,
-                        UnitPrice = pl.UnitPrice,
-                        Unit = unit
-                    });
+                    lvi.ForeColor = Color.DarkBlue;
                 }
-
-                decimal courtMultiplier = PriceCalculator.GetCourtRateMultiplier(_selectedCourt?.CourtType, _selectedCourt?.Name);
-                decimal courtPayableRatio = GetCourtPayableRatio();
-
-                var breakdown = DemoPick.Services.PriceCalculator.CalculateTotal(_currentBooking.StartTime, _currentBooking.EndTime, _isFixedCustomer, services, courtMultiplier);
-
-                foreach (var ts in breakdown.TimeSlots)
-                {
-                    decimal payableSlotTotal = ts.Total * courtPayableRatio;
-                    var lviCourt = new ListViewItem(new[] { "Giờ sân " + ts.Description, $"{ts.Hours:0.##}h", payableSlotTotal.ToString("N0") + "đ" });
-                    lviCourt.Tag = new CartLine(-1, "Giờ sân " + ts.Description, 1, payableSlotTotal);
-                    lviCourt.ForeColor = Color.DarkBlue;
-                    lstCart.Items.Add(lviCourt);
-                }
-
-                foreach (var svc in breakdown.Services)
-                {
-                    var lvi = new ListViewItem(new[] { svc.ServiceName, svc.Quantity.ToString(), svc.Total.ToString("N0") + "đ" });
-                    lvi.Tag = new CartLine(svc.ProductID, svc.ServiceName, svc.Quantity, svc.UnitPrice);
-                    lstCart.Items.Add(lvi);
-                }
-
-                _cartTotal = (breakdown.SubtotalCourts * courtPayableRatio) + breakdown.SubtotalServices;
-                fixedDiscountAmtAmount = breakdown.DiscountAmount * courtPayableRatio;
-            }
-            else
-            {
-                var pendingLines = PosService.GetPendingOrder(_selectedCourtName);
-                foreach (var line in pendingLines)
-                {
-                    var lvi = new ListViewItem(new[] { line.ProductName, line.Quantity.ToString(), (line.UnitPrice * line.Quantity).ToString("N0") + "đ" });
-                    lvi.Tag = line;
-                    lstCart.Items.Add(lvi);
-                    _cartTotal += (line.UnitPrice * line.Quantity);
-                }
+                lstCart.Items.Add(lvi);
             }
 
-            lblSubTotalV.Text = _cartTotal.ToString("N0") + "đ";
+            _cartTotal = result.SubTotal;
+            lblSubTotalV.Text = result.SubTotal.ToString("N0") + "đ";
+            lblDiscountV.Text = "-" + result.DiscountAmount.ToString("N0") + "đ";
 
-            // Normal discount % + fixed amount discount
-            decimal discountAmt = (_cartTotal * _currentDiscountPct) + fixedDiscountAmtAmount;
-            lblDiscountV.Text = "-" + discountAmt.ToString("N0") + "đ";
+            _lastDiscountAmount = result.DiscountAmount;
+            _lastFinalTotal = result.FinalTotal;
 
-            decimal finalTotal = _cartTotal - discountAmt;
-            if (finalTotal < 0) finalTotal = 0;
-
-            _lastDiscountAmount = discountAmt;
-            _lastFinalTotal = finalTotal;
-
-            lblTotalV.Text = finalTotal.ToString("N0") + "đ";
-            UpdateMockInvoicePreview(_cartTotal, discountAmt, finalTotal);
+            lblTotalV.Text = result.FinalTotal.ToString("N0") + "đ";
+            UpdateMockInvoicePreview(result.SubTotal, result.DiscountAmount, result.FinalTotal);
         }
 
         private void UpdateMockInvoicePreview(decimal subtotal, decimal discountAmount, decimal finalTotal)
@@ -242,7 +197,7 @@ namespace DemoPick
             if (_currentBooking != null && DateTime.Now < _currentBooking.StartTime)
             {
                 MessageBox.Show(
-                    "Booking chưa tới giờ chơi. Hãy bấm 'Nhận sân' để check-in, rồi thanh toán khi ca đã bắt đầu.",
+                    "Booking chưa tới giờ chơi. Hãy bấm 'Nhận sân' trước, rồi thanh toán khi ca đã bắt đầu.",
                     "Chưa tới giờ thanh toán",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
@@ -268,36 +223,35 @@ namespace DemoPick
                     }
                 }
 
-                var pos = new PosService();
-                int? preferredBookingId = (_currentBooking != null && _currentBooking.BookingID > 0)
-                    ? (int?)_currentBooking.BookingID
-                    : null;
-
-                int invoiceId = pos.Checkout(
+                var result = _controller.PerformCheckout(
                     _currentCustomerId,
                     lines,
                     _cartTotal,
                     discountAmt,
                     finalTotal,
-                    "Cash",
                     _selectedCourtName,
-                    preferredBookingId
+                    _currentBooking
                 );
 
-                _lastCompletedInvoiceId = invoiceId;
-                _lastCompletedCourtName = _selectedCourtName ?? string.Empty;
-                if (ucInvoiceReprintPanel != null)
+                if (result.Success)
                 {
-                    ucInvoiceReprintPanel.InvoiceIdText = invoiceId.ToString();
+                    _lastCompletedInvoiceId = result.InvoiceId;
+                    _lastCompletedCourtName = _selectedCourtName ?? string.Empty;
+                    if (ucInvoiceReprintPanel != null)
+                    {
+                        ucInvoiceReprintPanel.InvoiceIdText = result.InvoiceId.ToString();
+                    }
+                    UpdateReprintButtonState();
+
+                    ShowInvoicePreview(result.InvoiceId, _lastCompletedCourtName);
+
+                    new UIPage().ShowSuccessTip($"Thanh toán hoàn tất! HĐ #{result.InvoiceId}");
+                    RefreshOnActivated();
                 }
-                UpdateReprintButtonState();
-
-                ShowInvoicePreview(invoiceId, _lastCompletedCourtName);
-
-                PosService.ClearPendingOrder(_selectedCourtName);
-                new UIPage().ShowSuccessTip($"Thanh toán hoàn tất! HĐ #{invoiceId}");
-                RefreshOnActivated();
-
+                else
+                {
+                    new UIPage().ShowErrorTip("Lỗi: " + result.ErrorMessage);
+                }
             }
             catch (Exception ex)
             {

@@ -195,6 +195,7 @@ namespace DemoPick
                     priceLbl.Enabled = false;
 
                     pnlProd.Controls.AddRange(new Control[] { pic, nameLbl, priceLbl });
+                    UiTheme.NormalizeTextBackgrounds(pnlProd);
                     pnlProd.Click += (s, e) => AddToCart(prodId, nameTxt, priceVal, catNorm);
 
                     flpProducts.Controls.Add(pnlProd);
@@ -204,6 +205,8 @@ namespace DemoPick
                 {
                     flpProducts.Controls.Add(new Label { Name = "lblEmptyProd", Text = "Toàn bộ Máy tính tiền đang trống vãn. Sếp nhập hàng vào Kho trước nhé!", Font = _posEmptyStateFont, AutoSize = true, Margin = new Padding(20), ForeColor = Color.Gray });
                 }
+
+                UiTheme.NormalizeTextBackgrounds(flpProducts);
             }
             catch (Exception ex)
             {
@@ -236,6 +239,7 @@ namespace DemoPick
                     flpProducts.Controls.Add(new Label { Name = "lblEmptyProd", Text = "Chưa có món hàng nào thuộc mục này.", Font = _posEmptyStateFont, AutoSize = true, Margin = new Padding(20), ForeColor = Color.Gray });
                 }
                 flpProducts.Controls["lblEmptyProd"].Visible = true;
+                UiTheme.NormalizeTextBackgrounds(flpProducts);
             }
             else
             {

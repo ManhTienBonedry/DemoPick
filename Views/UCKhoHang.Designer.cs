@@ -126,12 +126,13 @@ namespace DemoPick
             // 
             // lblC1Badge
             // 
-            this.lblC1Badge.AutoSize = true;
+            this.lblC1Badge.AutoSize = false;
+            this.lblC1Badge.TextAlign = System.Drawing.ContentAlignment.TopRight;
             this.lblC1Badge.Font = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Bold);
             this.lblC1Badge.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(76)))), ((int)(((byte)(175)))), ((int)(((byte)(80)))));
-            this.lblC1Badge.Location = new System.Drawing.Point(210, 20);
+            this.lblC1Badge.Location = new System.Drawing.Point(115, 20);
             this.lblC1Badge.Name = "lblC1Badge";
-            this.lblC1Badge.Size = new System.Drawing.Size(0, 20);
+            this.lblC1Badge.Size = new System.Drawing.Size(130, 20);
             this.lblC1Badge.TabIndex = 1;
             // 
             // lblC1Title
@@ -177,12 +178,13 @@ namespace DemoPick
             // 
             // lblC2Badge
             // 
-            this.lblC2Badge.AutoSize = true;
+            this.lblC2Badge.AutoSize = false;
+            this.lblC2Badge.TextAlign = System.Drawing.ContentAlignment.TopRight;
             this.lblC2Badge.Font = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Bold);
             this.lblC2Badge.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(108)))), ((int)(((byte)(108)))));
-            this.lblC2Badge.Location = new System.Drawing.Point(200, 20);
+            this.lblC2Badge.Location = new System.Drawing.Point(115, 20);
             this.lblC2Badge.Name = "lblC2Badge";
-            this.lblC2Badge.Size = new System.Drawing.Size(0, 20);
+            this.lblC2Badge.Size = new System.Drawing.Size(130, 20);
             this.lblC2Badge.TabIndex = 1;
             // 
             // lblC2Title
@@ -228,12 +230,13 @@ namespace DemoPick
             // 
             // lblC3Badge
             // 
-            this.lblC3Badge.AutoSize = true;
+            this.lblC3Badge.AutoSize = false;
+            this.lblC3Badge.TextAlign = System.Drawing.ContentAlignment.TopRight;
             this.lblC3Badge.Font = new System.Drawing.Font("Segoe UI", 8.5F);
             this.lblC3Badge.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(107)))), ((int)(((byte)(114)))), ((int)(((byte)(128)))));
-            this.lblC3Badge.Location = new System.Drawing.Point(210, 20);
+            this.lblC3Badge.Location = new System.Drawing.Point(115, 20);
             this.lblC3Badge.Name = "lblC3Badge";
-            this.lblC3Badge.Size = new System.Drawing.Size(0, 20);
+            this.lblC3Badge.Size = new System.Drawing.Size(130, 20);
             this.lblC3Badge.TabIndex = 1;
             // 
             // lblC3Title
@@ -279,12 +282,13 @@ namespace DemoPick
             // 
             // lblC4Badge
             // 
-            this.lblC4Badge.AutoSize = true;
+            this.lblC4Badge.AutoSize = false;
+            this.lblC4Badge.TextAlign = System.Drawing.ContentAlignment.TopRight;
             this.lblC4Badge.Font = new System.Drawing.Font("Segoe UI", 8.5F);
             this.lblC4Badge.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(107)))), ((int)(((byte)(114)))), ((int)(((byte)(128)))));
-            this.lblC4Badge.Location = new System.Drawing.Point(200, 20);
+            this.lblC4Badge.Location = new System.Drawing.Point(115, 20);
             this.lblC4Badge.Name = "lblC4Badge";
-            this.lblC4Badge.Size = new System.Drawing.Size(0, 20);
+            this.lblC4Badge.Size = new System.Drawing.Size(130, 20);
             this.lblC4Badge.TabIndex = 1;
             // 
             // lblC4Title

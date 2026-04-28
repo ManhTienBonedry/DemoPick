@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Threading.Tasks;
 using DemoPick.Models;
 
@@ -25,7 +26,7 @@ namespace DemoPick.Services
 
             sku = sku.Trim();
             name = name.Trim();
-            category = (category ?? "").Trim();
+            category = (category ?? string.Empty).Trim();
 
             await Task.Run(() =>
             {
@@ -42,7 +43,7 @@ namespace DemoPick.Services
                 DatabaseHelper.ExecuteNonQuery(
                     SqlQueries.Inventory.InsertSystemLog,
                     new SqlParameter("@EventDesc", "Nhập Kho Trực Tiếp"),
-                    new SqlParameter("@SubDesc", $"+{stockQuantity} {name}")
+                    new SqlParameter("@SubDesc", "+" + stockQuantity + " " + name)
                 );
             });
         }
@@ -52,14 +53,18 @@ namespace DemoPick.Services
             return await Task.Run(() =>
             {
                 var list = new List<string>();
-                var dt = DatabaseHelper.ExecuteQuery(
-                    SqlQueries.Inventory.ProductCategories);
+                var dt = DatabaseHelper.ExecuteQuery(SqlQueries.Inventory.ProductCategories);
                 foreach (DataRow row in dt.Rows)
                 {
                     string cat = row[0]?.ToString();
-                    if (string.IsNullOrWhiteSpace(cat)) continue;
+                    if (string.IsNullOrWhiteSpace(cat))
+                    {
+                        continue;
+                    }
+
                     list.Add(cat.Trim());
                 }
+
                 return list;
             });
         }
@@ -68,7 +73,7 @@ namespace DemoPick.Services
         {
             if (productId <= 0)
             {
-                return new ProductDeleteResult { Success = false, Message = "Mã sản phẩm không hợp lệ." };
+                return new ProductDeleteResult { Success = false, Message = "Ma san pham khong hop le." };
             }
 
             return await Task.Run(() =>
@@ -85,7 +90,7 @@ namespace DemoPick.Services
 
                     if (string.IsNullOrWhiteSpace(productName))
                     {
-                        return new ProductDeleteResult { Success = false, Message = "Không tìm thấy sản phẩm để xóa." };
+                        return new ProductDeleteResult { Success = false, Message = "Khong tim thay san pham de xoa." };
                     }
 
                     var usedObj = DatabaseHelper.ExecuteScalar(
@@ -98,7 +103,7 @@ namespace DemoPick.Services
                         return new ProductDeleteResult
                         {
                             Success = false,
-                            Message = "Sản phẩm đã có lịch sử bán hàng nên không thể xóa."
+                            Message = "San pham da co lich su ban hang nen khong the xoa."
                         };
                     }
 
@@ -108,19 +113,16 @@ namespace DemoPick.Services
 
                     if (rows <= 0)
                     {
-                        return new ProductDeleteResult { Success = false, Message = "Xóa sản phẩm thất bại." };
+                        return new ProductDeleteResult { Success = false, Message = "Xoa san pham that bai." };
                     }
 
-                    DatabaseHelper.TryLog(
-                        "Xóa Sản phẩm Kho",
-                        $"-{productName} (ID: {productId})");
-
-                    return new ProductDeleteResult { Success = true, Message = "Đã xóa sản phẩm thành công." };
+                    DatabaseHelper.TryLog("Xóa Sản phẩm Kho", "-" + productName + " (ID: " + productId + ")");
+                    return new ProductDeleteResult { Success = true, Message = "Da xoa san pham thanh cong." };
                 }
                 catch (Exception ex)
                 {
                     DatabaseHelper.TryLog("Delete Product Error", ex, "InventoryService.DeleteProductAsync");
-                    return new ProductDeleteResult { Success = false, Message = "Không thể xóa sản phẩm lúc này." };
+                    return new ProductDeleteResult { Success = false, Message = "Khong the xoa san pham luc nay." };
                 }
             });
         }
@@ -134,9 +136,9 @@ namespace DemoPick.Services
                 foreach (DataRow row in dt.Rows)
                 {
                     int productId = row["ProductID"] == DBNull.Value ? 0 : Convert.ToInt32(row["ProductID"]);
-                    string name = row["Name"]?.ToString() ?? "";
+                    string name = row["Name"]?.ToString() ?? string.Empty;
                     decimal price = row["Price"] == DBNull.Value ? 0m : Convert.ToDecimal(row["Price"]);
-                    string category = row["Category"]?.ToString() ?? "";
+                    string category = row["Category"]?.ToString() ?? string.Empty;
 
                     list.Add(new ProductCatalogItemModel
                     {
@@ -146,6 +148,7 @@ namespace DemoPick.Services
                         Category = category
                     });
                 }
+
                 return list;
             });
         }
@@ -179,9 +182,10 @@ namespace DemoPick.Services
             return await Task.Run(() =>
             {
                 var dt = DatabaseHelper.ExecuteQuery(SqlQueries.Inventory.InventoryKpis);
-
                 if (dt.Rows.Count <= 0)
+                {
                     return new InventoryKpiModel();
+                }
 
                 var row = dt.Rows[0];
                 return new InventoryKpiModel
@@ -197,54 +201,121 @@ namespace DemoPick.Services
         public async Task<List<InventoryItemModel>> GetInventoryItemsAsync()
         {
             var list = new List<InventoryItemModel>();
-            string query = SqlQueries.Inventory.InventoryItems;
 
-            await Task.Run(() => {
-                var dt = DatabaseHelper.ExecuteQuery(query);
+            await Task.Run(() =>
+            {
+                var dt = DatabaseHelper.ExecuteQuery(SqlQueries.Inventory.InventoryItems);
                 foreach (DataRow row in dt.Rows)
                 {
-                    int stock = Convert.ToInt32(row["StockQuantity"]);
-                    int min = Convert.ToInt32(row["MinThreshold"]);
-                    string status = "Healthy";
-                    if (stock <= 0) status = "Out of Stock";
-                    else if (stock <= min) status = "Critical Low";
-                    else if (stock <= min * 2) status = "Warning";
+                    int stock = row["StockQuantity"] == DBNull.Value ? 0 : Convert.ToInt32(row["StockQuantity"]);
+                    int min = row["MinThreshold"] == DBNull.Value ? 0 : Convert.ToInt32(row["MinThreshold"]);
+                    int soldLast14Days = row.Table.Columns.Contains("SoldLast14Days") && row["SoldLast14Days"] != DBNull.Value
+                        ? Convert.ToInt32(row["SoldLast14Days"])
+                        : 0;
+                    decimal avgDailySales = Math.Round(soldLast14Days / 14m, 2);
+                    int targetStock = BuildTargetStock(min, avgDailySales);
+                    int? daysRemaining = avgDailySales > 0m
+                        ? Math.Max(0, (int)Math.Floor(stock / avgDailySales))
+                        : (int?)null;
+                    string status = GetInventoryStatus(stock, min, daysRemaining);
+                    int suggestedReorder = Math.Max(0, targetStock - stock);
 
                     list.Add(new InventoryItemModel
                     {
                         ProductId = row["ProductID"] == DBNull.Value ? 0 : Convert.ToInt32(row["ProductID"]),
-                        Sku = row["SKU"].ToString(),
-                        Name = row["Name"].ToString(),
-                        Category = row["Category"].ToString(),
-                        Stock = $"{stock} / {min * 10}", // Giổ hàng max giả định
+                        Sku = row["SKU"]?.ToString() ?? string.Empty,
+                        Name = row["Name"]?.ToString() ?? string.Empty,
+                        Category = row["Category"]?.ToString() ?? string.Empty,
+                        Stock = stock.ToString("N0"),
                         Status = status,
-                        Price = Convert.ToDecimal(row["Price"]).ToString("N0") + "đ"
+                        Price = (row["Price"] == DBNull.Value ? 0m : Convert.ToDecimal(row["Price"])).ToString("N0") + "d",
+                        CurrentStock = stock,
+                        MinThreshold = min,
+                        SoldLast14Days = soldLast14Days,
+                        AvgDailySales = avgDailySales,
+                        SuggestedReorderQuantity = suggestedReorder,
+                        TargetStockQuantity = targetStock,
+                        DaysRemaining = daysRemaining,
+                        Recommendation = BuildRecommendation(stock, min, avgDailySales, daysRemaining, suggestedReorder)
                     });
                 }
             });
+
             return list;
+        }
+
+        public InventorySmartInsightsModel BuildSmartInsights(IReadOnlyCollection<InventoryItemModel> items)
+        {
+            var safeItems = items ?? Array.Empty<InventoryItemModel>();
+            var insight = new InventorySmartInsightsModel
+            {
+                OutOfStockCount = safeItems.Count(x => x.CurrentStock <= 0),
+                WarningItemsCount = safeItems.Count(x => !string.Equals(x.Status, "Healthy", StringComparison.OrdinalIgnoreCase)),
+                SuggestedReorderProductCount = safeItems.Count(x => x.SuggestedReorderQuantity > 0),
+                SuggestedReorderUnits = safeItems.Sum(x => x.SuggestedReorderQuantity),
+                SoldLast14Days = safeItems.Sum(x => x.SoldLast14Days),
+                AvgDailySales = Math.Round(safeItems.Sum(x => x.AvgDailySales), 1)
+            };
+
+            for (int day = 1; day <= 7; day++)
+            {
+                int riskItems = 0;
+                foreach (var item in safeItems)
+                {
+                    if (item.AvgDailySales <= 0m)
+                    {
+                        if (item.CurrentStock <= item.MinThreshold)
+                        {
+                            riskItems++;
+                        }
+
+                        continue;
+                    }
+
+                    decimal projectedStock = item.CurrentStock - (item.AvgDailySales * day);
+                    if (projectedStock <= item.MinThreshold)
+                    {
+                        riskItems++;
+                    }
+                }
+
+                insight.ForecastPoints.Add(new InventoryForecastPointModel
+                {
+                    Label = "Ngay " + day,
+                    RiskItems = riskItems
+                });
+            }
+
+            return insight;
         }
 
         public async Task<List<TransactionModel>> GetRecentTransactionsAsync()
         {
             var list = new List<TransactionModel>();
-            // Inventory screen should show actual inventory/sales transactions,
-            // not generic system error logs from other modules.
-            string query = SqlQueries.Inventory.RecentTransactions;
 
-            await Task.Run(() => {
-                var dt = DatabaseHelper.ExecuteQuery(query);
+            await Task.Run(() =>
+            {
+                var dt = DatabaseHelper.ExecuteQuery(SqlQueries.Inventory.RecentTransactions);
                 foreach (DataRow row in dt.Rows)
                 {
                     DateTime time = Convert.ToDateTime(row["CreatedAt"]);
                     string timeStr;
                     var span = DateTime.Now - time;
-                    if (span.TotalMinutes < 60) timeStr = $"{(int)span.TotalMinutes} phút trước";
-                    else if (span.TotalHours < 24) timeStr = $"{(int)span.TotalHours} giờ trước";
-                    else timeStr = "Hôm qua";
+                    if (span.TotalMinutes < 60)
+                    {
+                        timeStr = ((int)span.TotalMinutes) + " phut truoc";
+                    }
+                    else if (span.TotalHours < 24)
+                    {
+                        timeStr = ((int)span.TotalHours) + " gio truoc";
+                    }
+                    else
+                    {
+                        timeStr = "Hom qua";
+                    }
 
-                    string eventRaw = row["EventDesc"]?.ToString() ?? "";
-                    string subRaw = row["SubDesc"] != DBNull.Value ? (row["SubDesc"]?.ToString() ?? "") : "";
+                    string eventRaw = row["EventDesc"]?.ToString() ?? string.Empty;
+                    string subRaw = row["SubDesc"] != DBNull.Value ? (row["SubDesc"]?.ToString() ?? string.Empty) : string.Empty;
 
                     string eventUi = InventoryTransactionFormatter.MapEventForUi(eventRaw);
                     string subUi = InventoryTransactionFormatter.FormatSubDescForUi(eventRaw, subRaw);
@@ -257,7 +328,67 @@ namespace DemoPick.Services
                     });
                 }
             });
+
             return list;
+        }
+
+        private static int BuildTargetStock(int minThreshold, decimal avgDailySales)
+        {
+            int forecastDemand = avgDailySales <= 0m ? 0 : (int)Math.Ceiling(avgDailySales * 14m);
+            return Math.Max(minThreshold * 2, forecastDemand + minThreshold);
+        }
+
+        private static string GetInventoryStatus(int stock, int minThreshold, int? daysRemaining)
+        {
+            if (stock <= 0)
+            {
+                return "Out of Stock";
+            }
+
+            if (stock <= minThreshold)
+            {
+                return "Critical Low";
+            }
+
+            if (daysRemaining.HasValue && daysRemaining.Value <= 3)
+            {
+                return "Critical Low";
+            }
+
+            if (stock <= minThreshold * 2)
+            {
+                return "Warning";
+            }
+
+            if (daysRemaining.HasValue && daysRemaining.Value <= 7)
+            {
+                return "Warning";
+            }
+
+            return "Healthy";
+        }
+
+        private static string BuildRecommendation(int stock, int minThreshold, decimal avgDailySales, int? daysRemaining, int suggestedReorder)
+        {
+            if (stock <= 0)
+            {
+                return suggestedReorder > 0 ? "Nhap gap +" + suggestedReorder.ToString("N0") : "Nhap gap";
+            }
+
+            bool lowByThreshold = stock <= minThreshold;
+            bool lowByVelocity = avgDailySales > 0m && daysRemaining.HasValue && daysRemaining.Value <= 7;
+            if (lowByThreshold || lowByVelocity)
+            {
+                string coverage = daysRemaining.HasValue ? daysRemaining.Value + " ngay" : "ban cham";
+                return "Nhap +" + suggestedReorder.ToString("N0") + " / " + coverage;
+            }
+
+            if (avgDailySales <= 0m)
+            {
+                return "Ban cham";
+            }
+
+            return "On dinh ~" + Math.Max(1, daysRemaining ?? 0) + " ngay";
         }
     }
 }

@@ -180,6 +180,12 @@ namespace DemoPick.Services
                     if (!string.IsNullOrWhiteSpace(note))
                         throw new InvalidOperationException("CSDL chưa được cập nhật để lưu ghi chú (thiếu cột Bookings.Note). Vui lòng khởi động lại app để chạy migration hoặc rebuild CSDL.");
                 }
+                if (timeChanged)
+                {
+                    DatabaseHelper.TryLog(
+                        "Doi Ca Booking",
+                        $"BookingID={bookingId}; {currentStart:dd/MM HH:mm}-{currentEnd:HH:mm} -> {newStartTime:dd/MM HH:mm}-{newEndTime:HH:mm}");
+                }
             }
         }
 

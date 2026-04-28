@@ -13,6 +13,7 @@
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
     <TargetFrameworkProfile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
@@ -129,12 +130,6 @@
     <Compile Include="Views\FrmChinh.Designer.cs">
       <DependentUpon>FrmChinh.cs</DependentUpon>
     </Compile>
-    <Compile Include="Views\FrmDatSan.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Views\FrmDatSan.Designer.cs">
-      <DependentUpon>FrmDatSan.cs</DependentUpon>
-    </Compile>
     <Compile Include="Views\FrmDatSanCoDinh.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -143,6 +138,10 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Views\FrmDatSanCoDinh.Booking.cs">
+      <DependentUpon>FrmDatSanCoDinh.cs</DependentUpon>
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\FrmDatSanCoDinh.Suggestions.cs">
       <DependentUpon>FrmDatSanCoDinh.cs</DependentUpon>
       <SubType>Form</SubType>
     </Compile>
@@ -217,6 +216,7 @@
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Services\PriceCalculator.cs" />
+    <Compile Include="Services\NativeMethods.cs" />
     <Compile Include="Views\UCBanHang.Designer.cs">
       <DependentUpon>UCBanHang.cs</DependentUpon>
     </Compile>
@@ -269,6 +269,12 @@
     </Compile>
     <Compile Include="Views\UCBaoCao.Designer.cs">
       <DependentUpon>UCBaoCao.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UCAuditLog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\UCAuditLog.Designer.cs">
+      <DependentUpon>UCAuditLog.cs</DependentUpon>
     </Compile>
     <Compile Include="Views\Controls\UCDateRangeFilter.cs">
       <SubType>UserControl</SubType>
@@ -327,13 +333,7 @@
     <Compile Include="Services\AuthLoginAttemptTracker.cs" />
     <Compile Include="Services\AuthFeatures.cs" />
     <Compile Include="Services\AppSession.cs" />
-    <Compile Include="Services\SmokeTestRunner.cs" />
-    <Compile Include="Services\SmokeTestContracts.cs" />
-    <Compile Include="Services\SmokeStepRunner.cs" />
-    <Compile Include="Services\SmokeUiReflectionHelper.cs" />
-    <Compile Include="Services\SmokeReportWriter.cs" />
-    <Compile Include="Services\SmokeMaintenanceHelper.cs" />
-    <Compile Include="Services\SmokePerformancePersistence.cs" />
+    <Compile Include="Services\MembershipTierHelper.cs" />
     <Compile Include="Services\SchemaInstaller.cs" />
     <Compile Include="Services\SqlScriptRunner.cs" />
     <Compile Include="Services\MigrationsRunner.cs" />
@@ -359,6 +359,7 @@
     <Compile Include="Services\ReportService.cs" />
     <Compile Include="Services\DashboardService.cs" />
     <Compile Include="Controllers\BookingController.cs" />
+    <Compile Include="Controllers\ThanhToanController.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Views\FrmInvoicePreview.cs">
@@ -379,9 +380,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Views\FrmChinh.resx">
       <DependentUpon>FrmChinh.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Views\FrmDatSan.resx">
-      <DependentUpon>FrmDatSan.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\FrmDoiCaBooking.resx">
       <DependentUpon>FrmDoiCaBooking.cs</DependentUpon>
@@ -426,6 +424,9 @@
     <EmbeddedResource Include="Views\UCKhoHang.resx">
       <DependentUpon>UCKhoHang.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\UCThanhToan.resx">
+      <DependentUpon>UCThanhToan.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Views\UCTongQuan.resx">
       <DependentUpon>UCTongQuan.cs</DependentUpon>
     </EmbeddedResource>
@@ -435,14 +436,12 @@
     <None Include="Docs\CLICK-WIRING-CHECKLIST.md" />
     <None Include="Docs\DB-WORKFLOW.md" />
     <None Include="Docs\SECURITY-AUDIT.md" />
-    <None Include="Docs\SMOKE_TEST.md" />
     <None Include="Docs\TIMELINE-ZOOM.md" />
     <None Include="NuGet.Config" />
-    <EmbeddedResource Include="Database\PickleProDB_Complete.sql" />
+    <EmbeddedResource Include="Database\PickleBallDB_Complete.sql" />
     <EmbeddedResource Include="Database\Migrations\*.sql" />
     <None Include="Database\TesterData_Seed.sql" />
     <None Include="Database\Legacy\migration.sql" />
-    <None Include="Tools\TestPrice.cs" />
     <Content Include="Resources\PickleBall.jpg" />
     <None Include="Resources\PickleBall1.jpg" />
     <Content Include="Resources\qr.*">

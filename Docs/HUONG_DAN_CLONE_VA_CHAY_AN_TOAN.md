@@ -21,13 +21,13 @@ cd DemoPick
 Mac dinh du an dung connection string trong App.config:
 
 - Server: `\\.\\SQLEXPRESS`
-- Database: `PickleProDB`
+- Database: `PickleBallDB`
 - Integrated Security: `True`
 
 Co the override bang bien moi truong (khuyen nghi cho moi truong khac nhau):
 
 ```powershell
-setx DEMOPICK_CONNECTION_STRING "Server=.\\SQLEXPRESS;Database=PickleProDB;Integrated Security=True;Encrypt=True;TrustServerCertificate=True;"
+setx DEMOPICK_CONNECTION_STRING "Server=.\\SQLEXPRESS;Database=PickleBallDB;Integrated Security=True;Encrypt=True;TrustServerCertificate=True;"
 ```
 
 Sau khi set `setx`, dong mo lai terminal/VS de bien moi truong co hieu luc.

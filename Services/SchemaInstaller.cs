@@ -44,7 +44,7 @@ namespace DemoPick.Services
 
             // Run bootstrap SQL from embedded resources (avoid tampering with .sql files on disk).
             SqlScriptRunner.ExecuteEmbeddedResourceSuffix(
-                ".Database.PickleProDB_Complete.sql",
+                ".Database.PickleBallDB_Complete.sql",
                 targetDb.ConnectionString);
 
             // SECURITY: never seed a predictable admin in Release builds.

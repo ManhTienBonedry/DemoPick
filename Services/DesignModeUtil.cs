@@ -14,7 +14,9 @@ namespace DemoPick.Services
             try
             {
                 var processName = Process.GetCurrentProcess().ProcessName;
-                if (string.Equals(processName, "devenv", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(processName, "devenv", StringComparison.OrdinalIgnoreCase) ||
+                    processName.IndexOf("xdesproc", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    processName.IndexOf("designtoolsserver", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
                     return true;
                 }
@@ -34,6 +36,22 @@ namespace DemoPick.Services
             {
                 Assembly entry = Assembly.GetEntryAssembly();
                 if (entry == null)
+                {
+                    return true;
+                }
+            }
+            catch
+            {
+                // ignore
+            }
+
+            // Out-of-proc WinForms designer can have non-null entry assembly but still be in design-time host.
+            try
+            {
+                var domainName = AppDomain.CurrentDomain.FriendlyName;
+                if (!string.IsNullOrWhiteSpace(domainName) &&
+                    (domainName.IndexOf("designtools", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                     domainName.IndexOf("xdesproc", StringComparison.OrdinalIgnoreCase) >= 0))
                 {
                     return true;
                 }

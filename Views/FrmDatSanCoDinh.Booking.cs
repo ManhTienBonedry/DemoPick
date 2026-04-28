@@ -22,6 +22,86 @@ namespace DemoPick
                 return;
             }
 
+            if (CurrentMode == BookingMode.Quick)
+            {
+                SubmitQuickBooking(phoneDigits);
+                return;
+            }
+
+            SubmitRecurringBooking(phoneDigits);
+        }
+
+        private void SubmitQuickBooking(string phoneDigits)
+        {
+            int courtId = ResolveSelectedCourtId();
+            if (courtId <= 0)
+            {
+                MessageBox.Show("Không xác định được sân. Vui lòng thử lại.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            int durationMins = ParseDurationMinutesFromUi();
+            if (durationMins <= 0) durationMins = 90;
+
+            DateTime selectedDate = ResolveSelectedDate();
+            DateTime start = selectedDate.Date.Add(GetSelectedStartTimeOfDay());
+            DateTime end = start.AddMinutes(durationMins);
+
+            if (start.Date == DateTime.Today && start < DateTime.Now)
+            {
+                MessageBox.Show("Không thể đặt sân trong quá khứ. Vui lòng chọn giờ khác.", "Lỗi chọn giờ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (HasConflictAtStart(courtId, start, end))
+            {
+                MessageBox.Show("Khung giờ này đã có booking trên sân đã chọn.", "Trùng lịch", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            string status = rbBaoTri.Checked ? AppConstants.BookingStatus.Maintenance : AppConstants.BookingStatus.Confirmed;
+            string guestName = rbBaoTri.Checked ? (txtName.Text ?? "Ban Quản Lý (Bảo Trì)") : (txtName.Text.Trim() + " - " + phoneDigits);
+            string note = (txtNote.Text ?? "").Trim();
+
+            int? memberId = null;
+            if (!string.Equals(status, AppConstants.BookingStatus.Maintenance, StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    memberId = _controller.GetOrCreateMemberId(txtName.Text, phoneDigits);
+                }
+                catch (Exception ex)
+                {
+                    DatabaseHelper.TryLogThrottled(
+                        throttleKey: "FrmDatSanCoDinh.GetOrCreateMemberId.Quick",
+                        eventDesc: "Member Upsert Error",
+                        ex: ex,
+                        context: "FrmDatSanCoDinh.SubmitQuickBooking",
+                        minSeconds: 300);
+                }
+            }
+
+            try
+            {
+                _controller.SubmitBooking(courtId, memberId, guestName, note, start, end, status);
+
+                MessageBox.Show(
+                    $"Đặt sân thành công!\n- {start:dd/MM/yyyy HH:mm} đến {end:HH:mm}",
+                    "Thành công",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+
+                DialogResult = DialogResult.OK;
+                Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Không thể đặt sân: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void SubmitRecurringBooking(string phoneDigits)
+        {
             // Check if at least one day is checked
             if (!chkMon.Checked && !chkTue.Checked && !chkWed.Checked && !chkThu.Checked &&
                 !chkFri.Checked && !chkSat.Checked && !chkSun.Checked)
@@ -39,30 +119,15 @@ namespace DemoPick
                 return;
             }
 
-            int courtId = 0;
-            object selected = cbCourt?.SelectedValue;
-            if (selected is int id)
-            {
-                courtId = id;
-            }
-            else if (selected != null && int.TryParse(selected.ToString(), out int parsed))
-            {
-                courtId = parsed;
-            }
+            int courtId = ResolveSelectedCourtId();
             if (courtId <= 0)
             {
                 MessageBox.Show("Không xác định được sân. Vui lòng thử lại.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            string timeStr = cbTime.SelectedItem?.ToString() ?? "17:00";
-            if (!TryParseHourMinute(timeStr, out int hh, out int mm))
-            {
-                MessageBox.Show("Giờ bắt đầu không hợp lệ.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            int durationMins = ParseDurationMinutes(cbDuration.SelectedItem?.ToString());
+            TimeSpan startOfDay = GetSelectedStartTimeOfDay();
+            int durationMins = ParseDurationMinutesFromUi();
             if (durationMins <= 0) durationMins = 90;
 
             bool dMon = chkMon.Checked;
@@ -110,7 +175,7 @@ namespace DemoPick
                 if (!IsSelectedDay(d.DayOfWeek, dMon, dTue, dWed, dThu, dFri, dSat, dSun))
                     continue;
 
-                DateTime start = d.AddHours(hh).AddMinutes(mm);
+                DateTime start = d.Date.Add(startOfDay);
                 DateTime end = start.AddMinutes(durationMins);
                 if (end <= start) continue;
 
@@ -130,6 +195,12 @@ namespace DemoPick
 
                 try
                 {
+                    if (HasConflictAtStart(courtId, start, end))
+                    {
+                        conflicts++;
+                        continue;
+                    }
+
                     _controller.SubmitBooking(courtId, memberId, guestName, note, start, end, status);
                     created++;
                 }
@@ -182,12 +253,7 @@ namespace DemoPick
 
         private static int ParseDurationMinutes(string durationText)
         {
-            string t = durationText ?? "";
-            if (t.IndexOf("60", StringComparison.OrdinalIgnoreCase) >= 0) return 60;
-            if (t.IndexOf("90", StringComparison.OrdinalIgnoreCase) >= 0) return 90;
-            if (t.IndexOf("120", StringComparison.OrdinalIgnoreCase) >= 0) return 120;
-            if (t.IndexOf("180", StringComparison.OrdinalIgnoreCase) >= 0) return 180;
-            return 0;
+            return ParseDurationMinutesCore(durationText);
         }
 
         private static bool TryParseHourMinute(string timeText, out int hours, out int minutes)

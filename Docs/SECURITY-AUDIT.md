@@ -74,10 +74,11 @@ Choose one of these patterns (ordered by security):
 ### B3. P/Invoke (DllImport) usage in UI
 **Evidence**
 - `DllImport` usage (rounded corners / drag support):
-   - [Views/FrmLogin.cs](../Views/FrmLogin.cs#L32-L52)
-   - [Views/FrmRegister.cs](../Views/FrmRegister.cs#L38-L61)
+   - [Views/UCLogin.cs](../Views/UCLogin.cs)
+   - [Views/UCRegister.cs](../Views/UCRegister.cs)
    - [Views/FrmUserMenu.cs](../Views/FrmUserMenu.cs#L62-L63)
-   - [Views/FrmDatSan.cs](../Views/FrmDatSan.cs#L99-L123)
+   - [Views/FrmDatSanCoDinh.WindowChrome.cs](../Views/FrmDatSanCoDinh.WindowChrome.cs)
+   - [Services/NativeMethods.cs](../Services/NativeMethods.cs)
 
 **Impact**
 - P/Invoke increases the attack surface and makes static analysis harder; however the usage here appears limited to standard window-dragging and rounded corners.

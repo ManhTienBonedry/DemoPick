@@ -19,13 +19,17 @@ namespace DemoPick
 
             if (pnlMockInvoice != null)
             {
-                pnlMockInvoice.Size = new Size(280, 420);
+                pnlMockInvoice.Size = new Size(280, 410);
             }
 
             if (lblPreviewTotal != null)
             {
-                lblPreviewTotal.Location = new Point(15, 370);
+                lblPreviewTotal.Location = new Point(15, 360);
             }
+
+            ucPaymentHistoryPanel.Location = new Point(20, 480);
+            ucPaymentHistoryPanel.Size = new Size(280, 296);
+            pnlRight.AutoScrollMinSize = new Size(0, ucPaymentHistoryPanel.Bottom + 20);
 
             ucPaymentHistoryPanel.SearchRequested -= UcPaymentHistoryPanel_SearchRequested;
             ucPaymentHistoryPanel.OpenRequested -= UcPaymentHistoryPanel_OpenRequested;
@@ -55,16 +59,19 @@ namespace DemoPick
             try
             {
                 string keyword = ucPaymentHistoryPanel.SearchKeyword;
-                _historyItems = InvoiceService.GetInvoiceHistory(120, keyword) ?? new List<InvoiceService.InvoiceHistoryItem>();
+                int? filterMemberId = _currentCustomerId > 0 ? (int?)_currentCustomerId : null;
+                var history = _controller.GetPaymentHistory(120, keyword, filterMemberId);
+                _historyItems = history ?? new List<InvoiceService.InvoiceHistoryItem>();
+                var shift = _controller.GetShiftSummary();
 
                 var rows = new List<UCPaymentHistoryPanel.HistoryRow>(_historyItems.Count);
-
                 for (int i = 0; i < _historyItems.Count; i++)
                 {
                     var h = _historyItems[i];
 
                     string court = string.IsNullOrWhiteSpace(h.CourtName) ? "-" : h.CourtName;
                     string payment = string.IsNullOrWhiteSpace(h.PaymentMethod) ? "-" : h.PaymentMethod;
+                    string booking = h.BookingID > 0 ? "BK#" + h.BookingID : "POS";
 
                     rows.Add(new UCPaymentHistoryPanel.HistoryRow
                     {
@@ -72,18 +79,38 @@ namespace DemoPick
                         TimeText = h.CreatedAt.ToString("dd/MM HH:mm"),
                         CustomerText = string.IsNullOrWhiteSpace(h.CustomerName) ? "Khách lẻ" : h.CustomerName,
                         TotalText = (h.FinalAmount <= 0 ? 0m : h.FinalAmount).ToString("N0") + "đ",
-                        ToolTipText = $"Sân: {court} | PTTT: {payment}",
+                        ToolTipText = "Booking: " + booking + " | Sân: " + court + " | PTTT: " + payment,
                         IsHighlighted = h.InvoiceID == _lastCompletedInvoiceId,
                         Tag = h
                     });
                 }
 
                 ucPaymentHistoryPanel.BindRows(rows);
+                ucPaymentHistoryPanel.SetShiftSummary(BuildShiftSummaryText(shift));
             }
             catch (Exception ex)
             {
                 DatabaseHelper.TryLog("Load Payment History Error", ex, "UCThanhToan.ReloadPaymentHistory");
             }
+        }
+
+        private static string BuildShiftSummaryText(InvoiceService.ShiftReconciliationSummary shift)
+        {
+            if (shift == null)
+            {
+                return string.Empty;
+            }
+
+            return string.Format(
+                "Ca {0:HH:mm}-{1:HH:mm} | {2} HĐ | {3:N0}đ | TM {4:N0}đ | CK {5:N0}đ | Sân {6} | POS {7}",
+                shift.ShiftStart,
+                shift.ShiftEnd,
+                shift.InvoiceCount,
+                shift.TotalAmount,
+                shift.CashAmount,
+                shift.BankAmount,
+                shift.BookingLinkedInvoices,
+                shift.PosOnlyInvoices);
         }
 
         private bool TryGetSelectedHistoryItem(out InvoiceService.InvoiceHistoryItem selected)

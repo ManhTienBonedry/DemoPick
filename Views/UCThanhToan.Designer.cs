@@ -57,6 +57,7 @@ namespace DemoPick
             this.lblPaymentStateHint = new System.Windows.Forms.Label();
             this.lstCart = new System.Windows.Forms.ListView();
             this.pnlTotals = new System.Windows.Forms.Panel();
+            this.ucInvoiceReprintPanel = new DemoPick.UCInvoiceReprintPanel();
             this.lblSubTotalT = new System.Windows.Forms.Label();
             this.lblSubTotalV = new System.Windows.Forms.Label();
             this.lblDiscountT = new System.Windows.Forms.Label();
@@ -65,13 +66,12 @@ namespace DemoPick
             this.lblTotalV = new System.Windows.Forms.Label();
             this.btnCheckout = new Sunny.UI.UIButton();
             this.btnCancel = new Sunny.UI.UIButton();
-            this.ucInvoiceReprintPanel = new DemoPick.UCInvoiceReprintPanel();
             this.pnlRight = new System.Windows.Forms.Panel();
-            this.ucPaymentHistoryPanel = new DemoPick.UCPaymentHistoryPanel();
-            this.lblPreviewTitle = new System.Windows.Forms.Label();
             this.pnlMockInvoice = new System.Windows.Forms.Panel();
-            this.lblPreviewDesc = new System.Windows.Forms.Label();
             this.lblPreviewTotal = new System.Windows.Forms.Label();
+            this.lblPreviewDesc = new System.Windows.Forms.Label();
+            this.lblPreviewTitle = new System.Windows.Forms.Label();
+            this.ucPaymentHistoryPanel = new DemoPick.UCPaymentHistoryPanel();
             this.pnlLeft.SuspendLayout();
             this.pnlCenter.SuspendLayout();
             this.pnlTotals.SuspendLayout();
@@ -97,7 +97,7 @@ namespace DemoPick
             this.lblLeftTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(26)))), ((int)(((byte)(35)))), ((int)(((byte)(50)))));
             this.lblLeftTitle.Location = new System.Drawing.Point(20, 20);
             this.lblLeftTitle.Name = "lblLeftTitle";
-            this.lblLeftTitle.Size = new System.Drawing.Size(180, 32);
+            this.lblLeftTitle.Size = new System.Drawing.Size(222, 32);
             this.lblLeftTitle.TabIndex = 0;
             this.lblLeftTitle.Text = "Chọn sân tính tiền";
             // 
@@ -133,7 +133,7 @@ namespace DemoPick
             this.lblRightTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(26)))), ((int)(((byte)(35)))), ((int)(((byte)(50)))));
             this.lblRightTitle.Location = new System.Drawing.Point(20, 20);
             this.lblRightTitle.Name = "lblRightTitle";
-            this.lblRightTitle.Size = new System.Drawing.Size(236, 32);
+            this.lblRightTitle.Size = new System.Drawing.Size(243, 32);
             this.lblRightTitle.TabIndex = 0;
             this.lblRightTitle.Text = "Hóa đơn thanh toán";
             // 
@@ -174,7 +174,7 @@ namespace DemoPick
             this.lblCustomerInfo.ForeColor = System.Drawing.Color.Gray;
             this.lblCustomerInfo.Location = new System.Drawing.Point(20, 125);
             this.lblCustomerInfo.Name = "lblCustomerInfo";
-            this.lblCustomerInfo.Size = new System.Drawing.Size(236, 23);
+            this.lblCustomerInfo.Size = new System.Drawing.Size(226, 23);
             this.lblCustomerInfo.TabIndex = 3;
             this.lblCustomerInfo.Text = "Khách lẻ (Không áp dụng thẻ)";
             // 
@@ -185,7 +185,7 @@ namespace DemoPick
             this.lblPaymentStateHint.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(99)))), ((int)(((byte)(235)))));
             this.lblPaymentStateHint.Location = new System.Drawing.Point(20, 148);
             this.lblPaymentStateHint.Name = "lblPaymentStateHint";
-            this.lblPaymentStateHint.Size = new System.Drawing.Size(201, 21);
+            this.lblPaymentStateHint.Size = new System.Drawing.Size(216, 21);
             this.lblPaymentStateHint.TabIndex = 6;
             this.lblPaymentStateHint.Text = "Không có booking đến hạn";
             // 
@@ -197,7 +197,6 @@ namespace DemoPick
             this.lstCart.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.lstCart.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.lstCart.FullRowSelect = true;
-            this.lstCart.GridLines = false;
             this.lstCart.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.lstCart.HideSelection = false;
             this.lstCart.Location = new System.Drawing.Point(20, 180);
@@ -226,6 +225,15 @@ namespace DemoPick
             this.pnlTotals.Size = new System.Drawing.Size(520, 180);
             this.pnlTotals.TabIndex = 5;
             // 
+            // ucInvoiceReprintPanel
+            // 
+            this.ucInvoiceReprintPanel.BackColor = System.Drawing.Color.Transparent;
+            this.ucInvoiceReprintPanel.InvoiceIdText = "";
+            this.ucInvoiceReprintPanel.Location = new System.Drawing.Point(300, 15);
+            this.ucInvoiceReprintPanel.Name = "ucInvoiceReprintPanel";
+            this.ucInvoiceReprintPanel.Size = new System.Drawing.Size(205, 72);
+            this.ucInvoiceReprintPanel.TabIndex = 8;
+            // 
             // lblSubTotalT
             // 
             this.lblSubTotalT.AutoSize = true;
@@ -233,7 +241,7 @@ namespace DemoPick
             this.lblSubTotalT.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(107)))), ((int)(((byte)(114)))), ((int)(((byte)(128)))));
             this.lblSubTotalT.Location = new System.Drawing.Point(20, 15);
             this.lblSubTotalT.Name = "lblSubTotalT";
-            this.lblSubTotalT.Size = new System.Drawing.Size(126, 25);
+            this.lblSubTotalT.Size = new System.Drawing.Size(130, 25);
             this.lblSubTotalT.TabIndex = 0;
             this.lblSubTotalT.Text = "Tổng tạm tính";
             // 
@@ -255,7 +263,7 @@ namespace DemoPick
             this.lblDiscountT.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(107)))), ((int)(((byte)(114)))), ((int)(((byte)(128)))));
             this.lblDiscountT.Location = new System.Drawing.Point(20, 45);
             this.lblDiscountT.Name = "lblDiscountT";
-            this.lblDiscountT.Size = new System.Drawing.Size(117, 25);
+            this.lblDiscountT.Size = new System.Drawing.Size(119, 25);
             this.lblDiscountT.TabIndex = 2;
             this.lblDiscountT.Text = "Giảm giá thẻ";
             // 
@@ -288,7 +296,7 @@ namespace DemoPick
             this.lblTotalV.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(239)))), ((int)(((byte)(68)))), ((int)(((byte)(68)))));
             this.lblTotalV.Location = new System.Drawing.Point(180, 80);
             this.lblTotalV.Name = "lblTotalV";
-            this.lblTotalV.Size = new System.Drawing.Size(51, 37);
+            this.lblTotalV.Size = new System.Drawing.Size(50, 37);
             this.lblTotalV.TabIndex = 5;
             this.lblTotalV.Text = "0đ";
             // 
@@ -314,8 +322,8 @@ namespace DemoPick
             this.btnCancel.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnCancel.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(243)))), ((int)(((byte)(244)))), ((int)(((byte)(246)))));
             this.btnCancel.FillHoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(229)))), ((int)(((byte)(231)))), ((int)(((byte)(235)))));
-            this.btnCancel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(107)))), ((int)(((byte)(114)))), ((int)(((byte)(128)))));
             this.btnCancel.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
+            this.btnCancel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(107)))), ((int)(((byte)(114)))), ((int)(((byte)(128)))));
             this.btnCancel.Location = new System.Drawing.Point(20, 115);
             this.btnCancel.MinimumSize = new System.Drawing.Size(1, 1);
             this.btnCancel.Name = "btnCancel";
@@ -327,16 +335,9 @@ namespace DemoPick
             this.btnCancel.Text = "HỦY";
             this.btnCancel.TipsFont = new System.Drawing.Font("Segoe UI", 9F);
             // 
-            // ucInvoiceReprintPanel
-            // 
-            this.ucInvoiceReprintPanel.BackColor = System.Drawing.Color.Transparent;
-            this.ucInvoiceReprintPanel.Location = new System.Drawing.Point(300, 15);
-            this.ucInvoiceReprintPanel.Name = "ucInvoiceReprintPanel";
-            this.ucInvoiceReprintPanel.Size = new System.Drawing.Size(205, 72);
-            this.ucInvoiceReprintPanel.TabIndex = 8;
-            // 
             // pnlRight
             // 
+            this.pnlRight.AutoScroll = true;
             this.pnlRight.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(243)))), ((int)(((byte)(244)))), ((int)(((byte)(246)))));
             this.pnlRight.Controls.Add(this.pnlMockInvoice);
             this.pnlRight.Controls.Add(this.lblPreviewTitle);
@@ -347,25 +348,6 @@ namespace DemoPick
             this.pnlRight.Size = new System.Drawing.Size(320, 820);
             this.pnlRight.TabIndex = 2;
             // 
-            // ucPaymentHistoryPanel
-            // 
-            this.ucPaymentHistoryPanel.BackColor = System.Drawing.Color.Transparent;
-            this.ucPaymentHistoryPanel.Location = new System.Drawing.Point(20, 500);
-            this.ucPaymentHistoryPanel.Name = "ucPaymentHistoryPanel";
-            this.ucPaymentHistoryPanel.Size = new System.Drawing.Size(280, 300);
-            this.ucPaymentHistoryPanel.TabIndex = 2;
-            // 
-            // lblPreviewTitle
-            // 
-            this.lblPreviewTitle.AutoSize = true;
-            this.lblPreviewTitle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-            this.lblPreviewTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(107)))), ((int)(((byte)(114)))), ((int)(((byte)(128)))));
-            this.lblPreviewTitle.Location = new System.Drawing.Point(20, 20);
-            this.lblPreviewTitle.Name = "lblPreviewTitle";
-            this.lblPreviewTitle.Size = new System.Drawing.Size(175, 28);
-            this.lblPreviewTitle.TabIndex = 0;
-            this.lblPreviewTitle.Text = "Preview Hóa Đơn";
-            // 
             // pnlMockInvoice
             // 
             this.pnlMockInvoice.BackColor = System.Drawing.Color.White;
@@ -373,19 +355,8 @@ namespace DemoPick
             this.pnlMockInvoice.Controls.Add(this.lblPreviewDesc);
             this.pnlMockInvoice.Location = new System.Drawing.Point(20, 70);
             this.pnlMockInvoice.Name = "pnlMockInvoice";
-            this.pnlMockInvoice.Size = new System.Drawing.Size(280, 500);
+            this.pnlMockInvoice.Size = new System.Drawing.Size(280, 487);
             this.pnlMockInvoice.TabIndex = 1;
-            // 
-            // lblPreviewDesc
-            // 
-            this.lblPreviewDesc.AutoSize = true;
-            this.lblPreviewDesc.Font = new System.Drawing.Font("Courier New", 9F);
-            this.lblPreviewDesc.ForeColor = System.Drawing.Color.Gray;
-            this.lblPreviewDesc.Location = new System.Drawing.Point(15, 15);
-            this.lblPreviewDesc.Name = "lblPreviewDesc";
-            this.lblPreviewDesc.Size = new System.Drawing.Size(242, 68);
-            this.lblPreviewDesc.TabIndex = 0;
-            this.lblPreviewDesc.Text = "   GREEN COURT\n-----------------------\nHÓA ĐƠN THANH TOÁN SÂN\n...";
             // 
             // lblPreviewTotal
             // 
@@ -396,6 +367,38 @@ namespace DemoPick
             this.lblPreviewTotal.Size = new System.Drawing.Size(40, 27);
             this.lblPreviewTotal.TabIndex = 1;
             this.lblPreviewTotal.Text = "0đ";
+            // 
+            // lblPreviewDesc
+            // 
+            this.lblPreviewDesc.AutoSize = true;
+            this.lblPreviewDesc.Font = new System.Drawing.Font("Courier New", 9F);
+            this.lblPreviewDesc.ForeColor = System.Drawing.Color.Gray;
+            this.lblPreviewDesc.Location = new System.Drawing.Point(15, 15);
+            this.lblPreviewDesc.Name = "lblPreviewDesc";
+            this.lblPreviewDesc.Size = new System.Drawing.Size(215, 68);
+            this.lblPreviewDesc.TabIndex = 0;
+            this.lblPreviewDesc.Text = "   GREEN COURT\n-----------------------\nHÓA ĐƠN THANH TOÁN SÂN\n...";
+            // 
+            // lblPreviewTitle
+            // 
+            this.lblPreviewTitle.AutoSize = true;
+            this.lblPreviewTitle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
+            this.lblPreviewTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(107)))), ((int)(((byte)(114)))), ((int)(((byte)(128)))));
+            this.lblPreviewTitle.Location = new System.Drawing.Point(20, 20);
+            this.lblPreviewTitle.Name = "lblPreviewTitle";
+            this.lblPreviewTitle.Size = new System.Drawing.Size(177, 28);
+            this.lblPreviewTitle.TabIndex = 0;
+            this.lblPreviewTitle.Text = "Preview Hóa Đơn";
+            // 
+            // ucPaymentHistoryPanel
+            // 
+            this.ucPaymentHistoryPanel.BackColor = System.Drawing.Color.Transparent;
+            this.ucPaymentHistoryPanel.Location = new System.Drawing.Point(20, 576);
+            this.ucPaymentHistoryPanel.Name = "ucPaymentHistoryPanel";
+            this.ucPaymentHistoryPanel.SearchKeyword = "";
+            this.ucPaymentHistoryPanel.Size = new System.Drawing.Size(280, 224);
+            this.ucPaymentHistoryPanel.TabIndex = 2;
+            this.ucPaymentHistoryPanel.Load += new System.EventHandler(this.ucPaymentHistoryPanel_Load);
             // 
             // UCThanhToan
             // 
@@ -417,6 +420,7 @@ namespace DemoPick
             this.pnlMockInvoice.ResumeLayout(false);
             this.pnlMockInvoice.PerformLayout();
             this.ResumeLayout(false);
+
         }
     }
 }

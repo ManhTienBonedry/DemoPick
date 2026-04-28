@@ -30,9 +30,9 @@ Lưu ý riêng với menu trái `FrmChinh`: hàm `BindClick()` đã tự gán cl
 
 - App khởi động theo luồng:
   - `Program.cs` gọi `SchemaInstaller.EnsureDatabaseAndSchema()` để tự tạo DB/bảng nếu thiếu.
-  - Mở `FrmLogin`.
+  - Mở `FrmAuthHost`.
   - Login OK → mở `FrmChinh`.
-  - Logout → quay lại `FrmLogin`.
+  - Logout → quay lại `FrmAuthHost`.
 
 Xem code:
 - `../Program.cs`
@@ -74,8 +74,8 @@ Xem code:
 |---|---|---|---|---|
 | `UCDatLich` | `btnPrevDay` | `Click` | lambda | Lùi ngày |
 | `UCDatLich` | `btnNextDay` | `Click` | lambda | Tiến ngày |
-| `UCDatLich` | `btnDatNhanh` | `Click` | mở `FrmDatSan` | Đặt sân nhanh |
-| `UCDatLich` | `btnDatCoDinh` | `Click` | mở `FrmDatSanCoDinh` | Đặt cố định / bảo trì |
+| `UCDatLich` | `court row trên timeline` | `Click` | click 1 lần để arm, click lần 2 mở `FrmDatSanCoDinh(BookingMode.Quick)` | Đặt sân chơi |
+| `UCDatLich` | `btnDoiCa` | `Click` | `OpenRescheduleForSelected()` | Đổi ca booking đã chọn |
 
 ### 4) POS (Bán hàng)
 
@@ -103,13 +103,13 @@ Xem code:
 
 | Màn | Control | Event | Handler / Logic | Mục đích |
 |---|---|---|---|---|
-| `FrmLogin` | `btnLogin` | `Click` | `btnLogin_Click` | Đăng nhập (SQL) |
-| `FrmLogin` | `btnRegister` | `Click` | `btnRegister_Click` | Mở đăng ký |
-| `FrmLogin` | `lblRegisterNow` | `Click` | `lblRegisterNow_Click` | Mở đăng ký |
-| `FrmLogin` | `btnClose` (Label X) | `Click` | `btnClose_Click` | Thoát |
-| `FrmRegister` | `btnRegister` | `Click` | `btnRegister_Click` | Đăng ký (SQL) |
-| `FrmRegister` | `lblLoginNow` | `Click` | `lblLoginNow_Click` | Quay lại |
-| `FrmRegister` | `btnClose` (Label X) | `Click` | `btnClose_Click` | Thoát |
+| `UCLogin` | `btnLogin` | `Click` | `btnLogin_Click` | Đăng nhập (SQL) |
+| `UCLogin` | `btnRegister` | `Click` | `btnRegister_Click` | Mở đăng ký |
+| `UCLogin` | `lblRegisterNow` | `Click` | `lblRegisterNow_Click` | Mở đăng ký |
+| `UCLogin` | `btnClose` (Label X) | `Click` | `btnClose_Click` | Thoát / hủy |
+| `UCRegister` | `btnRegister` | `Click` | `btnRegister_Click` | Đăng ký (SQL) |
+| `UCRegister` | `lblLoginNow` | `Click` | `lblLoginNow_Click` | Quay lại |
+| `UCRegister` | `btnClose` (Label X) | `Click` | `btnClose_Click` | Quay lại đăng nhập |
 | `FrmUserMenu` | `btnDoiMatKhau` | `Click` | `btnDoiMatKhau_Click` | Đổi mật khẩu |
 | `FrmUserMenu` | `btnDangXuat` | `Click` | `btnDangXuat_Click` | Đăng xuất |
 | `FrmUserMenu` | `btnThoat` | `Click` | `btnThoat_Click` | Thoát app |

@@ -66,12 +66,12 @@
   <tr>
     <td>🔐 <b>Xác thực</b></td>
     <td>Đăng nhập · Đăng ký · Đổi mật khẩu · Auto-seed Admin (DEBUG)</td>
-    <td><code>FrmLogin</code> · <code>FrmRegister</code> · <code>AuthService</code></td>
+    <td><code>FrmAuthHost</code> · <code>UCLogin</code> · <code>UCRegister</code> · <code>AuthService</code></td>
   </tr>
   <tr>
     <td>📅 <b>Đặt lịch</b></td>
     <td>Booking theo sân/khung giờ · Hiển thị lịch trực quan · Chống trùng lịch</td>
-    <td><code>UCDatLich</code> · <code>FrmDatSan</code> · <code>BookingController</code></td>
+    <td><code>UCDatLich</code> · <code>FrmDatSanCoDinh</code> · <code>BookingController</code></td>
   </tr>
   <tr>
     <td>🛠️ <b>Cố định & Bảo trì</b></td>
@@ -103,7 +103,7 @@
 flowchart TD
   A[🚀 Program.cs] --> B[🗄️ SchemaInstaller.EnsureDatabaseAndSchema]
   B --> C[📦 MigrationsRunner.ApplyPendingMigrations]
-  C --> D[🔐 FrmLogin]
+  C --> D[🔐 FrmAuthHost]
   D -->|✅ Đăng nhập thành công| E[🏠 FrmChinh]
   D -->|❌ Hủy| Z[🚪 Exit]
 
@@ -145,7 +145,7 @@ Sửa connection string `DefaultConnection` trong [App.config](App.config):
 
 ```xml
 <add name="DefaultConnection"
-     connectionString="Server=.\SQLEXPRESS;Database=PickleProDB;Integrated Security=True;"
+     connectionString="Server=.\SQLEXPRESS;Database=PickleBallDB;Integrated Security=True;"
      providerName="System.Data.SqlClient" />
 ```
 
@@ -198,7 +198,7 @@ App sẽ tự động thực hiện pipeline khởi tạo:
 
 | Thành phần | Đường dẫn | Mô tả |
 |:---|:---|:---|
-| 📄 **Schema** | [Database/PickleProDB_Complete.sql](Database/PickleProDB_Complete.sql) | Schema chính, chạy từ embedded resources khi khởi động |
+| 📄 **Schema** | [Database/PickleBallDB_Complete.sql](Database/PickleBallDB_Complete.sql) | Schema chính, chạy từ embedded resources khi khởi động |
 | 📦 **Migrations** | [Database/Migrations/](Database/Migrations) | Quy ước `NNNN__Description.sql` · Có checksum chống drift |
 | 🧪 **Seed data** | [Database/TesterData_Seed.sql](Database/TesterData_Seed.sql) | Dữ liệu test cho môi trường dev (placeholder) |
 

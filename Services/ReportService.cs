@@ -11,55 +11,58 @@ namespace DemoPick.Services
     {
         public async Task<List<TopCourtModel>> GetTopCourtsAsync()
         {
-            // Backward-compatible: default to all time.
             return await GetTopCourtsAsync(null, null);
         }
 
         public async Task<List<TopCourtModel>> GetTopCourtsAsync(DateTime? fromDateInclusive, DateTime? toDateExclusive)
         {
             var list = new List<TopCourtModel>();
-            string query = SqlQueries.Report.TopCourts;
 
-            await Task.Run(() => {
+            await Task.Run(() =>
+            {
                 var dt = DatabaseHelper.ExecuteQuery(
-                    query,
-                    new System.Data.SqlClient.SqlParameter("@From", (object)fromDateInclusive ?? DBNull.Value),
-                    new System.Data.SqlClient.SqlParameter("@To", (object)toDateExclusive ?? DBNull.Value)
+                    SqlQueries.Report.TopCourts,
+                    new SqlParameter("@From", (object)fromDateInclusive ?? DBNull.Value),
+                    new SqlParameter("@To", (object)toDateExclusive ?? DBNull.Value)
                 );
-                
-                // Find max booked minutes for relative scaling up to 100%
-                decimal maxMins = 0;
+
+                decimal maxMins = 0m;
                 foreach (DataRow row in dt.Rows)
                 {
-                    decimal mins = Convert.ToDecimal(row["BookedMinutes"]);
-                    if (mins > maxMins) maxMins = mins;
+                    decimal mins = row["BookedMinutes"] == DBNull.Value ? 0m : Convert.ToDecimal(row["BookedMinutes"]);
+                    if (mins > maxMins)
+                    {
+                        maxMins = mins;
+                    }
                 }
 
                 int rank = 1;
                 foreach (DataRow row in dt.Rows)
                 {
-                    decimal rev = Convert.ToDecimal(row["Revenue"]);
-                    decimal mins = Convert.ToDecimal(row["BookedMinutes"]);
-                    string name = row["CourtName"].ToString();
-                    
-                    // Allow fallback to generic string if Type column isn't properly returned by some schemas
-                    string type = dt.Columns.Contains("CourtType") ? row["CourtType"].ToString() : "Sân Pickleball";
+                    decimal rev = row["Revenue"] == DBNull.Value ? 0m : Convert.ToDecimal(row["Revenue"]);
+                    decimal mins = row["BookedMinutes"] == DBNull.Value ? 0m : Convert.ToDecimal(row["BookedMinutes"]);
+                    string name = row["CourtName"]?.ToString() ?? string.Empty;
+                    string type = dt.Columns.Contains("CourtType") ? row["CourtType"]?.ToString() ?? "San Pickleball" : "San Pickleball";
+                    int peakHour = row["PeakHour"] == DBNull.Value ? -1 : Convert.ToInt32(row["PeakHour"]);
+                    decimal cancelRate = row["CancelRate"] == DBNull.Value ? 0m : Convert.ToDecimal(row["CancelRate"]);
 
-                    // Relative occupancy: 0 to 100% logic
-                    int occPct = maxMins > 0 ? (int)Math.Round((mins / maxMins) * 100) : 0;
-                    string visualBar = occPct + "%";
+                    int occPct = maxMins > 0 ? (int)Math.Round((mins / maxMins) * 100m) : 0;
 
                     list.Add(new TopCourtModel
                     {
                         CourtId = "T" + rank,
                         Name = name,
                         Type = type,
-                        Occupancy = visualBar,
-                        Revenue = rev == 0 ? "0đ" : rev.ToString("N0") + "đ"
+                        Occupancy = occPct + "%",
+                        Revenue = rev == 0m ? "0d" : rev.ToString("N0") + "d",
+                        PeakSlot = peakHour < 0 ? "-" : peakHour.ToString("00") + ":00",
+                        CancelRate = cancelRate.ToString("0.0") + "%"
                     });
+
                     rank++;
                 }
             });
+
             return list;
         }
 
@@ -74,7 +77,9 @@ namespace DemoPick.Services
                     new SqlParameter("@Days", days));
 
                 if (dt.Rows.Count <= 0)
+                {
                     return new ReportKpiModel();
+                }
 
                 var row = dt.Rows[0];
                 return new ReportKpiModel
@@ -101,12 +106,12 @@ namespace DemoPick.Services
                     new SqlParameter("@FromStart", fromStart),
                     new SqlParameter("@ToExclusive", toExclusive));
 
-                foreach (DataRow r in dtTrend.Rows)
+                foreach (DataRow row in dtTrend.Rows)
                 {
                     list.Add(new TrendPointModel
                     {
-                        Label = r["Label"].ToString(),
-                        Revenue = r["Revenue"] == DBNull.Value ? 0m : Convert.ToDecimal(r["Revenue"])
+                        Label = row["Label"]?.ToString() ?? string.Empty,
+                        Revenue = row["Revenue"] == DBNull.Value ? 0m : Convert.ToDecimal(row["Revenue"])
                     });
                 }
 
@@ -124,16 +129,65 @@ namespace DemoPick.Services
                     new SqlParameter("@FromStart", fromStart),
                     new SqlParameter("@ToExclusive", toExclusive));
 
-                foreach (DataRow r in dtPie.Rows)
+                foreach (DataRow row in dtPie.Rows)
                 {
                     list.Add(new NamedRevenueModel
                     {
-                        Name = r["Name"].ToString(),
-                        Revenue = r["Rev"] == DBNull.Value ? 0m : Convert.ToDecimal(r["Rev"])
+                        Name = row["Name"]?.ToString() ?? string.Empty,
+                        Revenue = row["Rev"] == DBNull.Value ? 0m : Convert.ToDecimal(row["Rev"])
                     });
                 }
 
                 return list;
+            });
+        }
+
+        public async Task<List<ReportHeatmapPointModel>> GetBookingHourHeatmapAsync(DateTime fromStart, DateTime toExclusive)
+        {
+            return await Task.Run(() =>
+            {
+                var list = new List<ReportHeatmapPointModel>();
+                var dt = DatabaseHelper.ExecuteQuery(
+                    SqlQueries.Report.BookingHourHeatmap,
+                    new SqlParameter("@FromStart", fromStart),
+                    new SqlParameter("@ToExclusive", toExclusive));
+
+                foreach (DataRow row in dt.Rows)
+                {
+                    list.Add(new ReportHeatmapPointModel
+                    {
+                        Hour = row["Hr"] == DBNull.Value ? 0 : Convert.ToInt32(row["Hr"]),
+                        Label = row["Label"]?.ToString() ?? string.Empty,
+                        BookingCount = row["BookingCount"] == DBNull.Value ? 0 : Convert.ToInt32(row["BookingCount"])
+                    });
+                }
+
+                return list;
+            });
+        }
+
+        public async Task<ReportBookingOpsModel> GetBookingOpsAsync(DateTime fromStart, DateTime toExclusive)
+        {
+            return await Task.Run(() =>
+            {
+                var dt = DatabaseHelper.ExecuteQuery(
+                    SqlQueries.Report.BookingOps,
+                    new SqlParameter("@FromStart", fromStart),
+                    new SqlParameter("@ToExclusive", toExclusive));
+
+                if (dt.Rows.Count <= 0)
+                {
+                    return new ReportBookingOpsModel();
+                }
+
+                var row = dt.Rows[0];
+                return new ReportBookingOpsModel
+                {
+                    TotalBookings = row["TotalBookings"] == DBNull.Value ? 0 : Convert.ToInt32(row["TotalBookings"]),
+                    CancelledBookings = row["CancelledBookings"] == DBNull.Value ? 0 : Convert.ToInt32(row["CancelledBookings"]),
+                    ShiftedBookings = row["ShiftedBookings"] == DBNull.Value ? 0 : Convert.ToInt32(row["ShiftedBookings"]),
+                    ActiveBookings = row["ActiveBookings"] == DBNull.Value ? 0 : Convert.ToInt32(row["ActiveBookings"])
+                };
             });
         }
     }

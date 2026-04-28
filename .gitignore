@@ -28,6 +28,7 @@ Thumbs.db
 # Local secrets / env files
 .env
 .env.*
+.dotnet-home/
 
 # Certificates / signing keys (never commit)
 *.pfx

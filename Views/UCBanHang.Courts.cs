@@ -44,6 +44,7 @@ namespace DemoPick
                     Label cTime = new Label { Text = "🕒 " + timeTxt, Font = _posCourtTimeFont, ForeColor = Color.Gray, Location = new Point(15, 45), AutoSize = true };
 
                     pnlCtx.Controls.AddRange(new Control[] { cName, badge, cTime });
+                    UiTheme.NormalizeTextBackgrounds(pnlCtx);
                     pnlCtx.Cursor = Cursors.Hand;
 
                     EventHandler selectCourt = (s, e) =>

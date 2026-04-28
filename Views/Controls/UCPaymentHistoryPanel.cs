@@ -7,6 +7,8 @@ namespace DemoPick
 {
     public partial class UCPaymentHistoryPanel : UserControl
     {
+        private Label _summaryLabel;
+
         public sealed class HistoryRow
         {
             public string InvoiceCode { get; set; }
@@ -25,17 +27,22 @@ namespace DemoPick
         {
             InitializeComponent();
 
+            EnsureSummaryLabel();
+
             txtSearch.KeyDown += TxtSearch_KeyDown;
             btnSearch.Click += BtnSearch_Click;
             btnOpen.Click += BtnOpen_Click;
-            lstHistory.DoubleClick += LstHistory_DoubleClick;
+            gridHistory.DoubleClick += GridHistory_DoubleClick;
         }
 
         public string SearchKeyword
         {
             get
             {
-                return txtSearch == null ? string.Empty : txtSearch.Text;
+                if (txtSearch == null) return string.Empty;
+                string val = txtSearch.Text;
+                if (val == txtSearch.Watermark) return string.Empty;
+                return val;
             }
             set
             {
@@ -46,15 +53,25 @@ namespace DemoPick
             }
         }
 
-        public void BindRows(IReadOnlyList<HistoryRow> rows)
+        public void SetShiftSummary(string summaryText)
         {
-            if (lstHistory == null)
+            EnsureSummaryLabel();
+            if (_summaryLabel == null)
             {
                 return;
             }
 
-            lstHistory.BeginUpdate();
-            lstHistory.Items.Clear();
+            _summaryLabel.Text = summaryText ?? string.Empty;
+        }
+
+        public void BindRows(IReadOnlyList<HistoryRow> rows)
+        {
+            if (gridHistory == null)
+            {
+                return;
+            }
+
+            gridHistory.Rows.Clear();
 
             if (rows != null)
             {
@@ -66,36 +83,67 @@ namespace DemoPick
                         continue;
                     }
 
-                    var lvi = new ListViewItem(row.InvoiceCode ?? string.Empty);
-                    lvi.SubItems.Add(row.TimeText ?? string.Empty);
-                    lvi.SubItems.Add(row.CustomerText ?? string.Empty);
-                    lvi.SubItems.Add(row.TotalText ?? string.Empty);
-                    lvi.ToolTipText = row.ToolTipText ?? string.Empty;
-                    lvi.Tag = row.Tag;
+                    int rowIndex = gridHistory.Rows.Add(
+                        row.InvoiceCode ?? string.Empty,
+                        row.TimeText ?? string.Empty,
+                        row.CustomerText ?? string.Empty,
+                        row.TotalText ?? string.Empty
+                    );
+                    
+                    var gridRow = gridHistory.Rows[rowIndex];
+                    gridRow.Tag = row.Tag;
 
                     if (row.IsHighlighted)
                     {
-                        lvi.BackColor = Color.FromArgb(239, 246, 255);
+                        gridRow.DefaultCellStyle.BackColor = Color.FromArgb(239, 246, 255);
                     }
-
-                    lstHistory.Items.Add(lvi);
+                    
+                    // Tooltip is not standard supported on row without specific cell events, but let's skip for simple UI
                 }
             }
-
-            lstHistory.EndUpdate();
         }
 
         public bool TryGetSelectedTag<T>(out T selected) where T : class
         {
             selected = null;
 
-            if (lstHistory == null || lstHistory.SelectedItems.Count <= 0)
+            if (gridHistory == null || gridHistory.SelectedRows.Count <= 0)
             {
                 return false;
             }
 
-            selected = lstHistory.SelectedItems[0].Tag as T;
+            selected = gridHistory.SelectedRows[0].Tag as T;
             return selected != null;
+        }
+
+        private void EnsureSummaryLabel()
+        {
+            if (_summaryLabel != null)
+            {
+                return;
+            }
+
+            _summaryLabel = new Label
+            {
+                AutoSize = false,
+                Location = new Point(0, 24),
+                Size = new Size(280, 30),
+                ForeColor = Color.FromArgb(107, 114, 128),
+                Font = new Font("Segoe UI", 8.5F, FontStyle.Regular),
+                Text = string.Empty
+            };
+
+            Controls.Add(_summaryLabel);
+            _summaryLabel.BringToFront();
+            DemoPick.Services.UiTheme.NormalizeTextBackgrounds(this);
+
+            // Push controls down to make room for the summary label
+            txtSearch.Location = new Point(0, 58);
+            btnSearch.Location = new Point(194, 58);
+            gridHistory.Location = new Point(0, 96);
+            gridHistory.Size = new Size(280, 156);
+            btnOpen.Location = new Point(0, 258);
+            Size = new Size(280, 296);
         }
 
         private void RaiseSearchRequested()
@@ -138,7 +186,7 @@ namespace DemoPick
             RaiseOpenRequested();
         }
 
-        private void LstHistory_DoubleClick(object sender, EventArgs e)
+        private void GridHistory_DoubleClick(object sender, EventArgs e)
         {
             RaiseOpenRequested();
         }

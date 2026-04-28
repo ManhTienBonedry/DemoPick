@@ -5,6 +5,7 @@ namespace DemoPick.Services
         internal static class BookingStatus
         {
             internal const string Cancelled = "Cancelled";
+            internal const string CheckedIn = "CheckedIn";
             internal const string Confirmed = "Confirmed";
             internal const string Maintenance = "Maintenance";
             internal const string Paid = "Paid";

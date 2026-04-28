@@ -1,16 +1,18 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using DemoPick.Services;
 
 namespace DemoPick
 {
     public partial class UCDatLich : UserControl
     {
-        private const int GridStartHour = 6;
-        private const int GridHoursToDraw = 18; // 06:00 to 24:00
+        private const int GridStartHour = 0;
+        private const int GridHoursToDraw = 24; // 00:00 to 24:00
         private const int CourtColWidth = 220;
         private const int TimeHeaderHeight = 46;
         private const int CourtRowHeight = 64;
+        private const int PendingBlinkWindowMinutes = 30;
 
         private const float ZoomMin = 1.0f;   // Fit-to-width baseline
         private const float ZoomMax = 2.5f;   // Allow horizontal scroll when zoomed
@@ -37,6 +39,11 @@ namespace DemoPick
         }
 
         private readonly System.Collections.Generic.List<BookingHitInfo> _bookingHits = new System.Collections.Generic.List<BookingHitInfo>();
+
+        private int _armedCourtId = -1;
+        private DateTime _armedCourtClickUtc = DateTime.MinValue;
+        private bool _pendingBlinkOn;
+        private Timer _pendingBlinkTimer;
 
         public UCDatLich()
         {
@@ -81,7 +88,8 @@ namespace DemoPick
             pnlTimelineContainer.Paint += (s, e) =>
             {
                 var p = s as Panel;
-                using (var pen = new Pen(Color.FromArgb(229, 231, 235), 1))
+                var borderColor = Color.FromArgb(229, 231, 235);
+                using (var pen = new Pen(borderColor, 1))
                 {
                     e.Graphics.DrawRectangle(pen, 0, 0, p.Width - 1, p.Height - 1);
                 }
@@ -91,8 +99,33 @@ namespace DemoPick
             pnlCanvas.MouseDoubleClick += PnlCanvas_MouseDoubleClick;
             pnlCanvas.MouseClick += PnlCanvas_MouseClick;
 
-            pnlTimelineContainer.Resize += (s, e) => RefreshTimelineLayoutOnly();
-            pnlTimelineContainer.Scroll += (s, e) => pnlCanvas.Invalidate();
+            // Debounce/Throttle cho Scroll và Resize
+            var throttleTimer = new Timer { Interval = 16 }; // ~60fps
+            bool pendingScroll = false;
+            bool pendingResize = false;
+
+            throttleTimer.Tick += (s, e) =>
+            {
+                if (pendingResize)
+                {
+                    RefreshTimelineLayoutOnly();
+                    pendingResize = false;
+                }
+                if (pendingScroll)
+                {
+                    pnlCanvas.Invalidate();
+                    pendingScroll = false;
+                }
+            };
+            throttleTimer.Start();
+
+            Disposed += (s, e) =>
+            {
+                try { throttleTimer.Stop(); throttleTimer.Dispose(); } catch { }
+            };
+
+            pnlTimelineContainer.Resize += (s, e) => pendingResize = true;
+            pnlTimelineContainer.Scroll += (s, e) => pendingScroll = true;
 
             if (btnZoomIn != null)
             {
@@ -104,41 +137,33 @@ namespace DemoPick
             }
             UpdateZoomButtons();
 
-            // Bind Quick Booking button
-            if (btnDatNhanh != null)
-            {
-                btnDatNhanh.Click += (s, e) =>
-                {
-                    using (var frm = new FrmDatSan())
-                    {
-                        if (frm.ShowDialog() == DialogResult.OK)
-                        {
-                            ReloadTimelineAsync(forceReload: true);
-                        }
-                    }
-                };
-            }
-
-            // Bind Fixed Booking & Maintenance button
-            if (btnDatCoDinh != null)
-            {
-                btnDatCoDinh.Click += (s, e) =>
-                {
-                    using (var frm = new FrmDatSanCoDinh())
-                    {
-                        if (frm.ShowDialog() == DialogResult.OK)
-                        {
-                            ReloadTimelineAsync(forceReload: true);
-                        }
-                    }
-                };
-            }
-
             // Đổi ca button (select booking then click)
             if (btnDoiCa != null)
             {
                 btnDoiCa.Click += (s, e) => OpenRescheduleForSelected();
             }
+
+            _pendingBlinkTimer = new Timer();
+            _pendingBlinkTimer.Interval = 460;
+            _pendingBlinkTimer.Tick += (s, e) =>
+            {
+                _pendingBlinkOn = !_pendingBlinkOn;
+                pnlCanvas.Invalidate();
+            };
+            _pendingBlinkTimer.Start();
+
+            Disposed += (s, e) =>
+            {
+                try
+                {
+                    _pendingBlinkTimer.Stop();
+                    _pendingBlinkTimer.Dispose();
+                }
+                catch
+                {
+                    // ignore
+                }
+            };
 
             if (IsHandleCreated)
             {

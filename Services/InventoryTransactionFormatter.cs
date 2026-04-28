@@ -43,6 +43,7 @@ namespace DemoPick.Services
             string e = (eventDesc ?? string.Empty).Trim();
             if (string.Equals(e, "POS Checkout", StringComparison.OrdinalIgnoreCase)) return "POS";
             if (string.Equals(e, "Nhập Kho Trực Tiếp", StringComparison.OrdinalIgnoreCase)) return "Nhập kho";
+            if (string.Equals(e, "Xóa Sản phẩm Kho", StringComparison.OrdinalIgnoreCase)) return "Xóa kho";
             return e;
         }
 

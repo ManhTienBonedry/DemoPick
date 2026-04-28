@@ -11,6 +11,7 @@ namespace DemoPick.Models
         public string CustomerType { get; set; }
         public decimal TotalHours { get; set; }
         public string TotalSpent { get; set; }
+        public string Tier { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 
@@ -23,6 +24,14 @@ namespace DemoPick.Models
         public string Stock { get; set; }
         public string Status { get; set; }
         public string Price { get; set; }
+        public int CurrentStock { get; set; }
+        public int MinThreshold { get; set; }
+        public int SoldLast14Days { get; set; }
+        public decimal AvgDailySales { get; set; }
+        public int SuggestedReorderQuantity { get; set; }
+        public int TargetStockQuantity { get; set; }
+        public int? DaysRemaining { get; set; }
+        public string Recommendation { get; set; }
     }
 
     public class TransactionModel
@@ -39,6 +48,8 @@ namespace DemoPick.Models
         public string Type { get; set; }
         public string Occupancy { get; set; }
         public string Revenue { get; set; }
+        public string PeakSlot { get; set; }
+        public string CancelRate { get; set; }
     }
     public class CourtModel
     {
@@ -82,6 +93,21 @@ namespace DemoPick.Models
         public int PrevNewCust { get; set; }
     }
 
+    public class ReportHeatmapPointModel
+    {
+        public int Hour { get; set; }
+        public string Label { get; set; }
+        public int BookingCount { get; set; }
+    }
+
+    public class ReportBookingOpsModel
+    {
+        public int TotalBookings { get; set; }
+        public int CancelledBookings { get; set; }
+        public int ShiftedBookings { get; set; }
+        public int ActiveBookings { get; set; }
+    }
+
     public class DashboardMetricsModel
     {
         public decimal Revenue { get; set; }
@@ -112,12 +138,38 @@ namespace DemoPick.Models
         public decimal Revenue { get; set; }
     }
 
+    public class MembershipSummaryModel
+    {
+        public int BasicCount { get; set; }
+        public int SilverCount { get; set; }
+        public int GoldCount { get; set; }
+        public int NearSilverCount { get; set; }
+        public int NearGoldCount { get; set; }
+    }
+
     public class InventoryKpiModel
     {
         public decimal TotalValue { get; set; }
         public int CriticalItems { get; set; }
         public int Sales { get; set; }
         public int InvoicesCount { get; set; }
+    }
+
+    public class InventoryForecastPointModel
+    {
+        public string Label { get; set; }
+        public int RiskItems { get; set; }
+    }
+
+    public class InventorySmartInsightsModel
+    {
+        public int OutOfStockCount { get; set; }
+        public int WarningItemsCount { get; set; }
+        public int SuggestedReorderProductCount { get; set; }
+        public int SuggestedReorderUnits { get; set; }
+        public int SoldLast14Days { get; set; }
+        public decimal AvgDailySales { get; set; }
+        public List<InventoryForecastPointModel> ForecastPoints { get; set; } = new List<InventoryForecastPointModel>();
     }
 
     public class ProductCatalogItemModel

@@ -119,6 +119,8 @@ namespace DemoPick
                         ForeColor = Color.Gray
                     });
                 }
+
+                UiTheme.NormalizeTextBackgrounds(flpCourts);
             }
             catch (Exception ex)
             {
@@ -219,6 +221,7 @@ namespace DemoPick
             pnlCtx.Controls.Add(lblBadge);
             pnlCtx.Controls.Add(lblTime);
             pnlCtx.Controls.Add(lblDetail);
+            UiTheme.NormalizeTextBackgrounds(pnlCtx);
 
             EventHandler selectCourt = (s, e) =>
             {
@@ -404,6 +407,7 @@ namespace DemoPick
 
             UpdatePaymentStateHint();
             UpdateTotals();
+            ReloadPaymentHistory();
         }
 
         private void UpdatePaymentStateHint()
@@ -454,6 +458,7 @@ namespace DemoPick
             _lastFinalTotal = 0m;
             UpdatePaymentStateHint();
             UpdateTotals();
+            ReloadPaymentHistory();
         }
     }
 }

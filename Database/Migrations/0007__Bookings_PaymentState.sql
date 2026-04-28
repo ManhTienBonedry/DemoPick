@@ -4,7 +4,10 @@ BEGIN
     ADD PaymentState NVARCHAR(50) NOT NULL
         CONSTRAINT DF_Bookings_PaymentState DEFAULT 'PayAtVenue';
 END
-ELSE
+GO
+
+-- Separate batch: column now exists, safe to reference
+IF COL_LENGTH('dbo.Bookings', 'PaymentState') IS NOT NULL
 BEGIN
     UPDATE dbo.Bookings
     SET PaymentState = 'PayAtVenue'

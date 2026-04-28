@@ -7,22 +7,22 @@ Mục tiêu: toàn bộ schema/seed ở dạng `.sql` trong repo; C# chỉ chị
 - `App.config` → connection string tên `DefaultConnection`.
 - Connection string này xác định:
   - `Server` (vd: `.\SQLEXPRESS`)
-  - `Database` (vd: `PickleProDB`)
+  - `Database` (vd: `PickleBallDB`)
   - Auth (Integrated Security / SQL Login)
 
 Code dùng `Services/Db.cs` để lấy connection string và tạo `SqlConnection`.
 
 ## 2) Schema script (complete)
 
-- File: `Database/PickleProDB_Complete.sql`
+- File: `Database/PickleBallDB_Complete.sql`
 - Nguyên tắc:
-  - Script **không hard-code tên DB** (`CREATE DATABASE` / `USE [PickleProDB]` không nằm trong script).
+  - Script **không hard-code tên DB** (`CREATE DATABASE` / `USE [PickleBallDB]` không nằm trong script).
   - Script giả định đang chạy **trong DB target** (DB được chọn từ `DefaultConnection`).
 
 Luồng khởi động:
 1. `Services/SchemaInstaller.EnsureDatabaseAndSchema()`
    - Tạo database theo `DefaultConnection` nếu chưa tồn tại.
-   - Chạy `PickleProDB_Complete.sql` vào DB đó.
+   - Chạy `PickleBallDB_Complete.sql` vào DB đó.
 
 ## 3) Migrations (bổ sung dần)
 

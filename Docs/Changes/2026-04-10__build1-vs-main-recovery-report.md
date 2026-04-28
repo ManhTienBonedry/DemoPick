@@ -1,4 +1,4 @@
-﻿# Report: Khoi phuc file tu main (so voi build1)
+# Report: Khoi phuc file tu main (so voi build1)
 
 - Thoi diem: 2026-04-10 16:53:12
 - Nhanh hien tai: main
@@ -30,7 +30,7 @@
 M	.gitignore
 M	Controllers/BookingController.cs
 A	Database/Migrations/0004__Bookings_Note.sql
-M	Database/PickleProDB_Complete.sql
+M	Database/PickleBallDB_Complete.sql
 M	DemoPick.csproj
 A	Docs/Changes/2026-04-10__fix-datlich-initial-load-and-rightclick-delete.md
 A	Docs/Changes/2026-04-10__fix-designer-global-designmode-guard.md

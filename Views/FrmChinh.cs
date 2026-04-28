@@ -17,6 +17,7 @@ namespace DemoPick
         public UCKhoHang khoHang;
         public UCBaoCao baoCao;
         public UCThanhToan thanhToan;
+        public UCAuditLog auditLog;
         private UserControl _activeModule;
 
         private readonly Timer _moduleRefreshDebounceTimer;
@@ -25,12 +26,38 @@ namespace DemoPick
 
         private const int SameModuleRefreshDebounceMs = 260;
         
+        private Timer _bookingAlertTimer;
+        private HashSet<string> _warnedBookingReminderKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        private DemoPick.Controllers.BookingController _bookingController = new DemoPick.Controllers.BookingController();
+
+        private sealed class ReminderWindow
+        {
+            public int MinMinutes { get; set; }
+            public int MaxMinutes { get; set; }
+            public string Title { get; set; }
+        }
+
+        private static readonly ReminderWindow[] BookingReminderWindows = new[]
+        {
+            new ReminderWindow { MinMinutes = 31, MaxMinutes = 60, Title = "Nhac 60 phut" },
+            new ReminderWindow { MinMinutes = 16, MaxMinutes = 30, Title = "Nhac 30 phut" },
+            new ReminderWindow { MinMinutes = 0, MaxMinutes = 15, Title = "Nhac 15 phut" }
+        };
+        
         private List<Sunny.UI.UIPanel> menuButtons;
 
         private Font _menuFontRegular;
         private Font _menuFontBold;
 
         private Size _adminAvatarRegionSize = Size.Empty;
+        private Sunny.UI.UIPanel _activeNavButton;
+
+        private static readonly Color NavDefaultColor = Color.FromArgb(22, 101, 52);
+        private static readonly Color NavHoverColor = Color.FromArgb(34, 124, 64);
+        private static readonly Color NavActiveColor = Color.FromArgb(56, 161, 105);
+        private static readonly Color NavLabelColor = Color.FromArgb(220, 252, 231);
+        private static readonly Color HeaderGreen = Color.FromArgb(16, 94, 53);
+        private static readonly Color HeaderGreenDark = Color.FromArgb(10, 67, 39);
 
         public FrmChinh()
         {
@@ -57,6 +84,11 @@ namespace DemoPick
                     _moduleRefreshDebounceTimer.Stop();
                     _moduleRefreshDebounceTimer.Dispose();
                 }
+                if (_bookingAlertTimer != null)
+                {
+                    _bookingAlertTimer.Stop();
+                    _bookingAlertTimer.Dispose();
+                }
             };
 
             _moduleRefreshDebounceTimer = new Timer { Interval = SameModuleRefreshDebounceMs };
@@ -68,7 +100,12 @@ namespace DemoPick
                 TriggerModuleRefresh(module);
             };
 
+            _bookingAlertTimer = new Timer { Interval = 60000 }; // 1 minute
+            _bookingAlertTimer.Tick += (s, e) => CheckUpcomingBookings();
+            _bookingAlertTimer.Start();
+
             InitModules();
+            ApplyShellTheme();
 
             // Consistent inner page background across all modules (better contrast with white cards).
             UiTheme.ApplyPageBackground(this);
@@ -116,8 +153,40 @@ namespace DemoPick
             khoHang = new UCKhoHang() { Dock = DockStyle.Fill };
             baoCao = new UCBaoCao() { Dock = DockStyle.Fill };
             thanhToan = new UCThanhToan() { Dock = DockStyle.Fill };
+            auditLog = new UCAuditLog() { Dock = DockStyle.Fill };
 
-            menuButtons = new List<Sunny.UI.UIPanel> { btnNavDashboard, btnNavDatLich, btnNavBanHang, btnNavKhachHang, btnNavKhoHang, btnNavBaoCao, btnNavThanhToan };
+            var btnNavAuditLog = new Sunny.UI.UIPanel();
+            var lblNav8 = new System.Windows.Forms.Label();
+            
+            btnNavAuditLog.BackColor = System.Drawing.Color.White;
+            btnNavAuditLog.Controls.Add(lblNav8);
+            btnNavAuditLog.Cursor = System.Windows.Forms.Cursors.Hand;
+            btnNavAuditLog.FillColor = System.Drawing.Color.White;
+            btnNavAuditLog.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
+            btnNavAuditLog.Location = new System.Drawing.Point(15, 495);
+            btnNavAuditLog.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            btnNavAuditLog.MinimumSize = new System.Drawing.Size(1, 1);
+            btnNavAuditLog.Name = "btnNavAuditLog";
+            btnNavAuditLog.Radius = 18;
+            btnNavAuditLog.RectColor = System.Drawing.Color.Transparent;
+            btnNavAuditLog.RectDisableColor = System.Drawing.Color.Transparent;
+            btnNavAuditLog.Size = new System.Drawing.Size(210, 48);
+            btnNavAuditLog.TabIndex = 8;
+            btnNavAuditLog.Text = null;
+            btnNavAuditLog.TextAlignment = System.Drawing.ContentAlignment.MiddleCenter;
+
+            lblNav8.AutoSize = true;
+            lblNav8.Font = new System.Drawing.Font("Segoe UI", 11F);
+            lblNav8.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(107)))), ((int)(((byte)(114)))), ((int)(((byte)(128)))));
+            lblNav8.Location = new System.Drawing.Point(40, 11);
+            lblNav8.Name = "lblNav8";
+            lblNav8.Size = new System.Drawing.Size(108, 25);
+            lblNav8.TabIndex = 0;
+            lblNav8.Text = "Nhật ký log";
+
+            pnlSidebar.Controls.Add(btnNavAuditLog);
+
+            menuButtons = new List<Sunny.UI.UIPanel> { btnNavDashboard, btnNavDatLich, btnNavBanHang, btnNavKhachHang, btnNavKhoHang, btnNavBaoCao, btnNavThanhToan, btnNavAuditLog };
 
             // Start with Dashboard
             SwitchModule(tongQuan, btnNavDashboard, "Dashboard", "Tổng quan hoạt động");
@@ -129,6 +198,7 @@ namespace DemoPick
             BindClick(btnNavKhoHang, khoHang, "Kho hàng", "Quản lý xuất nhập tồn báo cáo vận hành");
             BindClick(btnNavBaoCao, baoCao, "Báo cáo & Phân tích", "Theo dõi và phân tích.");
             BindClick(btnNavThanhToan, thanhToan, "Thanh Toán Hóa Đơn", "Kiểm tra bill, thu tiền và in hóa đơn cho khách.");
+            BindClick(btnNavAuditLog, auditLog, "Nhật ký hệ thống", "Theo dõi thao tác và vận hành (Audit log).");
 
             System.EventHandler logoClick = (s, e) => SwitchModule(tongQuan, btnNavDashboard, "Dashboard", "Tổng quan hoạt động");
             pnlLogo.Cursor = Cursors.Hand;
@@ -155,14 +225,13 @@ namespace DemoPick
             };
             p.Click += h;
 
-            // Fix dark hover issue
             System.EventHandler hoverIn = (s, e) => {
-                if (p.FillColor == Color.White)
-                    p.FillColor = Color.FromArgb(235, 245, 235); // Light mint green instead of gray
+                if (!ReferenceEquals(p, _activeNavButton))
+                    p.FillColor = NavHoverColor;
             };
             System.EventHandler hoverOut = (s, e) => {
-                if (p.FillColor == Color.FromArgb(235, 245, 235))
-                    p.FillColor = Color.White;
+                if (!ReferenceEquals(p, _activeNavButton))
+                    p.FillColor = NavDefaultColor;
             };
 
             p.MouseEnter += hoverIn;
@@ -183,13 +252,16 @@ namespace DemoPick
 
             if (!isSameModule)
             {
+                pnlContent.SuspendLayout();
                 pnlContent.Controls.Clear();
 
                 UiTheme.ApplyPageBackground(pnlContent);
                 UiTheme.ApplyModuleTheme(uc);
 
+                uc.Dock = DockStyle.Fill;
                 pnlContent.Controls.Add(uc);
                 _activeModule = uc;
+                pnlContent.ResumeLayout();
             }
 
             QueueModuleRefresh(uc, isSameModule);
@@ -197,15 +269,28 @@ namespace DemoPick
             lblPageTitle.Text = title;
             lblPageSubtitle.Text = subtitle;
 
+            _activeNavButton = activeBtn;
+            ApplyNavStyles();
+        }
+
+        private void ApplyNavStyles()
+        {
             foreach (var btn in menuButtons)
             {
-                btn.FillColor = Color.White;
+                btn.FillColor = NavDefaultColor;
+                btn.BackColor = NavDefaultColor;
+                btn.RectColor = Color.Transparent;
+                btn.RectDisableColor = Color.Transparent;
+                btn.Radius = 18;
                 SetLabelStyle(btn, false);
             }
-            // Primary Color #4CAF50
-            activeBtn.FillColor = Color.FromArgb(76, 175, 80);
-            
-            SetLabelStyle(activeBtn, true);
+
+            if (_activeNavButton != null)
+            {
+                _activeNavButton.FillColor = NavActiveColor;
+                _activeNavButton.BackColor = NavDefaultColor;
+                SetLabelStyle(_activeNavButton, true);
+            }
         }
 
         private void QueueModuleRefresh(UserControl module, bool isSameModule)
@@ -256,11 +341,85 @@ namespace DemoPick
                 else if (uc is UCKhoHang kho) kho.RefreshOnActivated();
                 else if (uc is UCBaoCao bc) bc.RefreshOnActivated();
                 else if (uc is UCThanhToan tt) tt.RefreshOnActivated();
+                else if (uc is UCAuditLog al) al.RefreshOnActivated();
             }
             catch (Exception ex)
             {
                 try { DemoPick.Services.DatabaseHelper.TryLog("SwitchModule Refresh Error", ex, "FrmChinh.RefreshModuleData"); } catch { }
             }
+        }
+
+        private void CheckUpcomingBookings()
+        {
+            if (this.InvokeRequired)
+            {
+                this.BeginInvoke(new Action(CheckUpcomingBookings));
+                return;
+            }
+
+            try
+            {
+                var now = DateTime.Now;
+                var bookings = LoadBookingsForReminderWindow(now);
+                if (bookings == null || bookings.Count == 0) return;
+
+                var groupedMessages = new List<string>();
+                foreach (var window in BookingReminderWindows)
+                {
+                    var lines = new List<string>();
+                    foreach (var b in bookings)
+                    {
+                        if (b == null) continue;
+                        if (string.Equals(b.Status, AppConstants.BookingStatus.Cancelled, StringComparison.OrdinalIgnoreCase)) continue;
+                        if (string.Equals(b.Status, AppConstants.BookingStatus.Paid, StringComparison.OrdinalIgnoreCase)) continue;
+                        if (string.Equals(b.Status, AppConstants.BookingStatus.Maintenance, StringComparison.OrdinalIgnoreCase)) continue;
+                        if (string.Equals(b.Status, AppConstants.BookingStatus.CheckedIn, StringComparison.OrdinalIgnoreCase)) continue;
+
+                        double mins = (b.StartTime - now).TotalMinutes;
+                        if (mins < window.MinMinutes || mins > window.MaxMinutes) continue;
+
+                        string key = b.BookingID.ToString() + ":" + window.Title;
+                        if (!_warnedBookingReminderKeys.Add(key)) continue;
+
+                        lines.Add(string.Format("- San {0}: {1} ({2:HH:mm})", b.CourtID, b.GuestName, b.StartTime));
+                    }
+
+                    if (lines.Count > 0)
+                    {
+                        groupedMessages.Add(window.Title + "\n" + string.Join("\n", lines));
+                    }
+                }
+
+                if (groupedMessages.Count > 0)
+                {
+                    string msg = string.Join("\n\n", groupedMessages);
+                    MessageBox.Show(this, msg, "Nhac lich dat san", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                DatabaseHelper.TryLogThrottled("FrmChinh.CheckUpcomingBookings", "Booking Alert Error", ex, "FrmChinh.CheckUpcomingBookings", 300);
+            }
+        }
+
+        private List<DemoPick.Models.BookingModel> LoadBookingsForReminderWindow(DateTime now)
+        {
+            var map = new Dictionary<int, DemoPick.Models.BookingModel>();
+
+            foreach (var date in new[] { now.Date, now.Date.AddDays(1) })
+            {
+                var bookings = _bookingController.GetBookingsByDate(date);
+                if (bookings == null) continue;
+
+                foreach (var booking in bookings)
+                {
+                    if (booking == null) continue;
+                    if (map.ContainsKey(booking.BookingID)) continue;
+                    map.Add(booking.BookingID, booking);
+                }
+            }
+
+            return new List<DemoPick.Models.BookingModel>(map.Values);
         }
 
         public void NavigateToDatLich()
@@ -275,10 +434,62 @@ namespace DemoPick
                 if (c is Label lbl)
                 {
                     lbl.BackColor = Color.Transparent;
-                    lbl.ForeColor = active ? Color.White : Color.FromArgb(107, 114, 128);
+                    lbl.ForeColor = active ? Color.White : NavLabelColor;
                     lbl.Font = active ? _menuFontBold : _menuFontRegular;
                 }
             }
+        }
+
+
+
+        private void ApplyShellTheme()
+        {
+            Color headerColor = HeaderGreen;
+
+            pnlSidebar.BackColor = NavDefaultColor;
+            pnlLogo.BackColor = NavDefaultColor;
+            pnlAdmin.BackColor = NavDefaultColor;
+            pnlHeader.BackColor = headerColor;
+
+            lblLogo1.ForeColor = Color.White;
+            lblLogo2.ForeColor = NavLabelColor;
+            lblAdminName.ForeColor = Color.White;
+            lblAdminStatus.ForeColor = NavLabelColor;
+            lblPageTitle.ForeColor = Color.White;
+            lblPageSubtitle.ForeColor = NavLabelColor;
+
+            pnlAdminAvatar.BackColor = Color.FromArgb(220, 252, 231);
+            lblAdminAvatarText.ForeColor = Color.FromArgb(21, 128, 61);
+
+
+            ApplyNavStyles();
+
+            UiTheme.ApplyPageBackground(this);
+            UiTheme.ApplyPageBackground(pnlContent);
+
+            foreach (var module in EnumerateModules())
+            {
+                if (module != null && !module.IsDisposed)
+                {
+                    UiTheme.ApplyModuleTheme(module);
+                }
+            }
+
+            UiTheme.NormalizeTextBackgrounds(this);
+
+            Invalidate(true);
+        }
+
+        private IEnumerable<UserControl> EnumerateModules()
+        {
+            yield return tongQuan;
+            yield return datLich;
+            yield return banHang;
+            yield return khachHang;
+            yield return khoHang;
+            yield return baoCao;
+            yield return thanhToan;
+            yield return auditLog;
         }
 
         private void ApplyCurrentUserUI()
@@ -332,7 +543,7 @@ namespace DemoPick
 
             if (!enabled)
             {
-                panel.FillColor = Color.White;
+                panel.FillColor = Color.FromArgb(18, 83, 47);
                 SetLabelStyle(panel, false);
                 panel.Cursor = Cursors.Default;
                 foreach (Control c in panel.Controls)

@@ -23,35 +23,23 @@ namespace DemoPick
 
             try
             {
-                var customer = await _customerService.FindCheckoutCustomerAsync(search);
+                var customer = await _controller.SearchCustomerAsync(search);
                 if (customer != null && customer.MemberId > 0)
                 {
                     _currentCustomerId = customer.MemberId;
                     string name = customer.FullName ?? "";
-                    string tier = (customer.Tier ?? "").ToLowerInvariant();
+                    string tier = MembershipTierHelper.NormalizeTier(customer.Tier);
                     _isFixedCustomer = customer.IsFixed;
 
-                    if (tier.Contains("vip") || tier.Contains("vàng") || tier == "gold")
-                    {
-                        _currentDiscountPct = 0.10m;
-                        lblCustomerInfo.Text = $"✓ {name} (VIP). Giảm 10%.";
-                        lblCustomerInfo.ForeColor = Color.FromArgb(255, 160, 0);
-                    }
-                    else if (tier.Contains("bạc") || tier == "silver")
-                    {
-                        _currentDiscountPct = 0.05m;
-                        lblCustomerInfo.Text = $"✓ {name} (Bạc). Giảm 5%.";
-                        lblCustomerInfo.ForeColor = Color.FromArgb(76, 175, 80);
-                    }
-                    else
-                    {
-                        _currentDiscountPct = 0.02m;
-                        lblCustomerInfo.Text = $"✓ {name} (Đồng). Giảm 2%.";
-                        lblCustomerInfo.ForeColor = Color.FromArgb(31, 41, 55);
-                    }
+                    _currentDiscountPct = 0m;
+
+                    string status = _isFixedCustomer ? "Cố định" : "Thành viên";
+                    lblCustomerInfo.Text = string.Format("✓ {0} ({1})", name, status);
+                    lblCustomerInfo.ForeColor = Color.DarkGreen;
+
                     if (_isFixedCustomer)
                     {
-                        lblCustomerInfo.Text += " | CỐ ĐỊNH";
+                        lblCustomerInfo.Text += " | CO DINH";
                     }
                 }
                 else
@@ -59,7 +47,7 @@ namespace DemoPick
                     _currentDiscountPct = 0;
                     _currentCustomerId = 0;
                     _isFixedCustomer = false;
-                    lblCustomerInfo.Text = "⚠ Không tìm thấy khách hàng này!";
+                    lblCustomerInfo.Text = "Khong tim thay khach hang nay.";
                     lblCustomerInfo.ForeColor = Color.Red;
                 }
             }
@@ -69,6 +57,7 @@ namespace DemoPick
             }
 
             UpdateTotals();
+            ReloadPaymentHistory();
         }
     }
 }

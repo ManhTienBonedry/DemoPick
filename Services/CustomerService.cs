@@ -30,7 +30,8 @@ namespace DemoPick.Services
                         Phone = row["Phone"].ToString(),
                         CustomerType = type,
                         TotalHours = hours,
-                        TotalSpent = Convert.ToDecimal(row["TotalSpent"]).ToString("N0") + "đ",
+                        TotalSpent = row.Table.Columns.Contains("TotalSpent") && row["TotalSpent"] != DBNull.Value ? Convert.ToDecimal(row["TotalSpent"]).ToString("N0") + "đ" : "0đ",
+                        Tier = MembershipTierHelper.NormalizeTier(row.Table.Columns.Contains("Tier") && row["Tier"] != DBNull.Value ? row["Tier"].ToString() : "Basic"),
                         CreatedAt = created
                     });
                 }
@@ -70,6 +71,26 @@ namespace DemoPick.Services
                 {
                     MemberCount = row["Cnt"] == DBNull.Value ? 0 : Convert.ToInt32(row["Cnt"]),
                     Revenue = row["Rev"] == DBNull.Value ? 0m : Convert.ToDecimal(row["Rev"])
+                };
+            });
+        }
+
+        public async Task<MembershipSummaryModel> GetMembershipSummaryAsync()
+        {
+            return await Task.Run(() =>
+            {
+                var dt = DatabaseHelper.ExecuteQuery(SqlQueries.Customer.MembershipSummary);
+                if (dt.Rows.Count <= 0)
+                    return new MembershipSummaryModel();
+
+                var row = dt.Rows[0];
+                return new MembershipSummaryModel
+                {
+                    BasicCount = row["BasicCount"] == DBNull.Value ? 0 : Convert.ToInt32(row["BasicCount"]),
+                    SilverCount = row["SilverCount"] == DBNull.Value ? 0 : Convert.ToInt32(row["SilverCount"]),
+                    GoldCount = row["GoldCount"] == DBNull.Value ? 0 : Convert.ToInt32(row["GoldCount"]),
+                    NearSilverCount = row["NearSilverCount"] == DBNull.Value ? 0 : Convert.ToInt32(row["NearSilverCount"]),
+                    NearGoldCount = row["NearGoldCount"] == DBNull.Value ? 0 : Convert.ToInt32(row["NearGoldCount"])
                 };
             });
         }
@@ -150,7 +171,7 @@ namespace DemoPick.Services
                 {
                     MemberId = row["MemberID"] == DBNull.Value ? 0 : Convert.ToInt32(row["MemberID"]),
                     FullName = row["FullName"]?.ToString() ?? "",
-                    Tier = row["Tier"] == DBNull.Value ? "" : (row["Tier"]?.ToString() ?? ""),
+                    Tier = MembershipTierHelper.NormalizeTier(row["Tier"] == DBNull.Value ? "" : (row["Tier"]?.ToString() ?? "")),
                     IsFixed = isFixed
                 };
             });

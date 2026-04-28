@@ -6,7 +6,8 @@ namespace DemoPick
 {
     public partial class UCThanhToan : UserControl
     {
-        private readonly CustomerService _customerService;
+
+        private readonly DemoPick.Controllers.ThanhToanController _controller;
         private decimal _cartTotal = 0;
         private string _selectedCourtName = "";
         private decimal _currentDiscountPct = 0;
@@ -22,7 +23,8 @@ namespace DemoPick
             InitializeComponent();
             if (DesignModeUtil.IsDesignMode(this)) return;
 
-            _customerService = new CustomerService();
+
+            _controller = new DemoPick.Controllers.ThanhToanController();
 
             SetupListView();
             btnSearchCustomer.Click += BtnSearchCustomer_Click;
@@ -41,6 +43,11 @@ namespace DemoPick
             ResetCheckoutPane();
             UpdateReprintButtonState();
             ReloadPaymentHistory();
+        }
+
+        private void ucPaymentHistoryPanel_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

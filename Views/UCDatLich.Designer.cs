@@ -14,8 +14,6 @@ namespace DemoPick
 
         public System.Windows.Forms.Label lblDate;
 
-        public UIButton btnDatNhanh;
-        public UIButton btnDatCoDinh;
         public UIButton btnDoiCa;
         public UIButton btnZoomOut;
         public UIButton btnZoomIn;
@@ -36,6 +34,7 @@ namespace DemoPick
             {
                 components.Dispose();
             }
+            DisposeGdiObjects();
             base.Dispose(disposing);
         }
 
@@ -46,8 +45,6 @@ namespace DemoPick
             this.lblDate = new System.Windows.Forms.Label();
             this.btnZoomOut = new Sunny.UI.UIButton();
             this.btnZoomIn = new Sunny.UI.UIButton();
-            this.btnDatNhanh = new Sunny.UI.UIButton();
-            this.btnDatCoDinh = new Sunny.UI.UIButton();
             this.btnDoiCa = new Sunny.UI.UIButton();
             this.pnlTimelineContainer = new System.Windows.Forms.Panel();
             this.pnlCanvas = new System.Windows.Forms.Panel();
@@ -72,8 +69,6 @@ namespace DemoPick
             this.pnlControlBar.Controls.Add(this.lblDate);
             this.pnlControlBar.Controls.Add(this.btnZoomOut);
             this.pnlControlBar.Controls.Add(this.btnZoomIn);
-            this.pnlControlBar.Controls.Add(this.btnDatNhanh);
-            this.pnlControlBar.Controls.Add(this.btnDatCoDinh);
             this.pnlControlBar.Controls.Add(this.btnDoiCa);
             this.pnlControlBar.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlControlBar.Location = new System.Drawing.Point(0, 0);
@@ -150,49 +145,6 @@ namespace DemoPick
             this.btnZoomIn.Text = "+";
             this.btnZoomIn.TipsFont = new System.Drawing.Font("Microsoft Sans Serif", 9F);
             // 
-            // btnDatNhanh
-            // 
-            this.btnDatNhanh.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnDatNhanh.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(204)))), ((int)(((byte)(113)))));
-            this.btnDatNhanh.FillHoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(56)))), ((int)(((byte)(214)))), ((int)(((byte)(123)))));
-            this.btnDatNhanh.FillPressColor = System.Drawing.Color.FromArgb(((int)(((byte)(36)))), ((int)(((byte)(194)))), ((int)(((byte)(103)))));
-            this.btnDatNhanh.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.btnDatNhanh.Location = new System.Drawing.Point(1000, 22);
-            this.btnDatNhanh.MinimumSize = new System.Drawing.Size(1, 1);
-            this.btnDatNhanh.Name = "btnDatNhanh";
-            this.btnDatNhanh.Radius = 18;
-            this.btnDatNhanh.RectColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(204)))), ((int)(((byte)(113)))));
-            this.btnDatNhanh.RectHoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(56)))), ((int)(((byte)(214)))), ((int)(((byte)(123)))));
-            this.btnDatNhanh.RectPressColor = System.Drawing.Color.FromArgb(((int)(((byte)(36)))), ((int)(((byte)(194)))), ((int)(((byte)(103)))));
-            this.btnDatNhanh.Size = new System.Drawing.Size(140, 40);
-            this.btnDatNhanh.Style = Sunny.UI.UIStyle.Custom;
-            this.btnDatNhanh.TabIndex = 4;
-            this.btnDatNhanh.Text = "+ Đặt sân nhanh";
-            this.btnDatNhanh.TipsFont = new System.Drawing.Font("Microsoft Sans Serif", 9F);
-            // 
-            // btnDatCoDinh
-            // 
-            this.btnDatCoDinh.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnDatCoDinh.FillColor = System.Drawing.Color.White;
-            this.btnDatCoDinh.FillHoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
-            this.btnDatCoDinh.FillPressColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.btnDatCoDinh.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.btnDatCoDinh.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(26)))), ((int)(((byte)(35)))), ((int)(((byte)(50)))));
-            this.btnDatCoDinh.ForeHoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(26)))), ((int)(((byte)(35)))), ((int)(((byte)(50)))));
-            this.btnDatCoDinh.ForePressColor = System.Drawing.Color.FromArgb(((int)(((byte)(26)))), ((int)(((byte)(35)))), ((int)(((byte)(50)))));
-            this.btnDatCoDinh.Location = new System.Drawing.Point(680, 22);
-            this.btnDatCoDinh.MinimumSize = new System.Drawing.Size(1, 1);
-            this.btnDatCoDinh.Name = "btnDatCoDinh";
-            this.btnDatCoDinh.Radius = 18;
-            this.btnDatCoDinh.RectColor = System.Drawing.Color.FromArgb(((int)(((byte)(229)))), ((int)(((byte)(231)))), ((int)(((byte)(235)))));
-            this.btnDatCoDinh.RectHoverColor = System.Drawing.Color.Gray;
-            this.btnDatCoDinh.RectPressColor = System.Drawing.Color.DimGray;
-            this.btnDatCoDinh.Size = new System.Drawing.Size(150, 40);
-            this.btnDatCoDinh.Style = Sunny.UI.UIStyle.Custom;
-            this.btnDatCoDinh.TabIndex = 5;
-            this.btnDatCoDinh.Text = "📅 Đặt sân cố định";
-            this.btnDatCoDinh.TipsFont = new System.Drawing.Font("Microsoft Sans Serif", 9F);
-            // 
             // btnDoiCa
             // 
             this.btnDoiCa.Cursor = System.Windows.Forms.Cursors.Hand;
@@ -203,7 +155,7 @@ namespace DemoPick
             this.btnDoiCa.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(26)))), ((int)(((byte)(35)))), ((int)(((byte)(50)))));
             this.btnDoiCa.ForeHoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(26)))), ((int)(((byte)(35)))), ((int)(((byte)(50)))));
             this.btnDoiCa.ForePressColor = System.Drawing.Color.FromArgb(((int)(((byte)(26)))), ((int)(((byte)(35)))), ((int)(((byte)(50)))));
-            this.btnDoiCa.Location = new System.Drawing.Point(840, 22);
+            this.btnDoiCa.Location = new System.Drawing.Point(680, 22);
             this.btnDoiCa.MinimumSize = new System.Drawing.Size(1, 1);
             this.btnDoiCa.Name = "btnDoiCa";
             this.btnDoiCa.Radius = 18;
@@ -212,7 +164,7 @@ namespace DemoPick
             this.btnDoiCa.RectPressColor = System.Drawing.Color.DimGray;
             this.btnDoiCa.Size = new System.Drawing.Size(150, 40);
             this.btnDoiCa.Style = Sunny.UI.UIStyle.Custom;
-            this.btnDoiCa.TabIndex = 6;
+            this.btnDoiCa.TabIndex = 4;
             this.btnDoiCa.Text = "✏ Đổi ca";
             this.btnDoiCa.TipsFont = new System.Drawing.Font("Microsoft Sans Serif", 9F);
             // 

@@ -52,10 +52,12 @@ Files:
 
 - ✅ `btnPrevDay`, `btnNextDay`
   - Gán `Click` trong code-behind.
-- ✅ `btnDatNhanh`, `btnDatCoDinh`
+- ✅ `pnlCanvas`
+  - Gán `MouseClick` / `MouseDoubleClick` trong code-behind để chọn sân, mở đặt sân chơi và đổi ca.
+- ✅ `btnDoiCa`
   - Gán `Click` trong code-behind.
-- ✅ `dtpCalendar`
-  - Có event `ValueChanged` + chặn nhập tay trong code-behind.
+- ✅ `dateFilter`
+  - Có event `SelectedDateChanged` trong code-behind để đổi ngày và reload timeline.
 
 ### D) POS (Bán hàng)
 
@@ -78,8 +80,8 @@ Files:
 ### F) Login
 
 Files:
-- `../Views/FrmLogin.Designer.cs`
-- `../Views/FrmLogin.cs`
+- `../Views/UCLogin.Designer.cs`
+- `../Views/UCLogin.cs`
 
 - ✅ `btnClose` (Label `X`), `btnLogin`, `btnRegister`, `lblRegisterNow`
   - Đang gán event trong Designer.
@@ -88,8 +90,8 @@ Files:
 ### G) Register (Đăng ký)
 
 Files:
-- `../Views/FrmRegister.Designer.cs`
-- `../Views/FrmRegister.cs`
+- `../Views/UCRegister.Designer.cs`
+- `../Views/UCRegister.cs`
 
 - ✅ `btnClose` (Label `X`), `btnRegister`, `lblLoginNow`
   - Đang gán trong code-behind (constructor) để đảm bảo bấm được.

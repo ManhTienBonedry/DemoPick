@@ -204,7 +204,7 @@ ORDER BY ActivityAt DESC";
         internal static class Customer
         {
             internal const string AllCustomers = @"
-SELECT MemberID, FullName, Phone, TotalHoursPurchased, IsFixed, TotalSpent, CreatedAt
+SELECT MemberID, FullName, Phone, TotalHoursPurchased, IsFixed, TotalSpent, Tier, CreatedAt
 FROM Members m
 WHERE NOT (
     ISNULL(m.IsFixed, 0) = 0
@@ -250,6 +250,31 @@ WHERE NOT (
 SELECT 
     SUM(CASE WHEN m.IsFixed = 1 THEN 1 ELSE 0 END) as CntFixed,
     SUM(CASE WHEN m.IsFixed = 0 OR m.IsFixed IS NULL THEN 1 ELSE 0 END) as CntWalkin
+FROM Members m
+WHERE NOT (
+    ISNULL(m.IsFixed, 0) = 0
+    AND ISNULL(m.TotalSpent, 0) = 0
+    AND ISNULL(m.TotalHoursPurchased, 0) = 0
+    AND NOT EXISTS (
+        SELECT 1
+        FROM Bookings b
+        WHERE b.MemberID = m.MemberID
+          AND b.Status <> 'Cancelled'
+    )
+    AND NOT EXISTS (
+        SELECT 1
+        FROM Invoices i
+        WHERE i.MemberID = m.MemberID
+    )
+)";
+
+            internal const string MembershipSummary = @"
+SELECT
+    SUM(CASE WHEN ISNULL(LTRIM(RTRIM(m.Tier)), '') IN (N'', N'Basic', N'Bronze') THEN 1 ELSE 0 END) AS BasicCount,
+    SUM(CASE WHEN ISNULL(LTRIM(RTRIM(m.Tier)), '') = N'Silver' THEN 1 ELSE 0 END) AS SilverCount,
+    SUM(CASE WHEN ISNULL(LTRIM(RTRIM(m.Tier)), '') = N'Gold' THEN 1 ELSE 0 END) AS GoldCount,
+    SUM(CASE WHEN ISNULL(m.TotalSpent, 0) >= 1500000 AND ISNULL(m.TotalSpent, 0) < 2000000 THEN 1 ELSE 0 END) AS NearSilverCount,
+    SUM(CASE WHEN ISNULL(m.TotalSpent, 0) >= 4000000 AND ISNULL(m.TotalSpent, 0) < 5000000 THEN 1 ELSE 0 END) AS NearGoldCount
 FROM Members m
 WHERE NOT (
     ISNULL(m.IsFixed, 0) = 0
@@ -318,7 +343,41 @@ WHERE Category != N'Dịch vụ đi kèm'
     AND SKU NOT LIKE N'SVC-%'
     AND SKU NOT LIKE N'DV_%'";
 
-            internal const string InventoryItems = "SELECT ProductID, SKU, Name, Category, StockQuantity, MinThreshold, Price FROM Products WHERE Category != N'Dịch vụ đi kèm'";
+            internal const string InventoryItems = @"
+;WITH Sales14 AS (
+    SELECT
+        d.ProductID,
+        SUM(ISNULL(d.Quantity, 1)) AS SoldLast14Days
+    FROM dbo.InvoiceDetails d
+    INNER JOIN dbo.Invoices i ON i.InvoiceID = d.InvoiceID
+    WHERE d.ProductID IS NOT NULL
+      AND i.CreatedAt >= DATEADD(DAY, -14, GETDATE())
+    GROUP BY d.ProductID
+)
+SELECT
+    p.ProductID,
+    p.SKU,
+    p.Name,
+    p.Category,
+    p.StockQuantity,
+    p.MinThreshold,
+    p.Price,
+    ISNULL(s.SoldLast14Days, 0) AS SoldLast14Days
+FROM dbo.Products p
+LEFT JOIN Sales14 s ON s.ProductID = p.ProductID
+WHERE p.Category != N'Dịch vụ đi kèm'
+  AND p.Category != N'Dịch vụ'
+  AND p.SKU NOT LIKE N'SVC-%'
+  AND p.SKU NOT LIKE N'DV[_]%'
+ORDER BY
+    CASE
+        WHEN p.StockQuantity <= 0 THEN 0
+        WHEN p.StockQuantity <= p.MinThreshold THEN 1
+        WHEN p.StockQuantity <= p.MinThreshold * 2 THEN 2
+        ELSE 3
+    END,
+    p.StockQuantity ASC,
+    p.Name ASC";
 
             internal const string RecentTransactions = @"
 SELECT TOP 10 EventDesc, SubDesc, CreatedAt
@@ -353,33 +412,66 @@ ORDER BY CreatedAt DESC";
         internal static class Report
         {
             internal const string TopCourts = @"
-SELECT 
-    c.Name as CourtName, 
-    c.CourtType as CourtType,
-    ISNULL(SUM(DATEDIFF(minute, b.StartTime, b.EndTime)), 0) as BookedMinutes,
-    ISNULL(SUM(CASE
-        WHEN b.BookingID IS NULL THEN 0
-        WHEN ib.BookingRevenue IS NOT NULL THEN ib.BookingRevenue
-        WHEN b.Status = 'Paid' THEN (DATEDIFF(minute, b.StartTime, b.EndTime) / 60.0) * c.HourlyRate
-        ELSE 0
-    END), 0) as Revenue
-FROM Courts c
-LEFT JOIN Bookings b 
-    ON c.CourtID = b.CourtID
-    AND b.Status != 'Cancelled'
-    AND b.Status != 'Maintenance'
-    AND (@From IS NULL OR b.StartTime >= @From)
-    AND (@To IS NULL OR b.StartTime < @To)
-LEFT JOIN (
+;WITH BookingScope AS (
     SELECT
-        D.BookingID,
-        SUM(ISNULL(D.Quantity, 1) * ISNULL(D.UnitPrice, 0)) as BookingRevenue
-    FROM InvoiceDetails D
-    WHERE D.BookingID IS NOT NULL
-    GROUP BY D.BookingID
-) ib ON ib.BookingID = b.BookingID
-GROUP BY c.CourtID, c.Name, c.CourtType
-ORDER BY Revenue DESC";
+        c.CourtID,
+        c.Name AS CourtName,
+        c.CourtType,
+        c.HourlyRate,
+        b.BookingID,
+        b.Status,
+        b.StartTime,
+        b.EndTime,
+        ISNULL(ib.BookingRevenue, CASE WHEN b.Status = 'Paid' THEN (DATEDIFF(minute, b.StartTime, b.EndTime) / 60.0) * c.HourlyRate ELSE 0 END) AS Revenue
+    FROM Courts c
+    LEFT JOIN Bookings b
+        ON c.CourtID = b.CourtID
+        AND (@From IS NULL OR b.StartTime >= @From)
+        AND (@To IS NULL OR b.StartTime < @To)
+    LEFT JOIN (
+        SELECT
+            D.BookingID,
+            SUM(ISNULL(D.Quantity, 1) * ISNULL(D.UnitPrice, 0)) as BookingRevenue
+        FROM InvoiceDetails D
+        WHERE D.BookingID IS NOT NULL
+        GROUP BY D.BookingID
+    ) ib ON ib.BookingID = b.BookingID
+),
+PeakHour AS (
+    SELECT
+        CourtID,
+        DATEPART(HOUR, StartTime) AS PeakHour,
+        COUNT(*) AS BookingCount,
+        ROW_NUMBER() OVER (PARTITION BY CourtID ORDER BY COUNT(*) DESC, DATEPART(HOUR, StartTime) ASC) AS rn
+    FROM BookingScope
+    WHERE BookingID IS NOT NULL
+      AND Status != 'Cancelled'
+      AND Status != 'Maintenance'
+    GROUP BY CourtID, DATEPART(HOUR, StartTime)
+)
+SELECT
+    bs.CourtName,
+    bs.CourtType,
+    ISNULL(SUM(CASE
+        WHEN bs.BookingID IS NULL THEN 0
+        WHEN bs.Status = 'Cancelled' OR bs.Status = 'Maintenance' THEN 0
+        ELSE DATEDIFF(minute, bs.StartTime, bs.EndTime)
+    END), 0) AS BookedMinutes,
+    ISNULL(SUM(CASE
+        WHEN bs.BookingID IS NULL THEN 0
+        WHEN bs.Status = 'Cancelled' OR bs.Status = 'Maintenance' THEN 0
+        ELSE bs.Revenue
+    END), 0) AS Revenue,
+    ISNULL(ph.PeakHour, -1) AS PeakHour,
+    CAST(CASE
+        WHEN SUM(CASE WHEN bs.BookingID IS NOT NULL AND bs.Status != 'Maintenance' THEN 1 ELSE 0 END) = 0 THEN 0
+        ELSE SUM(CASE WHEN bs.Status = 'Cancelled' THEN 1 ELSE 0 END) * 100.0
+            / SUM(CASE WHEN bs.BookingID IS NOT NULL AND bs.Status != 'Maintenance' THEN 1 ELSE 0 END)
+    END AS DECIMAL(18,2)) AS CancelRate
+FROM BookingScope bs
+LEFT JOIN PeakHour ph ON ph.CourtID = bs.CourtID AND ph.rn = 1
+GROUP BY bs.CourtID, bs.CourtName, bs.CourtType, ph.PeakHour
+ORDER BY Revenue DESC, BookedMinutes DESC";
 
             internal const string Kpis = @"
 DECLARE @currStart DATETIME = @FromStart;
@@ -519,6 +611,57 @@ LEFT JOIN (
 ) IB ON IB.BookingID = B.BookingID
 GROUP BY C.Name
 ORDER BY Rev DESC";
+
+            internal const string BookingHourHeatmap = @"
+;WITH Hours AS (
+    SELECT 6 AS Hr UNION ALL
+    SELECT 7 UNION ALL
+    SELECT 8 UNION ALL
+    SELECT 9 UNION ALL
+    SELECT 10 UNION ALL
+    SELECT 11 UNION ALL
+    SELECT 12 UNION ALL
+    SELECT 13 UNION ALL
+    SELECT 14 UNION ALL
+    SELECT 15 UNION ALL
+    SELECT 16 UNION ALL
+    SELECT 17 UNION ALL
+    SELECT 18 UNION ALL
+    SELECT 19 UNION ALL
+    SELECT 20 UNION ALL
+    SELECT 21 UNION ALL
+    SELECT 22 UNION ALL
+    SELECT 23
+)
+SELECT
+    Hr,
+    RIGHT('0' + CAST(Hr AS VARCHAR(2)), 2) + ':00' AS Label,
+    COUNT(b.BookingID) AS BookingCount
+FROM Hours h
+LEFT JOIN Bookings b
+    ON DATEPART(HOUR, b.StartTime) = h.Hr
+    AND b.Status != 'Cancelled'
+    AND b.Status != 'Maintenance'
+    AND b.StartTime >= @FromStart
+    AND b.StartTime < @ToExclusive
+GROUP BY Hr
+ORDER BY Hr";
+
+            internal const string BookingOps = @"
+SELECT
+    SUM(CASE WHEN b.Status != 'Maintenance' THEN 1 ELSE 0 END) AS TotalBookings,
+    SUM(CASE WHEN b.Status = 'Cancelled' THEN 1 ELSE 0 END) AS CancelledBookings,
+    SUM(CASE WHEN b.Status != 'Cancelled' AND b.Status != 'Maintenance' THEN 1 ELSE 0 END) AS ActiveBookings,
+    (
+        SELECT COUNT(*)
+        FROM dbo.SystemLogs s
+        WHERE s.EventDesc = N'Doi Ca Booking'
+          AND s.CreatedAt >= @FromStart
+          AND s.CreatedAt < @ToExclusive
+    ) AS ShiftedBookings
+FROM dbo.Bookings b
+WHERE b.StartTime >= @FromStart
+  AND b.StartTime < @ToExclusive";
         }
 
         internal static class Invoice

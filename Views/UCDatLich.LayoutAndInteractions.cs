@@ -87,6 +87,19 @@ namespace DemoPick
                 return;
             }
 
+            // Single click on timeline row: first click prompts, second click opens "Đặt Sân Chơi".
+            if (TryGetCourtAtPoint(e.Location, requireTimelineArea: true, out var clickedCourt))
+            {
+                if (_selectedBooking != null)
+                {
+                    _selectedBooking = null;
+                    pnlCanvas.Invalidate();
+                }
+
+                HandleCourtSingleClick(clickedCourt);
+                return;
+            }
+
             // Clicked empty area
             if (_selectedBooking != null)
             {
@@ -179,45 +192,11 @@ namespace DemoPick
         {
             try
             {
-                if (_cachedCourts == null || _cachedCourts.Count == 0) return;
-                if (canvasPoint.X > CourtColWidth) return;
-                if (canvasPoint.Y < TimeHeaderHeight) return;
-
-                int idx = (canvasPoint.Y - TimeHeaderHeight) / CourtRowHeight;
-                if (idx < 0 || idx >= _cachedCourts.Count) return;
-
-                var court = _cachedCourts[idx];
-                if (court == null) return;
+                if (!TryGetCourtAtPoint(canvasPoint, requireTimelineArea: false, out var court)) return;
 
                 var menu = new ContextMenuStrip();
                 var miDelete = new ToolStripMenuItem("Xóa sân");
-                miDelete.Click += (s, e) =>
-                {
-                    if (!CanManageCourts()) return;
-
-                    var name = string.IsNullOrWhiteSpace(court.Name) ? "(Không tên)" : court.Name;
-                    var confirm = MessageBox.Show(
-                        $"Bạn chắc chắn muốn xóa sân: {name}?\n(Sân sẽ bị ẩn khỏi danh sách và không thể đặt mới.)",
-                        "Xác nhận xóa sân",
-                        MessageBoxButtons.YesNo,
-                        MessageBoxIcon.Warning
-                    );
-
-                    if (confirm != DialogResult.Yes) return;
-
-                    try
-                    {
-                        _controller.DeactivateCourt(court.CourtID);
-                        _selectedBooking = null;
-                        ReloadTimelineAsync(forceReload: true);
-                        MessageBox.Show("Đã xóa sân thành công.", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    catch (Exception ex)
-                    {
-                        try { DemoPick.Services.DatabaseHelper.TryLog("DeactivateCourt Error", ex, "UCDatLich"); } catch { }
-                        MessageBox.Show(ex.Message, "Không thể xóa sân", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    }
-                };
+                miDelete.Click += (s, e) => DeleteCourtWithConfirmation(court);
 
                 menu.Items.Add(miDelete);
                 menu.Show(pnlCanvas, canvasPoint);
@@ -302,14 +281,14 @@ namespace DemoPick
             {
                 if (e.Button != MouseButtons.Left) return;
 
-                if (!CanReschedule()) return;
-
                 // Find booking under cursor
                 for (int i = _bookingHits.Count - 1; i >= 0; i--)
                 {
                     var hit = _bookingHits[i];
                     if (hit?.Booking == null) continue;
                     if (!hit.Rect.Contains(e.Location)) continue;
+
+                    if (!CanReschedule()) return;
 
                     var b = hit.Booking;
                     if (string.Equals(b.Status, DemoPick.Services.AppConstants.BookingStatus.Paid, StringComparison.OrdinalIgnoreCase))
@@ -337,11 +316,102 @@ namespace DemoPick
                         return;
                     }
                 }
+
+                // Double-click court name area to delete court quickly.
+                if (TryGetCourtAtPoint(e.Location, requireTimelineArea: false, out var courtToDelete))
+                {
+                    DeleteCourtWithConfirmation(courtToDelete);
+                }
             }
             catch (Exception ex)
             {
                 try { DemoPick.Services.DatabaseHelper.TryLog("DoiCa Error", ex, "UCDatLich.PnlCanvas_MouseDoubleClick"); } catch { }
                 MessageBox.Show("Không thể đổi ca: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private bool TryGetCourtAtPoint(Point canvasPoint, bool requireTimelineArea, out DemoPick.Models.CourtModel court)
+        {
+            court = null;
+
+            try
+            {
+                if (_cachedCourts == null || _cachedCourts.Count == 0) return false;
+                if (canvasPoint.Y < TimeHeaderHeight) return false;
+                if (requireTimelineArea && canvasPoint.X <= CourtColWidth) return false;
+                if (!requireTimelineArea && canvasPoint.X > CourtColWidth) return false;
+
+                int idx = (canvasPoint.Y - TimeHeaderHeight) / CourtRowHeight;
+                if (idx < 0 || idx >= _cachedCourts.Count) return false;
+
+                court = _cachedCourts[idx];
+                return court != null;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private void HandleCourtSingleClick(DemoPick.Models.CourtModel court)
+        {
+            if (court == null) return;
+
+            bool secondClick = _armedCourtId == court.CourtID && (DateTime.UtcNow - _armedCourtClickUtc).TotalSeconds <= 8;
+            _armedCourtId = court.CourtID;
+            _armedCourtClickUtc = DateTime.UtcNow;
+
+            if (!secondClick)
+            {
+                string courtName = string.IsNullOrWhiteSpace(court.Name) ? "(không tên)" : court.Name;
+                MessageBox.Show(
+                    $"Bạn muốn chọn sân số {courtName}.\nBấm lại 1 lần để mở form Đặt Sân Chơi.",
+                    "Chọn sân",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+                return;
+            }
+
+            _armedCourtId = -1;
+
+            DateTime now = DateTime.Now;
+            DateTime suggestedStart = _currentDate.Date.Add(now.TimeOfDay);
+
+            using (var frm = new FrmDatSanCoDinh(FrmDatSanCoDinh.BookingMode.Quick, court.CourtID, _currentDate.Date, suggestedStart))
+            {
+                if (frm.ShowDialog() == DialogResult.OK)
+                {
+                    ReloadTimelineAsync(forceReload: true);
+                }
+            }
+        }
+
+        private void DeleteCourtWithConfirmation(DemoPick.Models.CourtModel court)
+        {
+            if (court == null) return;
+            if (!CanManageCourts()) return;
+
+            var name = string.IsNullOrWhiteSpace(court.Name) ? "(Không tên)" : court.Name;
+            var confirm = MessageBox.Show(
+                $"Bạn chắc chắn muốn xóa sân: {name}?\n(Sân sẽ bị ẩn khỏi danh sách và không thể đặt mới.)",
+                "Xác nhận xóa sân",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning
+            );
+
+            if (confirm != DialogResult.Yes) return;
+
+            try
+            {
+                _controller.DeactivateCourt(court.CourtID);
+                _selectedBooking = null;
+                ReloadTimelineAsync(forceReload: true);
+                MessageBox.Show("Đã xóa sân thành công.", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                try { DemoPick.Services.DatabaseHelper.TryLog("DeactivateCourt Error", ex, "UCDatLich"); } catch { }
+                MessageBox.Show(ex.Message, "Không thể xóa sân", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 

@@ -161,6 +161,7 @@ namespace DemoPick
                 if (_ucRegister != null) _ucRegister.Visible = ReferenceEquals(card, _ucRegister);
                 if (_ucBasicLogin != null) _ucBasicLogin.Visible = ReferenceEquals(card, _ucBasicLogin);
 
+                UiTheme.NormalizeTextBackgrounds(card);
                 card.Visible = true;
                 card.BringToFront();
             }

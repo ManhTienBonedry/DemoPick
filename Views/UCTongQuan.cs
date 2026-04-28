@@ -9,6 +9,8 @@ namespace DemoPick
     public partial class UCTongQuan : UserControl
     {
         private DashboardService _dashboardService;
+        private InventoryService _inventoryService;
+        private Label _lblInventoryWarning;
 
         private bool _scrollResetQueued;
 
@@ -25,6 +27,18 @@ namespace DemoPick
             AttachBorders();
 
             _dashboardService = new DashboardService();
+            _inventoryService = new InventoryService();
+
+            _lblInventoryWarning = new Label();
+            _lblInventoryWarning.AutoSize = true;
+            _lblInventoryWarning.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
+            _lblInventoryWarning.ForeColor = Color.FromArgb(220, 38, 38);
+            _lblInventoryWarning.BackColor = Color.FromArgb(254, 226, 226);
+            _lblInventoryWarning.Padding = new Padding(10, 5, 10, 5);
+            _lblInventoryWarning.Location = new Point(25, 475);
+            _lblInventoryWarning.Visible = false;
+            this.Controls.Add(_lblInventoryWarning);
+
             LoadRealDataAsync();
         }
 
@@ -116,37 +130,53 @@ namespace DemoPick
 
         private void SetupCharts()
         {
-            // Trend Area Chart
-            chartTrend.ChartAreas.Add(new ChartArea("MainArea"));
-            chartTrend.ChartAreas[0].AxisX.MajorGrid.LineColor = Color.FromArgb(243, 244, 246);
-            chartTrend.ChartAreas[0].AxisY.MajorGrid.LineColor = Color.FromArgb(243, 244, 246);
-            chartTrend.ChartAreas[0].AxisX.LabelStyle.ForeColor = Color.Gray;
-            chartTrend.ChartAreas[0].AxisY.LabelStyle.ForeColor = Color.Gray;
+            // Trend chart: clean spline-area style for clear up/down reading.
+            chartTrend.ChartAreas.Clear();
+            chartTrend.Series.Clear();
+            chartTrend.BackColor = Color.Transparent;
+
+            ChartArea trendArea = new ChartArea("MainArea");
+            trendArea.BackColor = Color.Transparent;
+            trendArea.AxisX.MajorGrid.Enabled = false;
+            trendArea.AxisY.MajorGrid.LineColor = Color.FromArgb(232, 234, 237);
+            trendArea.AxisX.LineColor = Color.FromArgb(220, 225, 229);
+            trendArea.AxisY.LineColor = Color.FromArgb(220, 225, 229);
+            trendArea.AxisX.LabelStyle.ForeColor = Color.FromArgb(107, 114, 128);
+            trendArea.AxisY.LabelStyle.ForeColor = Color.FromArgb(107, 114, 128);
+            trendArea.AxisY.LabelStyle.Format = "#,0";
+            chartTrend.ChartAreas.Add(trendArea);
 
             Series s = new Series("Revenue");
-            s.ChartType = SeriesChartType.Area;
-            s.Color = Color.FromArgb(100, 76, 175, 80); // Semi-transparent green
-            s.BorderColor = Color.FromArgb(76, 175, 80); // Solid green line
-            s.BorderWidth = 2;
-            
-            // To be populated by LoadRealDataAsync
+            s.ChartType = SeriesChartType.SplineArea;
+            s.Color = Color.FromArgb(90, 76, 175, 80);
+            s.BorderColor = Color.FromArgb(40, 140, 60);
+            s.BorderWidth = 3;
+            s.MarkerStyle = MarkerStyle.Circle;
+            s.MarkerSize = 5;
+            s.MarkerColor = Color.FromArgb(40, 140, 60);
+            s["LineTension"] = "0.35";
             chartTrend.Series.Add(s);
             chartTrend.Legends.Clear();
 
-            // Doughnut / Pie Chart
+            // Doughnut chart.
+            chartPie.ChartAreas.Clear();
+            chartPie.Series.Clear();
+            chartPie.Legends.Clear();
+
             chartPie.ChartAreas.Add(new ChartArea("PieArea"));
-            chartPie.ChartAreas[0].BackColor = Color.White;
+            chartPie.ChartAreas[0].BackColor = Color.Transparent;
             Series sp = new Series("Tỉ trọng");
             sp.ChartType = SeriesChartType.Doughnut;
             sp.BorderWidth = 2;
             sp.BorderColor = Color.White;
+            sp["DoughnutRadius"] = "68";
             
-            // To be populated by LoadRealDataAsync
             chartPie.Series.Add(sp);
             
             Legend l = new Legend("Legend");
             l.Docking = Docking.Bottom;
             l.Alignment = StringAlignment.Center;
+            l.BackColor = Color.Transparent;
             chartPie.Legends.Add(l);
         }
 
@@ -169,13 +199,25 @@ namespace DemoPick
                 var trendTask = _dashboardService.GetRevenueTrendLast7DaysAsync();
                 var pieTask = _dashboardService.GetTopCourtsRevenueAsync();
                 var activityTask = _dashboardService.GetRecentActivityAsync(10);
+                var inventoryTask = _inventoryService.GetInventoryKpisAsync();
 
-                await System.Threading.Tasks.Task.WhenAll(metricsTask, trendTask, pieTask, activityTask);
+                await System.Threading.Tasks.Task.WhenAll(metricsTask, trendTask, pieTask, activityTask, inventoryTask);
 
                 BindTopCards(metricsTask.Result);
                 BindTrendChart(trendTask.Result);
                 BindPieChart(pieTask.Result);
                 BindRecentActivity(activityTask.Result);
+                
+                var kpi = inventoryTask.Result ?? new DemoPick.Models.InventoryKpiModel();
+                if (kpi.CriticalItems > 0)
+                {
+                    _lblInventoryWarning.Text = $"⚠ CẢNH BÁO: Có {kpi.CriticalItems} sản phẩm sắp hết hàng trong kho. Vui lòng kiểm tra mục Kho hàng.";
+                    _lblInventoryWarning.Visible = true;
+                }
+                else
+                {
+                    _lblInventoryWarning.Visible = false;
+                }
             }
             catch (Exception ex)
             {
@@ -212,6 +254,32 @@ namespace DemoPick
             foreach (var p in points)
             {
                 chartTrend.Series[0].Points.AddXY(p.Label, p.Revenue);
+            }
+
+            if (points.Count >= 2)
+            {
+                decimal first = points[0].Revenue;
+                decimal last = points[points.Count - 1].Revenue;
+                if (last > first)
+                {
+                    lblChartT.Text = "Xu hướng doanh thu ▲";
+                    lblChartT.ForeColor = Color.FromArgb(22, 163, 74);
+                }
+                else if (last < first)
+                {
+                    lblChartT.Text = "Xu hướng doanh thu ▼";
+                    lblChartT.ForeColor = Color.FromArgb(220, 38, 38);
+                }
+                else
+                {
+                    lblChartT.Text = "Xu hướng doanh thu";
+                    lblChartT.ForeColor = Color.FromArgb(26, 35, 50);
+                }
+            }
+            else
+            {
+                lblChartT.Text = "Xu hướng doanh thu";
+                lblChartT.ForeColor = Color.FromArgb(26, 35, 50);
             }
         }
 

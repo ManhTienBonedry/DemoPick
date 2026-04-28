@@ -1,4 +1,4 @@
-USE PickleProDB;
+USE PickleBallDB;
 GO
 IF COL_LENGTH('dbo.Members', 'TotalHoursPurchased') IS NULL
 BEGIN

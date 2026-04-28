@@ -12,6 +12,7 @@ namespace DemoPick
         private Label lblTitle;
         private Label btnCancelTop;
         
+        private UIRadioButton rbDatNhanh;
         private UIRadioButton rbKhachThue;
         private UIRadioButton rbBaoTri;
         
@@ -61,6 +62,7 @@ namespace DemoPick
             this.pnlHeader = new System.Windows.Forms.Panel();
             this.btnCancelTop = new System.Windows.Forms.Label();
             this.lblTitle = new System.Windows.Forms.Label();
+            this.rbDatNhanh = new Sunny.UI.UIRadioButton();
             this.rbKhachThue = new Sunny.UI.UIRadioButton();
             this.rbBaoTri = new Sunny.UI.UIRadioButton();
             this.lblName = new System.Windows.Forms.Label();
@@ -99,7 +101,7 @@ namespace DemoPick
             this.pnlHeader.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlHeader.Location = new System.Drawing.Point(0, 0);
             this.pnlHeader.Name = "pnlHeader";
-            this.pnlHeader.Size = new System.Drawing.Size(700, 70);
+            this.pnlHeader.Size = new System.Drawing.Size(760, 70);
             this.pnlHeader.TabIndex = 26;
             // 
             // btnCancelTop
@@ -108,7 +110,7 @@ namespace DemoPick
             this.btnCancelTop.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnCancelTop.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
             this.btnCancelTop.ForeColor = System.Drawing.Color.Silver;
-            this.btnCancelTop.Location = new System.Drawing.Point(650, 20);
+            this.btnCancelTop.Location = new System.Drawing.Point(710, 20);
             this.btnCancelTop.Name = "btnCancelTop";
             this.btnCancelTop.Size = new System.Drawing.Size(25, 28);
             this.btnCancelTop.TabIndex = 0;
@@ -125,24 +127,36 @@ namespace DemoPick
             this.lblTitle.TabIndex = 1;
             this.lblTitle.Text = "Lập Lịch Bảo Trì & Thuê Cố Định";
             // 
+            // rbDatNhanh
+            // 
+            this.rbDatNhanh.Checked = true;
+            this.rbDatNhanh.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.rbDatNhanh.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold);
+            this.rbDatNhanh.Location = new System.Drawing.Point(30, 90);
+            this.rbDatNhanh.MinimumSize = new System.Drawing.Size(1, 1);
+            this.rbDatNhanh.Name = "rbDatNhanh";
+            this.rbDatNhanh.RadioButtonColor = System.Drawing.Color.FromArgb(((int)(((byte)(59)))), ((int)(((byte)(130)))), ((int)(((byte)(246)))));
+            this.rbDatNhanh.Size = new System.Drawing.Size(160, 29);
+            this.rbDatNhanh.TabIndex = 29;
+            this.rbDatNhanh.Text = "Đặt sân nhanh";
+            // 
             // rbKhachThue
             // 
-            this.rbKhachThue.Checked = true;
             this.rbKhachThue.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.rbKhachThue.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-            this.rbKhachThue.Location = new System.Drawing.Point(30, 90);
+            this.rbKhachThue.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold);
+            this.rbKhachThue.Location = new System.Drawing.Point(200, 90);
             this.rbKhachThue.MinimumSize = new System.Drawing.Size(1, 1);
             this.rbKhachThue.Name = "rbKhachThue";
             this.rbKhachThue.RadioButtonColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(204)))), ((int)(((byte)(113)))));
-            this.rbKhachThue.Size = new System.Drawing.Size(180, 29);
+            this.rbKhachThue.Size = new System.Drawing.Size(160, 29);
             this.rbKhachThue.TabIndex = 25;
-            this.rbKhachThue.Text = "Khách thuê";
+            this.rbKhachThue.Text = "Đặt cố định";
             // 
             // rbBaoTri
             // 
             this.rbBaoTri.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.rbBaoTri.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-            this.rbBaoTri.Location = new System.Drawing.Point(220, 90);
+            this.rbBaoTri.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold);
+            this.rbBaoTri.Location = new System.Drawing.Point(370, 90);
             this.rbBaoTri.MinimumSize = new System.Drawing.Size(1, 1);
             this.rbBaoTri.Name = "rbBaoTri";
             this.rbBaoTri.RadioButtonColor = System.Drawing.Color.FromArgb(((int)(((byte)(231)))), ((int)(((byte)(76)))), ((int)(((byte)(60)))));
@@ -232,7 +246,7 @@ namespace DemoPick
             // 
             this.lblCourt.AutoSize = true;
             this.lblCourt.Font = new System.Drawing.Font("Segoe UI", 10F);
-            this.lblCourt.Location = new System.Drawing.Point(370, 95);
+            this.lblCourt.Location = new System.Drawing.Point(370, 140);
             this.lblCourt.Name = "lblCourt";
             this.lblCourt.Size = new System.Drawing.Size(127, 23);
             this.lblCourt.TabIndex = 15;
@@ -253,7 +267,7 @@ namespace DemoPick
             "Sân VIP 2",
             "Tất Cả Các Sân"});
             this.cbCourt.ItemSelectForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(235)))), ((int)(((byte)(243)))), ((int)(((byte)(255)))));
-            this.cbCourt.Location = new System.Drawing.Point(370, 120);
+            this.cbCourt.Location = new System.Drawing.Point(370, 165);
             this.cbCourt.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.cbCourt.MinimumSize = new System.Drawing.Size(63, 0);
             this.cbCourt.Name = "cbCourt";
@@ -268,7 +282,7 @@ namespace DemoPick
             // 
             this.lblTime.AutoSize = true;
             this.lblTime.Font = new System.Drawing.Font("Segoe UI", 10F);
-            this.lblTime.Location = new System.Drawing.Point(370, 170);
+            this.lblTime.Location = new System.Drawing.Point(370, 215);
             this.lblTime.Name = "lblTime";
             this.lblTime.Size = new System.Drawing.Size(137, 23);
             this.lblTime.TabIndex = 13;
@@ -318,7 +332,7 @@ namespace DemoPick
             "22:30",
             "23:00"});
             this.cbTime.ItemSelectForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(235)))), ((int)(((byte)(243)))), ((int)(((byte)(255)))));
-            this.cbTime.Location = new System.Drawing.Point(370, 195);
+            this.cbTime.Location = new System.Drawing.Point(370, 240);
             this.cbTime.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.cbTime.MinimumSize = new System.Drawing.Size(63, 0);
             this.cbTime.Name = "cbTime";
@@ -333,7 +347,7 @@ namespace DemoPick
             // 
             this.lblDuration.AutoSize = true;
             this.lblDuration.Font = new System.Drawing.Font("Segoe UI", 10F);
-            this.lblDuration.Location = new System.Drawing.Point(530, 170);
+            this.lblDuration.Location = new System.Drawing.Point(560, 215);
             this.lblDuration.Name = "lblDuration";
             this.lblDuration.Size = new System.Drawing.Size(96, 23);
             this.lblDuration.TabIndex = 11;
@@ -352,7 +366,7 @@ namespace DemoPick
             "120 phút",
             "Nguyên ngày"});
             this.cbDuration.ItemSelectForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(235)))), ((int)(((byte)(243)))), ((int)(((byte)(255)))));
-            this.cbDuration.Location = new System.Drawing.Point(530, 195);
+            this.cbDuration.Location = new System.Drawing.Point(560, 240);
             this.cbDuration.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.cbDuration.MinimumSize = new System.Drawing.Size(63, 0);
             this.cbDuration.Name = "cbDuration";
@@ -387,7 +401,7 @@ namespace DemoPick
             // 
             this.lblRepeat.AutoSize = true;
             this.lblRepeat.Font = new System.Drawing.Font("Segoe UI", 10F);
-            this.lblRepeat.Location = new System.Drawing.Point(370, 250);
+            this.lblRepeat.Location = new System.Drawing.Point(370, 290);
             this.lblRepeat.Name = "lblRepeat";
             this.lblRepeat.Size = new System.Drawing.Size(155, 23);
             this.lblRepeat.TabIndex = 9;
@@ -398,7 +412,7 @@ namespace DemoPick
             this.chkMon.Cursor = System.Windows.Forms.Cursors.Hand;
             this.chkMon.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.chkMon.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
-            this.chkMon.Location = new System.Drawing.Point(370, 280);
+            this.chkMon.Location = new System.Drawing.Point(370, 320);
             this.chkMon.MinimumSize = new System.Drawing.Size(1, 1);
             this.chkMon.Name = "chkMon";
             this.chkMon.Size = new System.Drawing.Size(80, 29);
@@ -410,7 +424,7 @@ namespace DemoPick
             this.chkTue.Cursor = System.Windows.Forms.Cursors.Hand;
             this.chkTue.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.chkTue.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
-            this.chkTue.Location = new System.Drawing.Point(460, 280);
+            this.chkTue.Location = new System.Drawing.Point(470, 320);
             this.chkTue.MinimumSize = new System.Drawing.Size(1, 1);
             this.chkTue.Name = "chkTue";
             this.chkTue.Size = new System.Drawing.Size(80, 29);
@@ -422,7 +436,7 @@ namespace DemoPick
             this.chkWed.Cursor = System.Windows.Forms.Cursors.Hand;
             this.chkWed.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.chkWed.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
-            this.chkWed.Location = new System.Drawing.Point(550, 280);
+            this.chkWed.Location = new System.Drawing.Point(570, 320);
             this.chkWed.MinimumSize = new System.Drawing.Size(1, 1);
             this.chkWed.Name = "chkWed";
             this.chkWed.Size = new System.Drawing.Size(80, 29);
@@ -434,7 +448,7 @@ namespace DemoPick
             this.chkThu.Cursor = System.Windows.Forms.Cursors.Hand;
             this.chkThu.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.chkThu.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
-            this.chkThu.Location = new System.Drawing.Point(370, 315);
+            this.chkThu.Location = new System.Drawing.Point(370, 355);
             this.chkThu.MinimumSize = new System.Drawing.Size(1, 1);
             this.chkThu.Name = "chkThu";
             this.chkThu.Size = new System.Drawing.Size(80, 29);
@@ -446,7 +460,7 @@ namespace DemoPick
             this.chkFri.Cursor = System.Windows.Forms.Cursors.Hand;
             this.chkFri.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.chkFri.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
-            this.chkFri.Location = new System.Drawing.Point(460, 315);
+            this.chkFri.Location = new System.Drawing.Point(470, 355);
             this.chkFri.MinimumSize = new System.Drawing.Size(1, 1);
             this.chkFri.Name = "chkFri";
             this.chkFri.Size = new System.Drawing.Size(80, 29);
@@ -458,7 +472,7 @@ namespace DemoPick
             this.chkSat.Cursor = System.Windows.Forms.Cursors.Hand;
             this.chkSat.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.chkSat.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
-            this.chkSat.Location = new System.Drawing.Point(550, 315);
+            this.chkSat.Location = new System.Drawing.Point(570, 355);
             this.chkSat.MinimumSize = new System.Drawing.Size(1, 1);
             this.chkSat.Name = "chkSat";
             this.chkSat.Size = new System.Drawing.Size(80, 29);
@@ -470,7 +484,7 @@ namespace DemoPick
             this.chkSun.Cursor = System.Windows.Forms.Cursors.Hand;
             this.chkSun.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.chkSun.ForeColor = System.Drawing.Color.Red;
-            this.chkSun.Location = new System.Drawing.Point(370, 350);
+            this.chkSun.Location = new System.Drawing.Point(370, 390);
             this.chkSun.MinimumSize = new System.Drawing.Size(1, 1);
             this.chkSun.Name = "chkSun";
             this.chkSun.Size = new System.Drawing.Size(120, 29);
@@ -484,7 +498,7 @@ namespace DemoPick
             this.btnCancel.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold);
             this.btnCancel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(60)))), ((int)(((byte)(70)))));
             this.btnCancel.ForeHoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(60)))), ((int)(((byte)(70)))));
-            this.btnCancel.Location = new System.Drawing.Point(30, 420);
+            this.btnCancel.Location = new System.Drawing.Point(30, 460);
             this.btnCancel.MinimumSize = new System.Drawing.Size(1, 1);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Radius = 8;
@@ -500,12 +514,12 @@ namespace DemoPick
             this.btnConfirm.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(119)))), ((int)(((byte)(219)))), ((int)(((byte)(44)))));
             this.btnConfirm.FillHoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(56)))), ((int)(((byte)(214)))), ((int)(((byte)(123)))));
             this.btnConfirm.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold);
-            this.btnConfirm.Location = new System.Drawing.Point(250, 420);
+            this.btnConfirm.Location = new System.Drawing.Point(250, 460);
             this.btnConfirm.MinimumSize = new System.Drawing.Size(1, 1);
             this.btnConfirm.Name = "btnConfirm";
             this.btnConfirm.Radius = 8;
             this.btnConfirm.RectColor = System.Drawing.Color.Transparent;
-            this.btnConfirm.Size = new System.Drawing.Size(420, 45);
+            this.btnConfirm.Size = new System.Drawing.Size(480, 45);
             this.btnConfirm.TabIndex = 0;
             this.btnConfirm.Text = "Tạo Lịch Cố Định";
             this.btnConfirm.TipsFont = new System.Drawing.Font("Microsoft Sans Serif", 9F);
@@ -522,7 +536,7 @@ namespace DemoPick
             // FrmDatSanCoDinh
             // 
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
-            this.ClientSize = new System.Drawing.Size(700, 500);
+            this.ClientSize = new System.Drawing.Size(760, 540);
             this.Controls.Add(this.ucDateRange);
             this.Controls.Add(this.btnConfirm);
             this.Controls.Add(this.btnCancel);
@@ -550,6 +564,7 @@ namespace DemoPick
             this.Controls.Add(this.lblName);
             this.Controls.Add(this.rbBaoTri);
             this.Controls.Add(this.rbKhachThue);
+            this.Controls.Add(this.rbDatNhanh);
             this.Controls.Add(this.pnlHeader);
             this.Name = "FrmDatSanCoDinh";
             this.pnlHeader.ResumeLayout(false);

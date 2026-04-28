@@ -17,39 +17,64 @@ namespace DemoPick
 
                 if (courts.Count > 0)
                     cbCourt.SelectedIndex = 0;
+
+                if (_preselectedCourtId.HasValue)
+                {
+                    for (int i = 0; i < courts.Count; i++)
+                    {
+                        if (courts[i].CourtID == _preselectedCourtId.Value)
+                        {
+                            cbCourt.SelectedIndex = i;
+                            break;
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Lỗi Data Sân: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+
+            DateTime selectedDate = _preselectedDate?.Date ?? DateTime.Today;
+            if (ucDateRange != null)
+            {
+                ucDateRange.FromDate = selectedDate;
+                ucDateRange.ToDate = CurrentMode == BookingMode.Fixed ? selectedDate.AddMonths(1) : selectedDate;
+            }
+
+            if (_dtStartClock != null)
+            {
+                DateTime now = DateTime.Now;
+                DateTime seed = _preselectedStartTime ?? now;
+                _dtStartClock.Value = now.Date.Add(seed.TimeOfDay);
+            }
+
+            if (CurrentMode == BookingMode.Quick)
+            {
+                cbDuration.SelectedItem = "90 phút";
+            }
+
+            // Select the correct radio based on constructor mode
+            if (_mode == BookingMode.Quick)
+            {
+                rbDatNhanh.Checked = true;
+            }
+            else
+            {
+                rbKhachThue.Checked = true;
+            }
+
+            QueueConflictHintRefresh();
         }
 
         private void RbMode_CheckedChanged(object sender, EventArgs e)
         {
-            if (rbBaoTri.Checked)
-            {
-                txtName.Enabled = false;
-                txtPhone.Enabled = false;
-                txtName.Text = "Ban Quản Lý (Bảo Trì)";
-                txtPhone.Text = "N/A";
+            // Only handle when a radio becomes checked (avoid double-fire)
+            var rb = sender as Sunny.UI.UIRadioButton;
+            if (rb != null && !rb.Checked) return;
 
-                btnConfirm.FillColor = Color.FromArgb(231, 76, 60); // Red
-                btnConfirm.FillHoverColor = Color.FromArgb(241, 86, 70);
-                btnConfirm.Text = "Xác nhận Khóa Sân";
-            }
-            else
-            {
-                txtName.Enabled = true;
-                txtPhone.Enabled = true;
-                txtName.Text = "";
-                txtPhone.Text = "";
-
-                btnConfirm.FillColor = Color.FromArgb(46, 204, 113); // Green
-                btnConfirm.FillHoverColor = Color.FromArgb(56, 214, 123);
-                btnConfirm.Text = "Tạo Lịch Cố Định";
-            }
-
-            UpdatePhoneValidationUi();
+            ApplyModeLayout();
+            QueueConflictHintRefresh();
         }
     }
 }
