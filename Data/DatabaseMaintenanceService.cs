@@ -10,6 +10,7 @@ namespace DemoPick.Data
 {
     public class DatabaseMaintenanceService
     {
+        // Thu thuc hien Try Heal Corrupted Court Names, neu du lieu khong hop le thi dung va tra thong bao phu hop.
         public void TryHealCorruptedCourtNames()
         {
             // Self-heal corrupted database text (tr?i instead of trời)
@@ -25,6 +26,7 @@ namespace DemoPick.Data
             }
         }
 
+        // Thu thuc hien Try Purge Orphan Pos Checkout Logs, neu du lieu khong hop le thi dung va tra thong bao phu hop.
         public void TryPurgeOrphanPosCheckoutLogs(int scanTop = 300)
         {
             try
@@ -90,6 +92,7 @@ namespace DemoPick.Data
             }
         }
 
+        // Lay hoac nap du lieu cho Load Existing Invoice Ids tu CSDL/nguon cau hinh.
         private static HashSet<int> LoadExistingInvoiceIds(HashSet<int> invoiceIds)
         {
             var existing = new HashSet<int>();
@@ -121,6 +124,7 @@ namespace DemoPick.Data
             return existing;
         }
 
+        // Thu thuc hien Try Extract Invoice Id From Pos Checkout Sub Desc, neu du lieu khong hop le thi dung va tra thong bao phu hop.
         private static int TryExtractInvoiceIdFromPosCheckoutSubDesc(string subDesc)
         {
             if (string.IsNullOrWhiteSpace(subDesc)) return 0;

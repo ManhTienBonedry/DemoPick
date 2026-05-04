@@ -12,6 +12,7 @@ namespace DemoPick
         private int _lastCompletedInvoiceId = 0;
         private string _lastCompletedCourtName = string.Empty;
 
+        // Thiet lap Initialize Reprint Button va gan cac cau hinh/su kien can dung ban dau.
         private void InitializeReprintButton()
         {
             if (ucInvoiceReprintPanel == null)
@@ -26,16 +27,19 @@ namespace DemoPick
             ucInvoiceReprintPanel.ReprintLastRequested += UcInvoiceReprintPanel_ReprintLastRequested;
         }
 
+        // Xu ly su kien tu control lien quan tren man hinh.
         private void UcInvoiceReprintPanel_ReprintByIdRequested(object sender, EventArgs e)
         {
             BtnReprintById_Click(sender, EventArgs.Empty);
         }
 
+        // Xu ly su kien tu control lien quan tren man hinh.
         private void UcInvoiceReprintPanel_ReprintLastRequested(object sender, EventArgs e)
         {
             BtnReprintLastInvoice_Click(sender, EventArgs.Empty);
         }
 
+        // Cap nhat lai du lieu/trang thai Update Reprint Button State tren man hinh hien tai.
         private void UpdateReprintButtonState()
         {
             if (ucInvoiceReprintPanel == null)
@@ -47,6 +51,7 @@ namespace DemoPick
             ucInvoiceReprintPanel.SetLastInvoiceEnabled(canReprint);
         }
 
+        // Xu ly su kien nguoi dung bam vao control lien quan va goi luong nghiep vu phu hop.
         private void BtnReprintLastInvoice_Click(object sender, EventArgs e)
         {
             if (_lastCompletedInvoiceId <= 0)
@@ -58,6 +63,7 @@ namespace DemoPick
             ShowInvoicePreview(_lastCompletedInvoiceId, _lastCompletedCourtName);
         }
 
+        // Xu ly su kien nguoi dung bam vao control lien quan va goi luong nghiep vu phu hop.
         private void BtnReprintById_Click(object sender, EventArgs e)
         {
             if (ucInvoiceReprintPanel == null)
@@ -85,6 +91,7 @@ namespace DemoPick
             ReloadPaymentHistory();
         }
 
+        // Dieu huong hoac hien thi Show Invoice Preview theo trang thai hien tai cua ung dung.
         private void ShowInvoicePreview(int invoiceId, string courtName)
         {
             if (invoiceId <= 0)

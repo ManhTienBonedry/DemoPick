@@ -35,11 +35,13 @@ namespace DemoPick.Controllers
 
         private readonly PosService _posService;
 
+        // Dieu phoi nghiep vu Thanh Toan Controller giua man hinh va tang service.
         public ThanhToanController()
         {
             _posService = new PosService();
         }
 
+        // Xac dinh ty le tien san con phai thu dua tren trang thai coc/chuyen khoan cua booking.
         public decimal GetCourtPayableRatio(BookingModel booking)
         {
             if (booking == null)
@@ -55,6 +57,7 @@ namespace DemoPick.Controllers
             return 1m;
         }
 
+        // Tinh cac dong tien thanh toan gom tien san, dich vu, giam gia va tong cuoi cung.
         public CheckoutBreakdown CalculateBreakdown(
             string courtName, 
             BookingModel booking, 
@@ -143,6 +146,7 @@ namespace DemoPick.Controllers
             return result;
         }
 
+        // Goi service thanh toan, don don tam cua san va tra ket qua hoa don cho man hinh.
         public CheckoutResult PerformCheckout(
             int customerId,
             List<CartLine> lines,
@@ -179,16 +183,19 @@ namespace DemoPick.Controllers
             }
         }
 
+        // Lay du lieu/ket qua cho Get Payment History tu tang xu ly phu hop.
         public List<InvoiceService.InvoiceHistoryItem> GetPaymentHistory(int limit, string keyword, int? memberId = null)
         {
             return InvoiceService.GetInvoiceHistory(limit, keyword, memberId) ?? new List<InvoiceService.InvoiceHistoryItem>();
         }
 
+        // Lay du lieu/ket qua cho Get Shift Summary tu tang xu ly phu hop.
         public InvoiceService.ShiftReconciliationSummary GetShiftSummary()
         {
             return InvoiceService.GetCurrentShiftSummary();
         }
 
+        // Lay du lieu/ket qua cho Search Customer tu tang xu ly phu hop.
         public async System.Threading.Tasks.Task<CheckoutCustomerModel> SearchCustomerAsync(string phone)
         {
             var svc = new CustomerService();

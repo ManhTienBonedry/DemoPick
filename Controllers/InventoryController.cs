@@ -17,11 +17,13 @@ namespace DemoPick.Controllers
     {
         private readonly InventoryService _inventoryService;
 
+        // Dieu phoi nghiep vu Inventory Controller giua man hinh va tang service.
         public InventoryController()
         {
             _inventoryService = new InventoryService();
         }
 
+        // Lay du lieu/ket qua cho Get Inventory Kpis tu tang xu ly phu hop.
         public Task<InventoryKpiModel> GetInventoryKpisAsync()
         {
             return _inventoryService.GetInventoryKpisAsync();
@@ -29,16 +31,19 @@ namespace DemoPick.Controllers
 
 
 
+        // Lay du lieu/ket qua cho Get Inventory Items tu tang xu ly phu hop.
         public Task<List<InventoryItemModel>> GetInventoryItemsAsync()
         {
             return _inventoryService.GetInventoryItemsAsync();
         }
 
+        // Lay du lieu/ket qua cho Get Recent Transactions tu tang xu ly phu hop.
         public Task<List<TransactionModel>> GetRecentTransactionsAsync()
         {
             return _inventoryService.GetRecentTransactionsAsync();
         }
 
+        // Tao hoac tinh ra du lieu Build Smart Insights tu cac thong tin dau vao hien co.
         public InventorySmartInsightsModel BuildSmartInsights(IReadOnlyCollection<InventoryItemModel> items)
         {
             return _inventoryService.BuildSmartInsights(items);

@@ -8,6 +8,7 @@ namespace DemoPick.Helpers
 {
     internal static class PosInvoiceWriter
     {
+        // Luu hoac ghi nhan Insert Invoice vao trang thai he thong/CSDL khi nghiep vu yeu cau.
         internal static int InsertInvoice(SqlConnection conn, SqlTransaction tran, int memberId, decimal totalAmount, decimal discountAmount, decimal finalAmount, string paymentMethod)
         {
             var memberParam = new SqlParameter("@MemberID", SqlDbType.Int);
@@ -30,6 +31,7 @@ namespace DemoPick.Helpers
             return Convert.ToInt32(idObj);
         }
 
+        // Luu hoac ghi nhan Insert Invoice Detail vao trang thai he thong/CSDL khi nghiep vu yeu cau.
         internal static void InsertInvoiceDetail(SqlConnection conn, SqlTransaction tran, int invoiceId, int? productId, int? bookingId, int qty, decimal unitPrice)
         {
             var pProduct = new SqlParameter("@ProductID", SqlDbType.Int);

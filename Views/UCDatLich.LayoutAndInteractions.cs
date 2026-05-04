@@ -8,6 +8,7 @@ namespace DemoPick
 {
     public partial class UCDatLich
     {
+        // Ap dung hoac chuan hoa trang thai Set Zoom de du lieu/giao dien nhat quan.
         private void SetZoom(float zoom)
         {
             float clamped = zoom;
@@ -20,6 +21,7 @@ namespace DemoPick
             RefreshTimelineLayoutOnly();
         }
 
+        // Cap nhat lai du lieu/trang thai Update Zoom Buttons tren man hinh hien tai.
         private void UpdateZoomButtons()
         {
             if (btnZoomOut != null)
@@ -32,6 +34,7 @@ namespace DemoPick
             }
         }
 
+        // Cap nhat lai du lieu/trang thai Refresh Timeline Layout Only tren man hinh hien tai.
         private void RefreshTimelineLayoutOnly()
         {
             try
@@ -65,6 +68,7 @@ namespace DemoPick
             pnlCanvas.Invalidate();
         }
 
+        // Xu ly thao tac click chuot tren vung hien thi de chon hoac mo menu phu hop.
         private void PnlCanvas_MouseClick(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
@@ -110,6 +114,7 @@ namespace DemoPick
             }
         }
 
+        // Thu thuc hien Try Show Booking Context Menu, neu du lieu khong hop le thi dung va tra thong bao phu hop.
         private bool TryShowBookingContextMenu(Point canvasPoint)
         {
             try
@@ -165,6 +170,7 @@ namespace DemoPick
             return false;
         }
 
+        // Kiem tra dieu kien Can Manage Courts va tra ve ket qua dung/sai cho luong xu ly.
         private bool CanManageCourts()
         {
             try
@@ -190,6 +196,7 @@ namespace DemoPick
             }
         }
 
+        // Thu thuc hien Try Show Court Context Menu, neu du lieu khong hop le thi dung va tra thong bao phu hop.
         private void TryShowCourtContextMenu(Point canvasPoint)
         {
             try
@@ -209,6 +216,7 @@ namespace DemoPick
             }
         }
 
+        // Kiem tra dieu kien Can Reschedule va tra ve ket qua dung/sai cho luong xu ly.
         private bool CanReschedule()
         {
             try
@@ -235,6 +243,7 @@ namespace DemoPick
             }
         }
 
+        // Dieu huong hoac hien thi Open Reschedule For Selected theo trang thai hien tai cua ung dung.
         private void OpenRescheduleForSelected()
         {
             if (!CanReschedule()) return;
@@ -277,6 +286,7 @@ namespace DemoPick
             }
         }
 
+        // Xu ly thao tac double click de mo nhanh chuc nang lien quan.
         private void PnlCanvas_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             try
@@ -332,6 +342,7 @@ namespace DemoPick
             }
         }
 
+        // Thu thuc hien Try Get Court At Point, neu du lieu khong hop le thi dung va tra thong bao phu hop.
         private bool TryGetCourtAtPoint(Point canvasPoint, bool requireTimelineArea, out DemoPick.Models.CourtModel court)
         {
             court = null;
@@ -355,6 +366,7 @@ namespace DemoPick
             }
         }
 
+        // Xu ly logic man hinh Handle Court Single Click va cap nhat control lien quan.
         private void HandleCourtSingleClick(DemoPick.Models.CourtModel court)
         {
             if (court == null) return;
@@ -371,6 +383,7 @@ namespace DemoPick
             }
         }
 
+        // Xoa, huy hoac dat lai du lieu Delete Court With Confirmation theo dung dieu kien nghiep vu.
         private void DeleteCourtWithConfirmation(DemoPick.Models.CourtModel court)
         {
             if (court == null) return;
@@ -400,6 +413,7 @@ namespace DemoPick
             }
         }
 
+        // Cap nhat lai du lieu/trang thai Update Date Label tren man hinh hien tai.
         private void UpdateDateLabel()
         {
             string dateStr = "Hôm nay";

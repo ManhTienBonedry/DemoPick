@@ -17,6 +17,7 @@ namespace DemoPick.Data
         {
             internal string MigrationId { get; }
 
+            // Khoi tao MigrationChecksumMismatchException va thiet lap trang thai ban dau can dung.
             internal MigrationChecksumMismatchException(string migrationId)
                 : base($"Migration '{migrationId}' was already applied but its contents changed.")
             {
@@ -24,6 +25,7 @@ namespace DemoPick.Data
             }
         }
 
+        // Ap dung cac migration CSDL chua chay de dua schema len phien ban moi nhat.
         internal static void ApplyPendingMigrations()
         {
             var builder = Db.CreateBuilder();
@@ -76,6 +78,7 @@ namespace DemoPick.Data
             internal string MigrationId { get; set; }
         }
 
+        // Lay hoac nap du lieu cho Get Embedded Migrations tu CSDL/nguon cau hinh.
         private static IEnumerable<EmbeddedMigration> GetEmbeddedMigrations()
         {
             var asm = Assembly.GetExecutingAssembly();
@@ -101,6 +104,7 @@ namespace DemoPick.Data
             }
         }
 
+        // Lay hoac nap du lieu cho Read All Bytes tu CSDL/nguon cau hinh.
         private static byte[] ReadAllBytes(string resourceName)
         {
             var asm = Assembly.GetExecutingAssembly();
@@ -117,11 +121,13 @@ namespace DemoPick.Data
             }
         }
 
+        // Dam bao dieu kien Ensure Migrations Table Exists da san sang truoc khi chay buoc xu ly tiep theo.
         private static void EnsureMigrationsTableExists()
         {
             DatabaseHelper.ExecuteNonQuery(SqlQueries.Migrations.EnsureMigrationsTableExists);
         }
 
+        // Lay hoac nap du lieu cho Load Applied Migrations tu CSDL/nguon cau hinh.
         private static Dictionary<string, byte[]> LoadAppliedMigrations()
         {
             var result = new Dictionary<string, byte[]>(StringComparer.OrdinalIgnoreCase);
@@ -140,6 +146,7 @@ namespace DemoPick.Data
             return result;
         }
 
+        // Luu hoac ghi nhan Mark Applied vao trang thai he thong/CSDL khi nghiep vu yeu cau.
         private static void MarkApplied(string migrationId, byte[] checksum)
         {
             DatabaseHelper.ExecuteNonQuery(
@@ -148,6 +155,7 @@ namespace DemoPick.Data
                 new SqlParameter("@Checksum", (object)checksum ?? DBNull.Value));
         }
 
+        // Tao hoac tinh ra du lieu Compute Sha256 tu cac thong tin dau vao hien co.
         private static byte[] ComputeSha256(byte[] bytes)
         {
             using (var sha = SHA256.Create())

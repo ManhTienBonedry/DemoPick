@@ -13,6 +13,7 @@ namespace DemoPick
         public event EventHandler Authenticated;
         public event EventHandler RequestLogin;
 
+        // Khoi tao man hinh/control UCRegister va chuan bi trang thai ban dau can dung.
         public UCRegister()
         {
             InitializeComponent();
@@ -54,6 +55,7 @@ namespace DemoPick
             }
         }
 
+        // Cap nhat lai du lieu/trang thai Update Phone Validation Ui tren man hinh hien tai.
         private void UpdatePhoneValidationUi()
         {
             if (txtPhone == null) return;
@@ -71,6 +73,7 @@ namespace DemoPick
         }
 
         [System.Runtime.InteropServices.DllImport("Gdi32.dll", EntryPoint = "CreateRoundRectRgn")]
+        // Tao hoac tinh ra du lieu Create Round Rect Rgn tu cac thong tin dau vao hien co.
         private static extern IntPtr CreateRoundRectRgn(
             int nLeftRect,
             int nTopRect,
@@ -80,8 +83,10 @@ namespace DemoPick
             int nHeightEllipse);
 
         [System.Runtime.InteropServices.DllImport("gdi32.dll", SetLastError = true)]
+        // Xoa, huy hoac dat lai du lieu Delete Object theo dung dieu kien nghiep vu.
         private static extern bool DeleteObject(IntPtr hObject);
 
+        // Xu ly su kien nguoi dung bam vao control lien quan va goi luong nghiep vu phu hop.
         private void btnRegister_Click(object sender, EventArgs e)
         {
             string fullName = txtName?.Text?.Trim() ?? "";
@@ -114,16 +119,19 @@ namespace DemoPick
             UIMessageBox.ShowError(err ?? "Đăng ký thất bại.");
         }
 
+        // Xu ly su kien nguoi dung bam vao control lien quan va goi luong nghiep vu phu hop.
         private void btnLogin_Click(object sender, EventArgs e)
         {
             RequestLogin?.Invoke(this, EventArgs.Empty);
         }
 
+        // Xu ly su kien nguoi dung bam vao control lien quan va goi luong nghiep vu phu hop.
         private void lblLoginNow_Click(object sender, EventArgs e)
         {
             btnLogin_Click(sender, e);
         }
 
+        // Xu ly su kien nguoi dung bam vao control lien quan va goi luong nghiep vu phu hop.
         private void btnClose_Click(object sender, EventArgs e)
         {
             // Close this card and return to login.

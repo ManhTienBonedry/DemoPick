@@ -10,6 +10,7 @@ namespace DemoPick.Services
 {
     internal static class BookingCourtQueryService
     {
+        // Lay du lieu/ket qua cho Get Active Courts tu tang xu ly phu hop.
         internal static List<CourtModel> GetActiveCourts()
         {
             var list = new List<CourtModel>();
@@ -62,6 +63,7 @@ ORDER BY
             return list;
         }
 
+        // Ap dung hoac chuan hoa trang thai Normalize Court Name Key de du lieu/giao dien nhat quan.
         private static string NormalizeCourtNameKey(string name)
         {
             if (string.IsNullOrWhiteSpace(name)) return string.Empty;

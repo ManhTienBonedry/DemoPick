@@ -11,6 +11,7 @@ namespace DemoPick
 {
     public partial class FrmDoiMatKhau : Form
     {
+        // Khoi tao man hinh/control FrmDoiMatKhau va chuan bi trang thai ban dau can dung.
         public FrmDoiMatKhau()
         {
             InitializeComponent();
@@ -32,6 +33,7 @@ namespace DemoPick
             this.Paint += Frm_Paint;
         }
 
+        // Ve lai phan giao dien tuy bien cho control lien quan.
         private void Frm_Paint(object sender, PaintEventArgs e)
         {
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
@@ -42,6 +44,7 @@ namespace DemoPick
             }
         }
 
+        // Xu ly logic man hinh Rounded Rect va cap nhat control lien quan.
         private GraphicsPath RoundedRect(Rectangle bounds, int radius)
         {
             int diameter = radius * 2;
@@ -66,12 +69,14 @@ namespace DemoPick
             return path;
         }
 
+        // Xu ly su kien nguoi dung bam vao control lien quan va goi luong nghiep vu phu hop.
         private void btnClose_Click(object sender, EventArgs e)
         {
             this.DialogResult = DialogResult.Cancel;
             this.Close();
         }
 
+        // Xu ly su kien nguoi dung bam vao control lien quan va goi luong nghiep vu phu hop.
         private void btnSave_Click(object sender, EventArgs e)
         {
             var user = AppSession.CurrentUser;
@@ -140,6 +145,7 @@ namespace DemoPick
             }
         }
 
+        // Xu ly logic man hinh Focus Field va cap nhat control lien quan.
         private static void FocusField(Control field, bool selectAll)
         {
             if (field == null) return;

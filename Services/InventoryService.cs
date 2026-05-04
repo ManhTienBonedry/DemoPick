@@ -18,6 +18,7 @@ namespace DemoPick.Services
             public string Message { get; set; }
         }
 
+        // Xu ly nghiep vu Add Product va tra ket qua cho controller/man hinh goi den.
         public async Task AddProductAsync(string sku, string name, string category, decimal price, int stockQuantity, int minThreshold)
         {
             if (string.IsNullOrWhiteSpace(sku)) throw new ArgumentException("SKU is required.", nameof(sku));
@@ -50,6 +51,7 @@ namespace DemoPick.Services
             });
         }
 
+        // Lay du lieu/ket qua cho Get Product Categories tu tang xu ly phu hop.
         public async Task<List<string>> GetProductCategoriesAsync()
         {
             return await Task.Run(() =>
@@ -71,6 +73,7 @@ namespace DemoPick.Services
             });
         }
 
+        // Xoa, huy hoac dat lai du lieu Delete Product theo dung dieu kien nghiep vu.
         public async Task<ProductDeleteResult> DeleteProductAsync(int productId)
         {
             if (productId <= 0)
@@ -129,6 +132,7 @@ namespace DemoPick.Services
             });
         }
 
+        // Lay du lieu/ket qua cho Get Products tu tang xu ly phu hop.
         public async Task<List<ProductCatalogItemModel>> GetProductsAsync()
         {
             return await Task.Run(() =>
@@ -155,6 +159,7 @@ namespace DemoPick.Services
             });
         }
 
+        // Lay du lieu/ket qua cho Get Products For Deletion tu tang xu ly phu hop.
         public async Task<List<ProductDeleteListItemModel>> GetProductsForDeletionAsync()
         {
             return await Task.Run(() =>
@@ -179,6 +184,7 @@ namespace DemoPick.Services
             });
         }
 
+        // Lay du lieu/ket qua cho Get Inventory Kpis tu tang xu ly phu hop.
         public async Task<InventoryKpiModel> GetInventoryKpisAsync()
         {
             return await Task.Run(() =>
@@ -200,6 +206,7 @@ namespace DemoPick.Services
             });
         }
 
+        // Lay du lieu/ket qua cho Get Inventory Items tu tang xu ly phu hop.
         public async Task<List<InventoryItemModel>> GetInventoryItemsAsync()
         {
             var list = new List<InventoryItemModel>();
@@ -251,6 +258,7 @@ namespace DemoPick.Services
             return list;
         }
 
+        // Tao hoac tinh ra du lieu Build Smart Insights tu cac thong tin dau vao hien co.
         public InventorySmartInsightsModel BuildSmartInsights(IReadOnlyCollection<InventoryItemModel> items)
         {
             var safeItems = items ?? Array.Empty<InventoryItemModel>();
@@ -297,6 +305,7 @@ namespace DemoPick.Services
             return insight;
         }
 
+        // Lay du lieu/ket qua cho Get Recent Transactions tu tang xu ly phu hop.
         public async Task<List<TransactionModel>> GetRecentTransactionsAsync()
         {
             var list = new List<TransactionModel>();
@@ -340,12 +349,14 @@ namespace DemoPick.Services
             return list;
         }
 
+        // Tao hoac tinh ra du lieu Build Target Stock tu cac thong tin dau vao hien co.
         private static int BuildTargetStock(int minThreshold, decimal avgDailySales)
         {
             int forecastDemand = avgDailySales <= 0m ? 0 : (int)Math.Ceiling(avgDailySales * 14m);
             return Math.Max(minThreshold * 2, forecastDemand + minThreshold);
         }
 
+        // Lay du lieu/ket qua cho Get Inventory Status tu tang xu ly phu hop.
         private static string GetInventoryStatus(int stock, int minThreshold, int? daysRemaining)
         {
             if (stock <= 0)
@@ -376,6 +387,7 @@ namespace DemoPick.Services
             return "Healthy";
         }
 
+        // Tao hoac tinh ra du lieu Build Recommendation tu cac thong tin dau vao hien co.
         private static string BuildRecommendation(int stock, int minThreshold, decimal avgDailySales, int? daysRemaining, int suggestedReorder)
         {
             if (stock <= 0)

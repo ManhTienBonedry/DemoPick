@@ -13,6 +13,7 @@ namespace DemoPick
         private DataTable _fullData;
         private Timer _searchDebounce;
 
+        // Khoi tao man hinh/control UCAuditLog va chuan bi trang thai ban dau can dung.
         public UCAuditLog()
         {
             InitializeComponent();
@@ -47,11 +48,13 @@ namespace DemoPick
             LoadLogs();
         }
 
+        // Cap nhat lai du lieu/trang thai Refresh On Activated tren man hinh hien tai.
         public void RefreshOnActivated()
         {
             LoadLogs();
         }
 
+        // Nap du lieu cho Load Logs roi cap nhat lai trang thai hien thi tren man hinh.
         private async void LoadLogs()
         {
             try
@@ -75,6 +78,7 @@ namespace DemoPick
             }
         }
 
+        // Xu ly logic man hinh Format Columns va cap nhat control lien quan.
         private void FormatColumns()
         {
             if (dgvLogs.Columns.Contains("LogID"))
@@ -100,6 +104,7 @@ namespace DemoPick
             }
         }
 
+        // Cap nhat lai du lieu/trang thai Update Kpi Cards tren man hinh hien tai.
         private void UpdateKpiCards(DataTable dt)
         {
             if (dt == null || dt.Rows.Count == 0)
@@ -156,11 +161,13 @@ namespace DemoPick
             SetKpi(lblCardErrorValue, errors.ToString());
         }
 
+        // Ap dung hoac chuan hoa trang thai Set Kpi de du lieu/giao dien nhat quan.
         private static void SetKpi(Label lbl, string value)
         {
             if (lbl != null) lbl.Text = value;
         }
 
+        // Ap dung hoac chuan hoa trang thai Apply Filter de du lieu/giao dien nhat quan.
         private void ApplyFilter()
         {
             if (_fullData == null || dgvLogs == null) return;
@@ -192,6 +199,7 @@ namespace DemoPick
             }
         }
 
+        // Xu ly logic man hinh Dgv Logs_Cell Formatting va cap nhat control lien quan.
         private void DgvLogs_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
             if (dgvLogs == null || e.RowIndex < 0) return;

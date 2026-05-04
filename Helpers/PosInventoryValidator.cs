@@ -12,6 +12,7 @@ namespace DemoPick.Helpers
 {
     internal static class PosInventoryValidator
     {
+        // Lay du lieu/ket qua cho Load Product Categories tu tang xu ly phu hop.
         internal static Dictionary<int, string> LoadProductCategories(SqlConnection conn, SqlTransaction tran, IReadOnlyList<CartLine> lines)
         {
             var result = new Dictionary<int, string>();
@@ -61,11 +62,13 @@ namespace DemoPick.Helpers
             return result;
         }
 
+        // Kiem tra dieu kien Is Service Category va tra ve ket qua dung/sai cho luong xu ly.
         internal static bool IsServiceCategory(string category)
         {
             return string.Equals(NormalizeCategoryKey(category), "dichvu", StringComparison.Ordinal);
         }
 
+        // Dam bao dieu kien Ensure Stock And Maybe Reduce da san sang truoc khi chay buoc xu ly tiep theo.
         internal static void EnsureStockAndMaybeReduce(SqlConnection conn, SqlTransaction tran, int productId, int qty, string prodName, bool hasReduceStockTrigger)
         {
             if (qty <= 0) return;
@@ -101,6 +104,7 @@ namespace DemoPick.Helpers
                 throw new InvalidOperationException("Sản phẩm '" + prodName + "' không đủ hàng để trừ kho.");
         }
 
+        // Ap dung hoac chuan hoa trang thai Normalize Category Key de du lieu/giao dien nhat quan.
         private static string NormalizeCategoryKey(string category)
         {
             if (string.IsNullOrWhiteSpace(category)) return string.Empty;
@@ -111,6 +115,7 @@ namespace DemoPick.Helpers
             return s.ToLowerInvariant();
         }
 
+        // Xoa, huy hoac dat lai du lieu Remove Diacritics theo dung dieu kien nghiep vu.
         private static string RemoveDiacritics(string text)
         {
             if (string.IsNullOrEmpty(text)) return string.Empty;

@@ -12,6 +12,7 @@ namespace DemoPick
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
+        // Diem vao chinh cua ung dung, khoi tao CSDL roi mo luong dang nhap/main form.
         static void Main(string[] args)
         {
             Application.EnableVisualStyles();
@@ -40,11 +41,13 @@ namespace DemoPick
 
     internal sealed class AppFlowContext : ApplicationContext
     {
+        // Khoi tao AppFlowContext va thiet lap trang thai ban dau can dung.
         public AppFlowContext()
         {
             ShowLogin();
         }
 
+        // Dieu huong hoac hien thi Show Login theo trang thai hien tai cua ung dung.
         private void ShowLogin()
         {
             var auth = new FrmAuthHost();
@@ -63,6 +66,7 @@ namespace DemoPick
             auth.Show();
         }
 
+        // Dieu huong hoac hien thi Show Main theo trang thai hien tai cua ung dung.
         private void ShowMain()
         {
             var main = new FrmChinh();

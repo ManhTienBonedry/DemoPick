@@ -7,6 +7,7 @@ namespace DemoPick.Services
 {
     internal static class BookingCourtCommandService
     {
+        // Xoa, huy hoac dat lai du lieu Deactivate Court theo dung dieu kien nghiep vu.
         internal static void DeactivateCourt(int courtId)
         {
             if (courtId <= 0) throw new ArgumentException("CourtID không hợp lệ.");

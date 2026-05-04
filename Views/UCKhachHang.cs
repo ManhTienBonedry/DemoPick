@@ -22,6 +22,7 @@ namespace DemoPick
         private System.Collections.Generic.List<DemoPick.Models.CustomerModel> _allCustomersCache;
         private ImageList _rowHeightImageList;
 
+        // Khoi tao man hinh/control UCKhachHang va chuan bi trang thai ban dau can dung.
         public UCKhachHang()
         {
             InitializeComponent();
@@ -72,6 +73,7 @@ namespace DemoPick
             LoadDataAsync();
         }
 
+        // Dam bao dieu kien Ensure Customer List Row Height da san sang truoc khi chay buoc xu ly tiep theo.
         private void EnsureCustomerListRowHeight()
         {
             if (lstKhachHang == null)
@@ -92,6 +94,7 @@ namespace DemoPick
             lstKhachHang.SmallImageList = _rowHeightImageList;
         }
 
+        // Thiet lap Initialize Customer List Columns va gan cac cau hinh/su kien can dung ban dau.
         private void InitializeCustomerListColumns()
         {
             if (lstKhachHang == null)
@@ -109,6 +112,7 @@ namespace DemoPick
             lstKhachHang.EndUpdate();
         }
 
+        // Xu ly logic man hinh Filter List va cap nhat control lien quan.
         private void FilterList(string filterMode, Label activeLabel)
         {
             lblTabAll.ForeColor = Color.FromArgb(107, 114, 128);
@@ -151,6 +155,7 @@ namespace DemoPick
             }
         }
 
+        // Xu ly logic man hinh Lst Khach Hang_Draw Column Header va cap nhat control lien quan.
         private void LstKhachHang_DrawColumnHeader(object sender, DrawListViewColumnHeaderEventArgs e)
         {
             e.DrawBackground();
@@ -163,6 +168,7 @@ namespace DemoPick
             }
         }
 
+        // Xu ly logic man hinh Lst Khach Hang_Draw Sub Item va cap nhat control lien quan.
         private void LstKhachHang_DrawSubItem(object sender, DrawListViewSubItemEventArgs e)
         {
             e.DrawBackground();
@@ -271,6 +277,7 @@ namespace DemoPick
             }
         }
 
+        // Nap du lieu cho Load Data roi cap nhat lai trang thai hien thi tren man hinh.
         private async void LoadDataAsync()
         {
             try
@@ -296,22 +303,26 @@ namespace DemoPick
             }
         }
 
+        // Cap nhat lai du lieu/trang thai Refresh On Activated tren man hinh hien tai.
         public void RefreshOnActivated()
         {
             LoadDataAsync();
         }
 
+        // Nap du lieu cho Load Customers roi cap nhat lai trang thai hien thi tren man hinh.
         private Task<System.Collections.Generic.List<DemoPick.Models.CustomerModel>> LoadCustomersAsync()
         {
             return _customerController.GetAllCustomersAsync();
         }
 
+        // Dua du lieu Bind Customers len giao dien hoac ve lai phan hien thi lien quan.
         private void BindCustomers(System.Collections.Generic.List<DemoPick.Models.CustomerModel> customers)
         {
             _allCustomersCache = customers ?? new System.Collections.Generic.List<DemoPick.Models.CustomerModel>();
             FilterList("Tất cả", lblTabAll);
         }
 
+        // Dua du lieu Bind Tier Counts len giao dien hoac ve lai phan hien thi lien quan.
         private void BindTierCounts(DemoPick.Models.CustomerTierCountsModel tier)
         {
             if (tier == null)
@@ -322,6 +333,7 @@ namespace DemoPick
             lblWalkinCount.Text = $"● {tier.WalkinCount} Hội viên";
         }
 
+        // Dua du lieu Bind Revenue len giao dien hoac ve lai phan hien thi lien quan.
         private void BindRevenue(DemoPick.Models.CustomerRevenueSummaryModel revenue, DemoPick.Models.CustomerTierCountsModel tier)
         {
             if (revenue == null)
@@ -339,11 +351,13 @@ namespace DemoPick
             lblBot2Value.Text = tier.FixedCount.ToString();
         }
 
+        // Dua du lieu Bind Today Occupancy len giao dien hoac ve lai phan hien thi lien quan.
         private void BindTodayOccupancy(int occPct)
         {
             lblBot4Value.Text = $"{occPct}%";
         }
 
+        // Dua du lieu Bind Membership Summary len giao dien hoac ve lai phan hien thi lien quan.
         private void BindMembershipSummary(DemoPick.Models.MembershipSummaryModel summary)
         {
             summary = summary ?? new DemoPick.Models.MembershipSummaryModel();

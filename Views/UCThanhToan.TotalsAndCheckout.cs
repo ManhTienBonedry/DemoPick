@@ -13,6 +13,7 @@ namespace DemoPick
 {
     public partial class UCThanhToan
     {
+        // Xac dinh ty le tien san con phai thu dua tren trang thai coc/chuyen khoan cua booking.
         private decimal GetCourtPayableRatio()
         {
             if (_currentBooking == null)
@@ -28,6 +29,7 @@ namespace DemoPick
             return 1m;
         }
 
+        // Thiet lap Setup List View va gan cac cau hinh/su kien can dung ban dau.
         private void SetupListView()
         {
             lstCart.Columns.Add("Sản phẩm", 140);
@@ -35,6 +37,7 @@ namespace DemoPick
             lstCart.Columns.Add("Thành tiền", 110);
         }
 
+        // Cap nhat lai du lieu/trang thai Update Totals tren man hinh hien tai.
         private void UpdateTotals()
         {
             lstCart.Items.Clear();
@@ -70,6 +73,7 @@ namespace DemoPick
             UpdateMockInvoicePreview(result.SubTotal, result.DiscountAmount, result.FinalTotal);
         }
 
+        // Cap nhat lai du lieu/trang thai Update Mock Invoice Preview tren man hinh hien tai.
         private void UpdateMockInvoicePreview(decimal subtotal, decimal discountAmount, decimal finalTotal)
         {
             if (lblPreviewDesc == null || lblPreviewTotal == null || pnlMockInvoice == null)
@@ -134,6 +138,7 @@ namespace DemoPick
             lblPreviewTotal.Text = finalTotal.ToString("N0") + "đ";
         }
 
+        // Nap du lieu cho Get Preview Customer Name roi cap nhat lai trang thai hien thi tren man hinh.
         private string GetPreviewCustomerName()
         {
             if (_currentCustomerId <= 0)
@@ -162,6 +167,7 @@ namespace DemoPick
             return string.IsNullOrWhiteSpace(infoText) ? "Khách thành viên" : infoText;
         }
 
+        // Dien giai hoac xac dinh Trim Preview tu du lieu dau vao de cac buoc sau dung thong nhat.
         private static string TrimPreview(string input, int maxLen)
         {
             if (string.IsNullOrWhiteSpace(input))
@@ -183,11 +189,13 @@ namespace DemoPick
             return value.Substring(0, maxLen - 1) + "~";
         }
 
+        // Xu ly su kien nguoi dung bam vao control lien quan va goi luong nghiep vu phu hop.
         private void BtnCancel_Click(object sender, EventArgs e)
         {
             ResetCheckoutPane();
         }
 
+        // Xu ly su kien nguoi dung bam vao control lien quan va goi luong nghiep vu phu hop.
         private void BtnCheckout_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(_selectedCourtName))

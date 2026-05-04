@@ -11,6 +11,7 @@ namespace DemoPick.Helpers
         private const int Pbkdf2Iterations = 100_000;
         private const int PasswordHashBytes = 32;
 
+        // Tao hoac tinh ra du lieu Generate Salt tu cac thong tin dau vao hien co.
         internal static byte[] GenerateSalt(int size)
         {
             var salt = new byte[size];
@@ -21,6 +22,7 @@ namespace DemoPick.Helpers
             return salt;
         }
 
+        // Kiem tra dieu kien Hash Password va tra ve ket qua dung/sai cho luong xu ly.
         internal static byte[] HashPassword(string password, byte[] salt)
         {
             using (var pbkdf2 = new Rfc2898DeriveBytes(password ?? string.Empty, salt, Pbkdf2Iterations, HashAlgorithmName.SHA256))
@@ -29,6 +31,7 @@ namespace DemoPick.Helpers
             }
         }
 
+        // Kiem tra dieu kien Hash Password Legacy Sha1 va tra ve ket qua dung/sai cho luong xu ly.
         internal static byte[] HashPasswordLegacySha1(string password, byte[] salt)
         {
             using (var pbkdf2 = new Rfc2898DeriveBytes(password ?? string.Empty, salt, Pbkdf2Iterations))
@@ -37,6 +40,7 @@ namespace DemoPick.Helpers
             }
         }
 
+        // Ho tro xu ly Fixed Time Equals de cac noi khac dung lai cung mot quy tac.
         internal static bool FixedTimeEquals(byte[] a, byte[] b)
         {
             if (a == null || b == null || a.Length != b.Length) return false;
@@ -49,6 +53,7 @@ namespace DemoPick.Helpers
             return diff == 0;
         }
 
+        // Tao hoac tinh ra du lieu Generate Random Password tu cac thong tin dau vao hien co.
         internal static string GenerateRandomPassword(int length)
         {
             const string alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%";

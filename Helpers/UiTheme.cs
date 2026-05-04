@@ -52,11 +52,13 @@ namespace DemoPick.Helpers
             ? Color.FromArgb(45, 52, 62)
             : Color.FromArgb(240, 242, 245);
 
+        // Ap dung hoac chuan hoa trang thai Toggle Mode de du lieu/giao dien nhat quan.
         public static void ToggleMode()
         {
             // Dark mode disabled
         }
 
+        // Ap dung hoac chuan hoa trang thai Apply Page Background de du lieu/giao dien nhat quan.
         public static void ApplyPageBackground(Control root)
         {
             if (root == null || root.IsDisposed) return;
@@ -75,6 +77,7 @@ namespace DemoPick.Helpers
             ApplyDeepTheme(moduleRoot, 0);
         }
 
+        // Ap dung hoac chuan hoa trang thai Normalize Text Backgrounds de du lieu/giao dien nhat quan.
         public static void NormalizeTextBackgrounds(Control root)
         {
             if (root == null || root.IsDisposed) return;
@@ -89,6 +92,7 @@ namespace DemoPick.Helpers
             // Theming disabled by user request. Colors will be handled by the Designer.
         }
 
+        // Ap dung hoac chuan hoa trang thai Normalize Text Backgrounds Recursive de du lieu/giao dien nhat quan.
         private static void NormalizeTextBackgroundsRecursive(Control root)
         {
             if (root == null || root.IsDisposed) return;
@@ -104,6 +108,7 @@ namespace DemoPick.Helpers
             }
         }
 
+        // Ap dung hoac chuan hoa trang thai Normalize Label Background de du lieu/giao dien nhat quan.
         private static void NormalizeLabelBackground(Label label)
         {
             if (label == null || label.IsDisposed) return;
@@ -129,6 +134,7 @@ namespace DemoPick.Helpers
             }
         }
 
+        // Kiem tra dieu kien Is Neutral Label Background va tra ve ket qua dung/sai cho luong xu ly.
         private static bool IsNeutralLabelBackground(Color color)
         {
             int argb = color.ToArgb();

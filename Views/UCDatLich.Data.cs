@@ -8,6 +8,7 @@ namespace DemoPick
 {
     public partial class UCDatLich
     {
+        // Nap du lieu cho Reload Timeline roi cap nhat lai trang thai hien thi tren man hinh.
         private void ReloadTimelineAsync(bool forceReload)
         {
             if (!forceReload && _cacheDate.Date == _currentDate.Date && _cachedCourts != null && _cachedBookings != null)

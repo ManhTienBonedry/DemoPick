@@ -24,6 +24,7 @@ namespace DemoPick
 
         private bool _scrollResetQueued;
 
+        // Khoi tao man hinh/control UCTongQuan va chuan bi trang thai ban dau can dung.
         public UCTongQuan()
         {
             InitializeComponent();
@@ -52,6 +53,7 @@ namespace DemoPick
             LoadRealDataAsync();
         }
 
+        // Xu ly logic man hinh On Visible Changed va cap nhat control lien quan.
         protected override void OnVisibleChanged(EventArgs e)
         {
             base.OnVisibleChanged(e);
@@ -67,6 +69,7 @@ namespace DemoPick
             }
         }
 
+        // Xoa, huy hoac dat lai du lieu Reset Scroll To Top theo dung dieu kien nghiep vu.
         public void ResetScrollToTop()
         {
             if (!AutoScroll) return;
@@ -85,6 +88,7 @@ namespace DemoPick
             }
         }
 
+        // Xoa, huy hoac dat lai du lieu Reset Scroll Value theo dung dieu kien nghiep vu.
         private static void ResetScrollValue(ScrollProperties scroll, int target)
         {
             if (scroll == null) return;
@@ -99,6 +103,7 @@ namespace DemoPick
             scroll.Value = target;
         }
 
+        // Xu ly logic man hinh Queue Reset Scroll To Top va cap nhat control lien quan.
         private void QueueResetScrollToTop()
         {
             if (_scrollResetQueued) return;
@@ -118,6 +123,7 @@ namespace DemoPick
             }
         }
 
+        // Thiet lap Attach Borders va gan cac cau hinh/su kien can dung ban dau.
         private void AttachBorders()
         {
             PaintEventHandler drawBorder = (s, e) => {
@@ -138,6 +144,7 @@ namespace DemoPick
             pnlTable.Paint += drawBorder;
         }
 
+        // Thiet lap Setup Charts va gan cac cau hinh/su kien can dung ban dau.
         private void SetupCharts()
         {
             // Trend chart: clean spline-area style for clear up/down reading.
@@ -190,6 +197,7 @@ namespace DemoPick
             chartPie.Legends.Add(l);
         }
 
+        // Thiet lap Setup Table va gan cac cau hinh/su kien can dung ban dau.
         private void SetupTable()
         {
             lstBookings.Columns.Add("Mã Đặt", 100);
@@ -201,6 +209,7 @@ namespace DemoPick
             lstBookings.Items.Clear();
         }
 
+        // Nap du lieu cho Load Real Data roi cap nhat lai trang thai hien thi tren man hinh.
         private async void LoadRealDataAsync()
         {
             try
@@ -235,12 +244,14 @@ namespace DemoPick
             }
         }
 
+        // Cap nhat lai du lieu/trang thai Refresh On Activated tren man hinh hien tai.
         public void RefreshOnActivated()
         {
             LoadRealDataAsync();
             QueueResetScrollToTop();
         }
 
+        // Dua du lieu Bind Top Cards len giao dien hoac ve lai phan hien thi lien quan.
         private void BindTopCards(DemoPick.Models.DashboardMetricsModel metrics)
         {
             metrics = metrics ?? new DemoPick.Models.DashboardMetricsModel();
@@ -256,6 +267,7 @@ namespace DemoPick
             lblC4S.Text = "+0% ↗";
         }
 
+        // Dua du lieu Bind Trend Chart len giao dien hoac ve lai phan hien thi lien quan.
         private void BindTrendChart(System.Collections.Generic.List<DemoPick.Models.TrendPointModel> points)
         {
             chartTrend.Series[0].Points.Clear();
@@ -293,6 +305,7 @@ namespace DemoPick
             }
         }
 
+        // Dua du lieu Bind Pie Chart len giao dien hoac ve lai phan hien thi lien quan.
         private void BindPieChart(System.Collections.Generic.List<DemoPick.Models.NamedRevenueModel> slices)
         {
             chartPie.Series[0].Points.Clear();
@@ -318,6 +331,7 @@ namespace DemoPick
             }
         }
 
+        // Dua du lieu Bind Recent Activity len giao dien hoac ve lai phan hien thi lien quan.
         private void BindRecentActivity(System.Collections.Generic.List<DemoPick.Models.DashboardActivityModel> items)
         {
             lstBookings.Items.Clear();

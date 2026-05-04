@@ -11,6 +11,7 @@ namespace DemoPick.Services
 {
     public class CustomerService
     {
+        // Lay du lieu/ket qua cho Get All Customers tu tang xu ly phu hop.
         public async Task<List<CustomerModel>> GetAllCustomersAsync()
         {
             var list = new List<CustomerModel>();
@@ -42,6 +43,7 @@ namespace DemoPick.Services
             return list;
         }
 
+        // Lay du lieu/ket qua cho Get Tier Counts tu tang xu ly phu hop.
         public async Task<CustomerTierCountsModel> GetTierCountsAsync()
         {
             return await Task.Run(() =>
@@ -60,6 +62,7 @@ namespace DemoPick.Services
             });
         }
 
+        // Lay du lieu/ket qua cho Get Revenue Summary tu tang xu ly phu hop.
         public async Task<CustomerRevenueSummaryModel> GetRevenueSummaryAsync()
         {
             return await Task.Run(() =>
@@ -77,6 +80,7 @@ namespace DemoPick.Services
             });
         }
 
+        // Lay du lieu/ket qua cho Get Membership Summary tu tang xu ly phu hop.
         public async Task<MembershipSummaryModel> GetMembershipSummaryAsync()
         {
             return await Task.Run(() =>
@@ -97,6 +101,7 @@ namespace DemoPick.Services
             });
         }
 
+        // Lay du lieu/ket qua cho Get Today Occupancy Pct tu tang xu ly phu hop.
         public async Task<int> GetTodayOccupancyPctAsync()
         {
             return await Task.Run(() =>
@@ -108,6 +113,7 @@ namespace DemoPick.Services
             });
         }
 
+        // Lay du lieu/ket qua cho Find Checkout Customer tu tang xu ly phu hop.
         public async Task<CheckoutCustomerModel> FindCheckoutCustomerAsync(string search)
         {
             if (string.IsNullOrWhiteSpace(search))

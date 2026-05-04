@@ -36,6 +36,7 @@ namespace DemoPick
             }
         }
 
+        // Khoi tao man hinh/control FrmAuthHost va chuan bi trang thai ban dau can dung.
         public FrmAuthHost()
         {
             InitializeComponent();
@@ -75,6 +76,7 @@ namespace DemoPick
             ShowLogin();
         }
 
+        // Thiet lap Initialize Root Background Cover va gan cac cau hinh/su kien can dung ban dau.
         private void InitializeRootBackgroundCover()
         {
             if (pnlRoot == null)
@@ -96,6 +98,7 @@ namespace DemoPick
             pnlRoot.Resize += (s, e) => pnlRoot.Invalidate();
         }
 
+        // Xu ly logic man hinh Pnl Root_Paint Cover Background va cap nhat control lien quan.
         private void PnlRoot_PaintCoverBackground(object sender, PaintEventArgs e)
         {
             Image img = _rootBackgroundImage;
@@ -118,6 +121,7 @@ namespace DemoPick
             DrawImageCover(e.Graphics, img, bounds);
         }
 
+        // Dua du lieu Draw Image Cover len giao dien hoac ve lai phan hien thi lien quan.
         private static void DrawImageCover(Graphics graphics, Image image, Rectangle bounds)
         {
             float scaleX = (float)bounds.Width / image.Width;
@@ -133,16 +137,19 @@ namespace DemoPick
             graphics.DrawImage(image, new Rectangle(x, y, drawWidth, drawHeight));
         }
 
+        // Dieu huong hoac hien thi Show Login theo trang thai hien tai cua ung dung.
         private void ShowLogin()
         {
             ShowCard(_ucBasicLogin);
         }
 
+        // Dieu huong hoac hien thi Show Register theo trang thai hien tai cua ung dung.
         private void ShowRegister()
         {
             ShowCard(_ucRegister);
         }
 
+        // Dieu huong hoac hien thi Show Card theo trang thai hien tai cua ung dung.
         private void ShowCard(Control card)
         {
             if (card == null)
@@ -175,6 +182,7 @@ namespace DemoPick
             CenterCard();
         }
 
+        // Dieu huong hoac hien thi Center Card theo trang thai hien tai cua ung dung.
         private void CenterCard()
         {
             if (pnlRoot == null)
@@ -197,6 +205,7 @@ namespace DemoPick
             card.Location = new Point(x, y);
         }
 
+        // Dam bao dieu kien Ensure Card Added da san sang truoc khi chay buoc xu ly tiep theo.
         private void EnsureCardAdded(Control card)
         {
             if (card == null || pnlRoot == null)
@@ -213,6 +222,7 @@ namespace DemoPick
             }
         }
 
+        // Thiet lap Enable Double Buffer va gan cac cau hinh/su kien can dung ban dau.
         private static void EnableDoubleBuffer(Control control)
         {
             if (control == null)
@@ -232,24 +242,28 @@ namespace DemoPick
             }
         }
 
+        // Xu ly logic man hinh Complete Ok va cap nhat control lien quan.
         private void CompleteOk()
         {
             this.DialogResult = DialogResult.OK;
             this.Close();
         }
 
+        // Xu ly logic man hinh Complete Cancel va cap nhat control lien quan.
         private void CompleteCancel()
         {
             this.DialogResult = DialogResult.Cancel;
             this.Close();
         }
 
+        // Xu ly logic man hinh On Shown va cap nhat control lien quan.
         protected override void OnShown(EventArgs e)
         {
             base.OnShown(e);
             CenterCard();
         }
 
+        // Xu ly logic man hinh On Resize va cap nhat control lien quan.
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);

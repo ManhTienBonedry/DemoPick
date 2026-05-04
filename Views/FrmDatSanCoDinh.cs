@@ -31,11 +31,13 @@ namespace DemoPick
         private Label _lblConflict;
         private Timer _conflictDebounceTimer;
 
+        // Khoi tao man hinh/control FrmDatSanCoDinh va chuan bi trang thai ban dau can dung.
         public FrmDatSanCoDinh()
             : this(BookingMode.Fixed, null, null, null)
         {
         }
 
+        // Khoi tao man hinh/control FrmDatSanCoDinh va chuan bi trang thai ban dau can dung.
         public FrmDatSanCoDinh(BookingMode mode, int? preselectedCourtId, DateTime? preselectedDate, DateTime? preselectedStartTime)
         {
             _mode = mode;
@@ -137,6 +139,7 @@ namespace DemoPick
             UiTheme.NormalizeTextBackgrounds(this);
         }
 
+        // Cap nhat lai du lieu/trang thai Update Form Region tren man hinh hien tai.
         private void UpdateFormRegion()
         {
             using (var path = RoundedRect(new Rectangle(0, 0, Width, Height), 20))
@@ -147,6 +150,7 @@ namespace DemoPick
             }
         }
 
+        // Tao hoac tinh ra du lieu Build Start Time Picker tu cac thong tin dau vao hien co.
         private void BuildStartTimePicker()
         {
             _dtStartClock = new DateTimePicker();
@@ -165,6 +169,7 @@ namespace DemoPick
             cbTime.Enabled = false;
         }
 
+        // Tao hoac tinh ra du lieu Build Realtime Conflict Hint tu cac thong tin dau vao hien co.
         private void BuildRealtimeConflictHint()
         {
             _lblConflict = new Label();
@@ -181,6 +186,7 @@ namespace DemoPick
 
 
 
+        // Tao hoac tinh ra du lieu Build Conflict Debounce Timer tu cac thong tin dau vao hien co.
         private void BuildConflictDebounceTimer()
         {
             _conflictDebounceTimer = new Timer();
@@ -214,6 +220,7 @@ namespace DemoPick
             }
         }
 
+        // Ap dung hoac chuan hoa trang thai Apply Mode Layout de du lieu/giao dien nhat quan.
         private void ApplyModeLayout()
         {
             bool quickMode = rbDatNhanh != null && rbDatNhanh.Checked;
@@ -235,6 +242,7 @@ namespace DemoPick
             UpdatePhoneValidationUi();
         }
 
+        // Ap dung hoac chuan hoa trang thai Apply Quick Mode Layout de du lieu/giao dien nhat quan.
         private void ApplyQuickModeLayout()
         {
             Text = "Đặt Sân Nhanh";
@@ -274,6 +282,7 @@ namespace DemoPick
             cbPayState.Enabled = true;
         }
 
+        // Ap dung hoac chuan hoa trang thai Apply Maintenance Mode Layout de du lieu/giao dien nhat quan.
         private void ApplyMaintenanceModeLayout()
         {
             Text = "Bảo Trì & Khóa Sân";
@@ -308,6 +317,7 @@ namespace DemoPick
             cbPayState.Visible = false;
         }
 
+        // Ap dung hoac chuan hoa trang thai Apply Fixed Mode Layout de du lieu/giao dien nhat quan.
         private void ApplyFixedModeLayout()
         {
             Text = "Đặt Sân Cố Định";
@@ -346,18 +356,21 @@ namespace DemoPick
             cbPayState.Enabled = true;
         }
 
+        // Nap du lieu cho Get Selected Start Time Of Day roi cap nhat lai trang thai hien thi tren man hinh.
         internal TimeSpan GetSelectedStartTimeOfDay()
         {
             if (_dtStartClock == null) return new TimeSpan(17, 0, 0);
             return _dtStartClock.Value.TimeOfDay;
         }
 
+        // Dien giai hoac xac dinh Parse Duration Minutes From Ui tu du lieu dau vao de cac buoc sau dung thong nhat.
         internal int ParseDurationMinutesFromUi()
         {
             string text = cbDuration == null ? string.Empty : cbDuration.SelectedItem?.ToString() ?? string.Empty;
             return ParseDurationMinutesCore(text);
         }
 
+        // Dien giai hoac xac dinh Resolve Selected Court Id tu du lieu dau vao de cac buoc sau dung thong nhat.
         internal int ResolveSelectedCourtId()
         {
             object selected = cbCourt == null ? null : cbCourt.SelectedValue;
@@ -372,12 +385,14 @@ namespace DemoPick
             return 0;
         }
 
+        // Dien giai hoac xac dinh Resolve Selected Date tu du lieu dau vao de cac buoc sau dung thong nhat.
         internal DateTime ResolveSelectedDate()
         {
             if (ucDateRange == null) return DateTime.Today;
             return ucDateRange.FromDate.Date;
         }
 
+        // Kiem tra dieu kien Has Conflict At Start va tra ve ket qua dung/sai cho luong xu ly.
         internal bool HasConflictAtStart(int courtId, DateTime start, DateTime end)
         {
             if (courtId <= 0) return false;
@@ -411,6 +426,7 @@ namespace DemoPick
             return false;
         }
 
+        // Xu ly logic man hinh Queue Conflict Hint Refresh va cap nhat control lien quan.
         private void QueueConflictHintRefresh()
         {
             if (_conflictDebounceTimer == null) return;
@@ -418,6 +434,7 @@ namespace DemoPick
             _conflictDebounceTimer.Start();
         }
 
+        // Cap nhat lai du lieu/trang thai Refresh Conflict Hint Ui tren man hinh hien tai.
         private void RefreshConflictHintUi()
         {
             if (_lblConflict == null || _lblConflict.IsDisposed) return;
@@ -448,6 +465,7 @@ namespace DemoPick
             }
         }
 
+        // Dien giai hoac xac dinh Parse Duration Minutes Core tu du lieu dau vao de cac buoc sau dung thong nhat.
         internal static int ParseDurationMinutesCore(string durationText)
         {
             string t = durationText ?? string.Empty;
@@ -461,6 +479,7 @@ namespace DemoPick
             return 0;
         }
 
+        // Cap nhat lai du lieu/trang thai Update Phone Validation Ui tren man hinh hien tai.
         private void UpdatePhoneValidationUi()
         {
             if (txtPhone == null) return;
@@ -483,6 +502,7 @@ namespace DemoPick
                 : Color.FromArgb(231, 76, 60);
         }
 
+        // Dien giai hoac xac dinh Resolve Payment State tu du lieu dau vao de cac buoc sau dung thong nhat.
         internal string ResolvePaymentState()
         {
             if (cbPayState == null) return AppConstants.BookingPaymentState.PayAtVenue;

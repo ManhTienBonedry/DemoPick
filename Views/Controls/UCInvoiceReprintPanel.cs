@@ -11,6 +11,7 @@ namespace DemoPick
         public event EventHandler ReprintByIdRequested;
         public event EventHandler ReprintLastRequested;
 
+        // Khoi tao man hinh/control UCInvoiceReprintPanel va chuan bi trang thai ban dau can dung.
         public UCInvoiceReprintPanel()
         {
             InitializeComponent();
@@ -34,6 +35,7 @@ namespace DemoPick
             }
         }
 
+        // Xu ly logic man hinh Focus Invoice Input va cap nhat control lien quan.
         public void FocusInvoiceInput()
         {
             if (txtInvoiceId == null)
@@ -45,6 +47,7 @@ namespace DemoPick
             txtInvoiceId.SelectAll();
         }
 
+        // Ap dung hoac chuan hoa trang thai Set Last Invoice Enabled de du lieu/giao dien nhat quan.
         public void SetLastInvoiceEnabled(bool canReprint)
         {
             if (btnReprintLast == null)
@@ -68,6 +71,7 @@ namespace DemoPick
             }
         }
 
+        // Xu ly su kien nguoi dung bam vao control lien quan va goi luong nghiep vu phu hop.
         private void BtnReprintById_Click(object sender, EventArgs e)
         {
             var handler = ReprintByIdRequested;
@@ -77,6 +81,7 @@ namespace DemoPick
             }
         }
 
+        // Xu ly su kien nguoi dung bam vao control lien quan va goi luong nghiep vu phu hop.
         private void BtnReprintLast_Click(object sender, EventArgs e)
         {
             var handler = ReprintLastRequested;
@@ -86,6 +91,7 @@ namespace DemoPick
             }
         }
 
+        // Xu ly phim bam de kich hoat thao tac nhanh hoac dieu huong tren man hinh.
         private void TxtInvoiceId_KeyDown(object sender, KeyEventArgs e)
         {
             if (e == null || e.KeyCode != Keys.Enter)

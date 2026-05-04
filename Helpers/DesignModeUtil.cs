@@ -10,6 +10,7 @@ namespace DemoPick.Helpers
 {
     internal static class DesignModeUtil
     {
+        // Kiem tra dieu kien Is Design Mode va tra ve ket qua dung/sai cho luong xu ly.
         internal static bool IsDesignMode(Control control)
         {
             // Most reliable early check for designer host.

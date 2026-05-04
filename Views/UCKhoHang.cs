@@ -23,6 +23,7 @@ namespace DemoPick
         private InventoryController _inventoryController;
         private bool _listColumnsInitialized;
 
+        // Khoi tao man hinh/control UCKhoHang va chuan bi trang thai ban dau can dung.
         public UCKhoHang()
         {
             InitializeComponent();
@@ -42,6 +43,7 @@ namespace DemoPick
             LoadDataAsync();
         }
 
+        // Dam bao dieu kien Ensure List Columns da san sang truoc khi chay buoc xu ly tiep theo.
         private void EnsureListColumns()
         {
             if (_listColumnsInitialized)
@@ -80,6 +82,7 @@ namespace DemoPick
             }
         }
 
+        // Xu ly logic man hinh To Ui Status va cap nhat control lien quan.
         private static string ToUiStatus(string raw)
         {
             string s = (raw ?? string.Empty).Trim();
@@ -95,6 +98,7 @@ namespace DemoPick
             return s;
         }
 
+        // Xu ly su kien nguoi dung bam vao control lien quan va goi luong nghiep vu phu hop.
         private void BtnXoaSP_Click(object sender, EventArgs e)
         {
             try
@@ -126,6 +130,7 @@ namespace DemoPick
             }
         }
 
+        // Xu ly su kien nguoi dung bam vao control lien quan va goi luong nghiep vu phu hop.
         private void BtnThemSP_Click(object sender, EventArgs e)
         {
             try
@@ -145,6 +150,7 @@ namespace DemoPick
             }
         }
 
+        // Nap du lieu cho Load Data roi cap nhat lai trang thai hien thi tren man hinh.
         private async void LoadDataAsync()
         {
             try
@@ -170,6 +176,7 @@ namespace DemoPick
             }
         }
 
+        // Dua du lieu Bind Inventory Items len giao dien hoac ve lai phan hien thi lien quan.
         private void BindInventoryItems(IReadOnlyCollection<InventoryItemModel> items)
         {
             lblListTitle.Text = "Tồn kho thông minh";
@@ -207,6 +214,7 @@ namespace DemoPick
             }
         }
 
+        // Dua du lieu Bind Transactions len giao dien hoac ve lai phan hien thi lien quan.
         private void BindTransactions(IReadOnlyCollection<TransactionModel> txs)
         {
             lblBotLeftTitle.Text = "Giao dịch kho gần đây";
@@ -240,6 +248,7 @@ namespace DemoPick
             }
         }
 
+        // Dua du lieu Bind Smart Kpis len giao dien hoac ve lai phan hien thi lien quan.
         private void BindSmartKpis(InventoryKpiModel kpi, InventorySmartInsightsModel insight)
         {
             lblC1Title.Text = "Tổng giá trị kho";
@@ -259,6 +268,7 @@ namespace DemoPick
             lblC4Badge.Text = insight.SuggestedReorderUnits > 0 ? "+" + insight.SuggestedReorderUnits.ToString("N0") + " đơn vị" : "Tạm đủ";
         }
 
+        // Dua du lieu Bind Forecast len giao dien hoac ve lai phan hien thi lien quan.
         private void BindForecast(InventorySmartInsightsModel insight)
         {
             lblBotRightTitle.Text = "Dự báo tồn kho 7 ngày tới";
@@ -306,6 +316,7 @@ namespace DemoPick
             }
         }
 
+        // Ap dung hoac chuan hoa trang thai Apply Row Style de du lieu/giao dien nhat quan.
         private static void ApplyRowStyle(ListViewItem item, InventoryItemModel model)
         {
             if (item == null || model == null)
@@ -331,6 +342,7 @@ namespace DemoPick
             }
         }
 
+        // Cap nhat lai du lieu/trang thai Refresh On Activated tren man hinh hien tai.
         public void RefreshOnActivated()
         {
             LoadDataAsync();

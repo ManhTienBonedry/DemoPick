@@ -12,6 +12,7 @@ namespace DemoPick.Services
         private static bool _noteSchemaChecked;
         private static bool _noteSchemaOk;
 
+        // Luu hoac ghi nhan Submit Booking vao trang thai he thong/CSDL khi nghiep vu yeu cau.
         internal static void SubmitBooking(int courtId, int? memberId, string guestName, string note, DateTime startTime, DateTime endTime, string status, string paymentState = null)
         {
             // Ensure schema/proc if possible; if not, fall back to legacy proc call (without @Note).
@@ -62,6 +63,7 @@ namespace DemoPick.Services
             }
         }
 
+        // Cap nhat du lieu hoac trang thai Update Booking Time theo quy tac nghiep vu.
         internal static void UpdateBookingTime(int bookingId, DateTime newStartTime, DateTime newEndTime)
         {
             if (bookingId <= 0) throw new ArgumentException("BookingID không hợp lệ.");
@@ -109,6 +111,7 @@ namespace DemoPick.Services
             }
         }
 
+        // Cap nhat du lieu hoac trang thai Update Booking Time And Note theo quy tac nghiep vu.
         internal static void UpdateBookingTimeAndNote(int bookingId, DateTime newStartTime, DateTime newEndTime, string note)
         {
             if (bookingId <= 0) throw new ArgumentException("BookingID không hợp lệ.");
@@ -191,6 +194,7 @@ namespace DemoPick.Services
             }
         }
 
+        // Luu hoac ghi nhan Mark Booking As Pending vao trang thai he thong/CSDL khi nghiep vu yeu cau.
         internal static void MarkBookingAsPending(int bookingId)
         {
             if (bookingId <= 0) throw new ArgumentException("BookingID không hợp lệ.");
@@ -212,6 +216,7 @@ WHERE BookingID = @Id
             }
         }
 
+        // Xoa, huy hoac dat lai du lieu Cancel Booking theo dung dieu kien nghiep vu.
         internal static void CancelBooking(int bookingId)
         {
             if (bookingId <= 0) throw new ArgumentException("BookingID không hợp lệ.");
@@ -253,6 +258,7 @@ WHERE BookingID = @Id
             BookingMemberCleanupService.TryCleanupOrphanWalkinMember(memberId);
         }
 
+        // Thu thuc hien Try Ensure Booking Note Schema, neu du lieu khong hop le thi dung va tra thong bao phu hop.
         private static bool TryEnsureBookingNoteSchema()
         {
             if (_noteSchemaChecked)
@@ -343,6 +349,7 @@ END");
             }
         }
 
+        // Kiem tra dieu kien Has Booking Note Column va tra ve ket qua dung/sai cho luong xu ly.
         private static bool HasBookingNoteColumn()
         {
             // Avoid depending on TryEnsureBookingNoteSchema() because proc ALTER might fail even if column exists.
@@ -363,6 +370,7 @@ END");
             }
         }
 
+        // Kiem tra dieu kien Has Booking Payment State Column va tra ve ket qua dung/sai cho luong xu ly.
         private static bool HasBookingPaymentStateColumn()
         {
             try
@@ -382,6 +390,7 @@ END");
             }
         }
 
+        // Xu ly nghiep vu Sp Create Booking Has Note Param va tra ket qua cho controller/man hinh goi den.
         private static bool SpCreateBookingHasNoteParam()
         {
             try
@@ -407,6 +416,7 @@ WHERE object_id = OBJECT_ID('dbo.sp_CreateBooking')
             }
         }
 
+        // Xu ly nghiep vu Sp Create Booking Has Member Id Param va tra ket qua cho controller/man hinh goi den.
         private static bool SpCreateBookingHasMemberIdParam()
         {
             try
@@ -432,6 +442,7 @@ WHERE object_id = OBJECT_ID('dbo.sp_CreateBooking')
             }
         }
 
+        // Xu ly nghiep vu Sp Create Booking Has Payment State Param va tra ket qua cho controller/man hinh goi den.
         private static bool SpCreateBookingHasPaymentStateParam()
         {
             try
@@ -457,6 +468,7 @@ WHERE object_id = OBJECT_ID('dbo.sp_CreateBooking')
             }
         }
 
+        // Ap dung hoac chuan hoa trang thai Normalize Booking Payment State de du lieu/giao dien nhat quan.
         private static string NormalizeBookingPaymentState(string paymentState)
         {
             string p = (paymentState ?? string.Empty).Trim();

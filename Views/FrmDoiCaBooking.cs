@@ -15,7 +15,7 @@ namespace DemoPick.Views
         public DateTime NewEnd { get; private set; }
         public string NewNote { get; private set; }
 
-        // Parameterless ctor for Visual Studio Designer.
+        // Khoi tao man hinh/control FrmDoiCaBooking va chuan bi trang thai ban dau can dung.
         public FrmDoiCaBooking()
         {
             InitializeComponent();
@@ -43,7 +43,7 @@ namespace DemoPick.Views
             if (cbDuration.Items.Count > 0 && cbDuration.SelectedIndex < 0) cbDuration.SelectedIndex = 1;
         }
 
-        // Backward compatible ctor
+        // Khoi tao man hinh/control FrmDoiCaBooking va chuan bi trang thai ban dau can dung.
         public FrmDoiCaBooking(DateTime date, DateTime currentStart, DateTime currentEnd)
             : this()
         {
@@ -68,6 +68,7 @@ namespace DemoPick.Views
             CancelButton = btnCancel;
         }
 
+        // Khoi tao man hinh/control FrmDoiCaBooking va chuan bi trang thai ban dau can dung.
         public FrmDoiCaBooking(DateTime date, int bookingId, string courtName, string guestName, string status, DateTime currentStart, DateTime currentEnd)
             : this(date, currentStart, currentEnd)
         {
@@ -77,6 +78,7 @@ namespace DemoPick.Views
             lblStatusValue.Text = string.IsNullOrWhiteSpace(status) ? "-" : status;
         }
 
+        // Khoi tao man hinh/control FrmDoiCaBooking va chuan bi trang thai ban dau can dung.
         public FrmDoiCaBooking(DateTime date, int bookingId, string courtName, string guestName, string status, DateTime currentStart, DateTime currentEnd, string currentNote)
             : this(date, bookingId, courtName, guestName, status, currentStart, currentEnd)
         {
@@ -86,6 +88,7 @@ namespace DemoPick.Views
             }
         }
 
+        // Thiet lap Wire Chrome va gan cac cau hinh/su kien can dung ban dau.
         private void WireChrome()
         {
             // Close button
@@ -96,12 +99,14 @@ namespace DemoPick.Views
             lblHeaderTop.MouseDown += Form_MouseDown;
         }
 
+        // Thiet lap Wire Buttons va gan cac cau hinh/su kien can dung ban dau.
         private void WireButtons()
         {
             btnOk.Click += (s, e) => TryConfirm();
             btnCancel.Click += (s, e) => { DialogResult = DialogResult.Cancel; Close(); };
         }
 
+        // Xu ly su kien tu control lien quan tren man hinh.
         private void Form_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
@@ -118,6 +123,7 @@ namespace DemoPick.Views
             }
         }
 
+        // Thu thuc hien Try Confirm, neu du lieu khong hop le thi dung va tra thong bao phu hop.
         private void TryConfirm()
         {
             string timeStr = cbTime.SelectedItem?.ToString();
@@ -164,6 +170,7 @@ namespace DemoPick.Views
             Close();
         }
 
+        // Dien giai hoac xac dinh Parse Duration Minutes tu du lieu dau vao de cac buoc sau dung thong nhat.
         private static int ParseDurationMinutes(string text)
         {
             if (string.IsNullOrWhiteSpace(text)) return 0;

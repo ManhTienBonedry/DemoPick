@@ -11,6 +11,7 @@ namespace DemoPick.Services
 {
     public class DashboardService
     {
+        // Lay du lieu/ket qua cho Get Metrics tu tang xu ly phu hop.
         public async Task<DashboardMetricsModel> GetMetricsAsync()
         {
             return await Task.Run(() =>
@@ -31,6 +32,7 @@ namespace DemoPick.Services
             });
         }
 
+        // Lay du lieu/ket qua cho Get Revenue Trend Last7 Days tu tang xu ly phu hop.
         public async Task<List<TrendPointModel>> GetRevenueTrendLast7DaysAsync()
         {
             return await Task.Run(() =>
@@ -51,6 +53,7 @@ namespace DemoPick.Services
             });
         }
 
+        // Lay du lieu/ket qua cho Get Top Courts Revenue tu tang xu ly phu hop.
         public async Task<List<NamedRevenueModel>> GetTopCourtsRevenueAsync()
         {
             return await Task.Run(() =>
@@ -71,6 +74,7 @@ namespace DemoPick.Services
             });
         }
 
+        // Lay du lieu/ket qua cho Get Recent Activity tu tang xu ly phu hop.
         public async Task<List<DashboardActivityModel>> GetRecentActivityAsync(int take)
         {
             return await Task.Run(() =>

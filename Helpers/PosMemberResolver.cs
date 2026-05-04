@@ -8,6 +8,7 @@ namespace DemoPick.Helpers
 {
     internal static class PosMemberResolver
     {
+        // Dien giai hoac xac dinh Resolve Member For Checkout tu du lieu dau vao de cac buoc sau dung thong nhat.
         internal static int ResolveMemberForCheckout(SqlConnection conn, SqlTransaction tran, int memberId, int creditedBookingId)
         {
             if (memberId > 0) return memberId;

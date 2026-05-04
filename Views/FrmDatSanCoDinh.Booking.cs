@@ -8,6 +8,7 @@ namespace DemoPick
 {
     public partial class FrmDatSanCoDinh
     {
+        // Xu ly su kien nguoi dung bam vao control lien quan va goi luong nghiep vu phu hop.
         private void BtnConfirm_Click(object sender, EventArgs e)
         {
             if (rbKhachThue.Checked && (string.IsNullOrWhiteSpace(txtName.Text) || string.IsNullOrWhiteSpace(txtPhone.Text)))
@@ -33,6 +34,7 @@ namespace DemoPick
             SubmitRecurringBooking(phoneDigits);
         }
 
+        // Luu hoac ghi nhan Submit Quick Booking vao trang thai he thong/CSDL khi nghiep vu yeu cau.
         private void SubmitQuickBooking(string phoneDigits)
         {
             int courtId = ResolveSelectedCourtId();
@@ -102,6 +104,7 @@ namespace DemoPick
             }
         }
 
+        // Luu hoac ghi nhan Submit Recurring Booking vao trang thai he thong/CSDL khi nghiep vu yeu cau.
         private void SubmitRecurringBooking(string phoneDigits)
         {
             // Check if at least one day is checked
@@ -238,6 +241,7 @@ namespace DemoPick
             this.Close();
         }
 
+        // Kiem tra dieu kien Is Selected Day va tra ve ket qua dung/sai cho luong xu ly.
         private static bool IsSelectedDay(DayOfWeek day, bool mon, bool tue, bool wed, bool thu, bool fri, bool sat, bool sun)
         {
             switch (day)
@@ -253,11 +257,13 @@ namespace DemoPick
             }
         }
 
+        // Dien giai hoac xac dinh Parse Duration Minutes tu du lieu dau vao de cac buoc sau dung thong nhat.
         private static int ParseDurationMinutes(string durationText)
         {
             return ParseDurationMinutesCore(durationText);
         }
 
+        // Thu thuc hien Try Parse Hour Minute, neu du lieu khong hop le thi dung va tra thong bao phu hop.
         private static bool TryParseHourMinute(string timeText, out int hours, out int minutes)
         {
             hours = 0;

@@ -11,16 +11,19 @@ namespace DemoPick.Data
 {
     internal static class SchemaInstaller
     {
+        // Dam bao database va schema bat buoc da ton tai truoc khi ung dung chay.
         internal static void EnsureDatabaseAndSchema()
         {
             EnsureDatabaseAndSchemaCore(rebuild: false);
         }
 
+        // Xu ly thao tac du lieu Rebuild Database And Schema lien quan toi CSDL hoac cau hinh he thong.
         internal static void RebuildDatabaseAndSchema()
         {
             EnsureDatabaseAndSchemaCore(rebuild: true);
         }
 
+        // Dam bao dieu kien Ensure Database And Schema Core da san sang truoc khi chay buoc xu ly tiep theo.
         private static void EnsureDatabaseAndSchemaCore(bool rebuild)
         {
             var baseBuilder = new SqlConnectionStringBuilder(Db.ConnectionString);
@@ -87,6 +90,7 @@ namespace DemoPick.Data
 #endif
         }
 
+        // Xoa, huy hoac dat lai du lieu Drop Database If Exists theo dung dieu kien nghiep vu.
         private static void DropDatabaseIfExists(string masterConnectionString, string dbName)
         {
             using (var conn = new SqlConnection(masterConnectionString))
@@ -107,6 +111,7 @@ END
             }
         }
 
+        // Dam bao dieu kien Ensure Database Exists da san sang truoc khi chay buoc xu ly tiep theo.
         private static void EnsureDatabaseExists(string masterConnectionString, string dbName)
         {
             using (var conn = new SqlConnection(masterConnectionString))

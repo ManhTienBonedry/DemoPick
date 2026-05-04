@@ -11,11 +11,13 @@ namespace DemoPick.Services
 {
     public class ReportService
     {
+        // Lay du lieu/ket qua cho Get Top Courts tu tang xu ly phu hop.
         public async Task<List<TopCourtModel>> GetTopCourtsAsync()
         {
             return await GetTopCourtsAsync(null, null);
         }
 
+        // Lay du lieu/ket qua cho Get Top Courts tu tang xu ly phu hop.
         public async Task<List<TopCourtModel>> GetTopCourtsAsync(DateTime? fromDateInclusive, DateTime? toDateExclusive)
         {
             var list = new List<TopCourtModel>();
@@ -68,6 +70,7 @@ namespace DemoPick.Services
             return list;
         }
 
+        // Lay du lieu/ket qua cho Get Kpis tu tang xu ly phu hop.
         public async Task<ReportKpiModel> GetKpisAsync(DateTime fromStart, DateTime toExclusive, int days)
         {
             return await Task.Run(() =>
@@ -96,6 +99,7 @@ namespace DemoPick.Services
             });
         }
 
+        // Lay du lieu/ket qua cho Get Trend tu tang xu ly phu hop.
         public async Task<List<TrendPointModel>> GetTrendAsync(DateTime fromStart, DateTime toExclusive, DateTime fromDateInclusive, DateTime toDateInclusive)
         {
             return await Task.Run(() =>
@@ -121,6 +125,7 @@ namespace DemoPick.Services
             });
         }
 
+        // Lay du lieu/ket qua cho Get Top Courts Revenue tu tang xu ly phu hop.
         public async Task<List<NamedRevenueModel>> GetTopCourtsRevenueAsync(DateTime fromStart, DateTime toExclusive)
         {
             return await Task.Run(() =>
@@ -144,6 +149,7 @@ namespace DemoPick.Services
             });
         }
 
+        // Lay du lieu/ket qua cho Get Booking Hour Heatmap tu tang xu ly phu hop.
         public async Task<List<ReportHeatmapPointModel>> GetBookingHourHeatmapAsync(DateTime fromStart, DateTime toExclusive)
         {
             return await Task.Run(() =>
@@ -168,6 +174,7 @@ namespace DemoPick.Services
             });
         }
 
+        // Lay du lieu/ket qua cho Get Booking Ops tu tang xu ly phu hop.
         public async Task<ReportBookingOpsModel> GetBookingOpsAsync(DateTime fromStart, DateTime toExclusive)
         {
             return await Task.Run(() =>

@@ -115,11 +115,13 @@ FROM (
             public int PosOnlyInvoices { get; set; }
         }
 
+        // Lay du lieu/ket qua cho Get Invoice Header tu tang xu ly phu hop.
         public static InvoiceHeader GetInvoiceHeader(int invoiceId)
         {
             return GetInvoiceHeader(invoiceId, null);
         }
 
+        // Lay du lieu/ket qua cho Get Invoice Header tu tang xu ly phu hop.
         public static InvoiceHeader GetInvoiceHeader(int invoiceId, string courtName)
         {
             var dt = DatabaseHelper.ExecuteQuery(
@@ -150,6 +152,7 @@ FROM (
             };
         }
 
+        // Lay du lieu/ket qua cho Get Invoice Lines tu tang xu ly phu hop.
         public static List<InvoiceLine> GetInvoiceLines(int invoiceId)
         {
             var list = new List<InvoiceLine>();
@@ -172,6 +175,7 @@ FROM (
             return list;
         }
 
+        // Lay du lieu/ket qua cho Get Invoice History tu tang xu ly phu hop.
         public static List<InvoiceHistoryItem> GetInvoiceHistory(int take, string keyword, int? memberId = null)
         {
             if (take <= 0)
@@ -204,6 +208,7 @@ FROM (
             return list;
         }
 
+        // Lay du lieu/ket qua cho Get Current Shift Summary tu tang xu ly phu hop.
         public static ShiftReconciliationSummary GetCurrentShiftSummary()
         {
             DateTime now = DateTime.Now;
@@ -238,6 +243,7 @@ FROM (
             };
         }
 
+        // Lay du lieu/ket qua cho Get Shift Window tu tang xu ly phu hop.
         private static Tuple<DateTime, DateTime> GetShiftWindow(DateTime now)
         {
             DateTime start = new DateTime(now.Year, now.Month, now.Day, 6, 0, 0);

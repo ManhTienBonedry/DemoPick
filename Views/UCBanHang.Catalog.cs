@@ -19,6 +19,7 @@ namespace DemoPick
         private static readonly Font _posCourtBadgeFont = new Font("Segoe UI", 9F, FontStyle.Bold);
         private static readonly Font _posCourtTimeFont = new Font("Segoe UI", 9F, FontStyle.Regular);
 
+        // Xoa, huy hoac dat lai du lieu Clear And Dispose Child Controls theo dung dieu kien nghiep vu.
         private static void ClearAndDisposeChildControls(Control parent)
         {
             if (parent == null) return;
@@ -35,6 +36,7 @@ namespace DemoPick
             }
         }
 
+        // Ap dung hoac chuan hoa trang thai Normalize Pos Category de du lieu/giao dien nhat quan.
         private static string NormalizePosCategory(string category)
         {
             string c = (category ?? string.Empty).Trim();
@@ -49,6 +51,7 @@ namespace DemoPick
             return c;
         }
 
+        // Xu ly su kien nguoi dung bam vao control lien quan va goi luong nghiep vu phu hop.
         private void BtnAddProduct_Click(object sender, EventArgs e)
         {
             try
@@ -69,6 +72,7 @@ namespace DemoPick
             }
         }
 
+        // Xu ly su kien nguoi dung bam vao control lien quan va goi luong nghiep vu phu hop.
         private void BtnDeleteProduct_Click(object sender, EventArgs e)
         {
             try
@@ -108,6 +112,7 @@ namespace DemoPick
             }
         }
 
+        // Nap du lieu cho Load Catalog roi cap nhat lai trang thai hien thi tren man hinh.
         private async void LoadCatalog()
         {
             try
@@ -218,6 +223,7 @@ namespace DemoPick
             }
         }
 
+        // Xu ly su kien nguoi dung bam vao control lien quan va goi luong nghiep vu phu hop.
         private void CategoryChip_Click(object sender, EventArgs e)
         {
             if (!(sender is UCCategoryChip chip)) return;

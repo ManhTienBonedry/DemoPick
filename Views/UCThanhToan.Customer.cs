@@ -9,6 +9,7 @@ namespace DemoPick
 {
     public partial class UCThanhToan
     {
+        // Xu ly su kien nguoi dung bam vao control lien quan va goi luong nghiep vu phu hop.
         private async void BtnSearchCustomer_Click(object sender, EventArgs e)
         {
             string search = txtCustomerPhone.Text.Trim();

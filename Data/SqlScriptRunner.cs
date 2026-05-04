@@ -21,6 +21,7 @@ namespace DemoPick.Data
             @"^\s*USE\s+(?:\[(?<db>[^\]]+)\]|(?<db>[^\s;]+))\s*;?\s*$",
             RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Multiline);
 
+        // Thuc thi Execute File, thuong la cau lenh hoac script thao tac voi CSDL.
         internal static void ExecuteFile(string scriptPath, string baseConnectionString)
         {
             if (string.IsNullOrWhiteSpace(scriptPath))
@@ -33,6 +34,7 @@ namespace DemoPick.Data
             ExecuteScript(script, baseConnectionString);
         }
 
+        // Thuc thi Execute Embedded Resource Suffix, thuong la cau lenh hoac script thao tac voi CSDL.
         internal static void ExecuteEmbeddedResourceSuffix(string resourceNameSuffix, string baseConnectionString)
         {
             if (string.IsNullOrWhiteSpace(resourceNameSuffix))
@@ -72,6 +74,7 @@ namespace DemoPick.Data
             }
         }
 
+        // Thuc thi Execute Script, thuong la cau lenh hoac script thao tac voi CSDL.
         internal static void ExecuteScript(string script, string baseConnectionString)
         {
             if (script == null) throw new ArgumentNullException(nameof(script));
@@ -129,6 +132,7 @@ namespace DemoPick.Data
             }
         }
 
+        // Tao hoac tinh ra du lieu Build Connection String tu cac thong tin dau vao hien co.
         private static string BuildConnectionString(SqlConnectionStringBuilder baseBuilder, string initialCatalog)
         {
             var b = new SqlConnectionStringBuilder(baseBuilder.ConnectionString)
@@ -138,6 +142,7 @@ namespace DemoPick.Data
             return b.ConnectionString;
         }
 
+        // Dien giai hoac xac dinh Split On Go tu du lieu dau vao de cac buoc sau dung thong nhat.
         private static List<string> SplitOnGo(string script)
         {
             var batches = new List<string>();

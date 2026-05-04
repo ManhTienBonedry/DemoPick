@@ -22,6 +22,7 @@ namespace DemoPick
         private readonly InventoryService _inventoryService;
         private ContextMenuStrip _cartContextMenu;
 
+        // Khoi tao man hinh/control UCBanHang va chuan bi trang thai ban dau can dung.
         public UCBanHang()
         {
             InitializeComponent();
@@ -68,6 +69,7 @@ namespace DemoPick
             LoadAllData(resetCart: true);
         }
 
+        // Xu ly su kien nguoi dung bam vao control lien quan va goi luong nghiep vu phu hop.
         private void BtnQtyPlus_Click(object sender, EventArgs e)
         {
             if (lstCart.SelectedItems.Count <= 0)
@@ -79,6 +81,7 @@ namespace DemoPick
             AdjustSelectedCartItemQuantity(+1);
         }
 
+        // Xu ly su kien nguoi dung bam vao control lien quan va goi luong nghiep vu phu hop.
         private void BtnQtyMinus_Click(object sender, EventArgs e)
         {
             if (lstCart.SelectedItems.Count <= 0)
@@ -90,6 +93,7 @@ namespace DemoPick
             AdjustSelectedCartItemQuantity(-1);
         }
 
+        // Xu ly phim bam de kich hoat thao tac nhanh hoac dieu huong tren man hinh.
         private void LstCart_KeyDown(object sender, KeyEventArgs e)
         {
             if (lstCart.SelectedItems.Count <= 0) return;
@@ -113,6 +117,7 @@ namespace DemoPick
             }
         }
 
+        // Cap nhat lai du lieu/trang thai Refresh On Activated tren man hinh hien tai.
         public void RefreshOnActivated()
         {
             _selectedCourtName = "";
@@ -120,6 +125,7 @@ namespace DemoPick
             LoadAllData(resetCart: true);
         }
 
+        // Nap du lieu cho Load All Data roi cap nhat lai trang thai hien thi tren man hinh.
         private void LoadAllData(bool resetCart)
         {
             LoadCatalog();
@@ -135,6 +141,7 @@ namespace DemoPick
             }
         }
 
+        // Thiet lap Setup Context Menus va gan cac cau hinh/su kien can dung ban dau.
         private void SetupContextMenus()
         {
             _cartContextMenu = new ContextMenuStrip();
@@ -172,6 +179,7 @@ namespace DemoPick
             lstCart.DoubleClick += (s, e) => SetSelectedCartItemQuantity();
         }
 
+        // Xoa, huy hoac dat lai du lieu Remove Selected Cart Item theo dung dieu kien nghiep vu.
         private void RemoveSelectedCartItem()
         {
             if (lstCart.SelectedItems.Count <= 0) return;
@@ -191,6 +199,7 @@ namespace DemoPick
             }
         }
 
+        // Xu ly logic man hinh Adjust Selected Cart Item Quantity va cap nhat control lien quan.
         private void AdjustSelectedCartItemQuantity(int delta)
         {
             if (lstCart.SelectedItems.Count <= 0) return;
@@ -222,6 +231,7 @@ namespace DemoPick
             SavePendingOrderFromCart(showSuccessTip: false);
         }
 
+        // Ap dung hoac chuan hoa trang thai Set Selected Cart Item Quantity de du lieu/giao dien nhat quan.
         private void SetSelectedCartItemQuantity()
         {
             if (lstCart.SelectedItems.Count <= 0) return;
@@ -255,6 +265,7 @@ namespace DemoPick
             SavePendingOrderFromCart(showSuccessTip: false);
         }
 
+        // Xu ly logic man hinh Prompt Quantity va cap nhat control lien quan.
         private int? PromptQuantity(string itemName, int currentQty)
         {
             using (var dlg = new Form())

@@ -47,6 +47,7 @@ namespace DemoPick
         private bool _pendingBlinkOn;
         private Timer _pendingBlinkTimer;
 
+        // Khoi tao man hinh/control UCDatLich va chuan bi trang thai ban dau can dung.
         public UCDatLich()
         {
             InitializeComponent();
@@ -183,6 +184,7 @@ namespace DemoPick
             }
         }
 
+        // Cap nhat lai du lieu/trang thai Refresh On Activated tren man hinh hien tai.
         public void RefreshOnActivated()
         {
             ReloadTimelineAsync(forceReload: true);

@@ -10,6 +10,7 @@ namespace DemoPick
 {
     public partial class FrmUserMenu : Form
     {
+        // Khoi tao man hinh/control FrmUserMenu va chuan bi trang thai ban dau can dung.
         public FrmUserMenu()
         {
             InitializeComponent();
@@ -41,13 +42,16 @@ namespace DemoPick
         }
 
         [System.Runtime.InteropServices.DllImport("Gdi32.dll", EntryPoint = "CreateRoundRectRgn")]
+        // Tao hoac tinh ra du lieu Create Round Rect Rgn tu cac thong tin dau vao hien co.
         private static extern IntPtr CreateRoundRectRgn(int nLeftRect, int nTopRect, int nRightRect, int nBottomRect, int nWidthEllipse, int nHeightEllipse);
 
         [System.Runtime.InteropServices.DllImport("gdi32.dll", SetLastError = true)]
+        // Xoa, huy hoac dat lai du lieu Delete Object theo dung dieu kien nghiep vu.
         private static extern bool DeleteObject(IntPtr hObject);
 
         private bool isOpeningSubForm = false;
 
+        // Xu ly logic man hinh Frm User Menu_Deactivate va cap nhat control lien quan.
         private void FrmUserMenu_Deactivate(object sender, EventArgs e)
         {
             if (!isOpeningSubForm)
@@ -56,6 +60,7 @@ namespace DemoPick
             }
         }
 
+        // Xu ly su kien nguoi dung bam vao control lien quan va goi luong nghiep vu phu hop.
         private void btnDoiMatKhau_Click(object sender, EventArgs e)
         {
             isOpeningSubForm = true;
@@ -67,6 +72,7 @@ namespace DemoPick
             this.Close();
         }
 
+        // Xu ly su kien nguoi dung bam vao control lien quan va goi luong nghiep vu phu hop.
         private void btnDangXuat_Click(object sender, EventArgs e)
         {
             AppSession.SignOut();
@@ -75,6 +81,7 @@ namespace DemoPick
             this.Close();
         }
 
+        // Xu ly su kien nguoi dung bam vao control lien quan va goi luong nghiep vu phu hop.
         private void btnThoat_Click(object sender, EventArgs e)
         {
             // Exit the app via the main form so AppFlowContext can end the message loop safely.

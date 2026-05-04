@@ -11,6 +11,7 @@ namespace DemoPick
     {
         private bool _isActive;
 
+        // Khoi tao man hinh/control UCCategoryChip va chuan bi trang thai ban dau can dung.
         public UCCategoryChip()
         {
             InitializeComponent();
@@ -43,13 +44,16 @@ namespace DemoPick
             }
         }
 
+        // Ap dung hoac chuan hoa trang thai Set Active de du lieu/giao dien nhat quan.
         public void SetActive(bool isActive) => IsActive = isActive;
 
+        // Xu ly logic man hinh On Click va cap nhat control lien quan.
         protected override void OnClick(EventArgs e)
         {
             base.OnClick(e);
         }
 
+        // Cap nhat lai du lieu/trang thai Update Visual tren man hinh hien tai.
         private void UpdateVisual()
         {
             UpdateSizeToContent();
@@ -73,6 +77,7 @@ namespace DemoPick
             }
         }
 
+        // Xu ly logic man hinh On Text Changed va cap nhat control lien quan.
         protected override void OnTextChanged(EventArgs e)
         {
             base.OnTextChanged(e);
@@ -81,12 +86,14 @@ namespace DemoPick
             UpdateSizeToContent();
         }
 
+        // Xu ly logic man hinh On Font Changed va cap nhat control lien quan.
         protected override void OnFontChanged(EventArgs e)
         {
             base.OnFontChanged(e);
             UpdateSizeToContent();
         }
 
+        // Cap nhat lai du lieu/trang thai Update Size To Content tren man hinh hien tai.
         private void UpdateSizeToContent()
         {
             // Keep a minimum width similar to the original hardcoded 100.

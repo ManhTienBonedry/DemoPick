@@ -14,6 +14,7 @@ namespace DemoPick.Services
         private static bool _noteSchemaChecked;
         private static bool _noteSchemaOk;
 
+        // Lay du lieu/ket qua cho Get Bookings By Date tu tang xu ly phu hop.
         internal static List<BookingModel> GetBookingsByDate(DateTime date)
         {
             var list = new List<BookingModel>();
@@ -43,6 +44,7 @@ namespace DemoPick.Services
             return list;
         }
 
+        // Lay du lieu/ket qua cho Get Unpaid Bookings Until tu tang xu ly phu hop.
         internal static List<BookingModel> GetUnpaidBookingsUntil(DateTime toDateInclusive)
         {
             var list = new List<BookingModel>();
@@ -76,6 +78,7 @@ namespace DemoPick.Services
             return list;
         }
 
+        // Xu ly nghiep vu Map Booking Row va tra ket qua cho controller/man hinh goi den.
         private static BookingModel MapBookingRow(DataRow row)
         {
             string guest = row["GuestName"] != DBNull.Value ? row["GuestName"].ToString() : null;
@@ -97,6 +100,7 @@ namespace DemoPick.Services
             };
         }
 
+        // Thu thuc hien Try Ensure Booking Note Schema, neu du lieu khong hop le thi dung va tra thong bao phu hop.
         private static bool TryEnsureBookingNoteSchema()
         {
             if (_noteSchemaChecked)
@@ -150,6 +154,7 @@ WHERE PaymentState IS NULL OR LTRIM(RTRIM(PaymentState)) = '';");
             }
         }
 
+        // Kiem tra dieu kien Has Booking Note Column va tra ve ket qua dung/sai cho luong xu ly.
         private static bool HasBookingNoteColumn()
         {
             try
@@ -169,6 +174,7 @@ WHERE PaymentState IS NULL OR LTRIM(RTRIM(PaymentState)) = '';");
             }
         }
 
+        // Kiem tra dieu kien Has Booking Payment State Column va tra ve ket qua dung/sai cho luong xu ly.
         private static bool HasBookingPaymentStateColumn()
         {
             try

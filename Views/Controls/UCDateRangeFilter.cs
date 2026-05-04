@@ -32,6 +32,7 @@ namespace DemoPick
         public event EventHandler RangeChanged;
         public event EventHandler ApplyClicked;
 
+        // Khoi tao man hinh/control UCDateRangeFilter va chuan bi trang thai ban dau can dung.
         public UCDateRangeFilter()
         {
             InitializeComponent();
@@ -167,6 +168,7 @@ namespace DemoPick
             }
         }
 
+        // Kiem tra Validate Range de phat hien du lieu khong hop le hoac tinh huong can canh bao.
         public bool ValidateRange(out string error)
         {
             error = null;

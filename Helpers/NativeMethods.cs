@@ -15,9 +15,11 @@ namespace DemoPick
         public const int HT_CAPTION = 0x2;
 
         [DllImport("user32.dll")]
+        // Ho tro xu ly Send Message de cac noi khac dung lai cung mot quy tac.
         public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
 
         [DllImport("user32.dll")]
+        // Ho tro xu ly Release Capture de cac noi khac dung lai cung mot quy tac.
         public static extern bool ReleaseCapture();
     }
 }

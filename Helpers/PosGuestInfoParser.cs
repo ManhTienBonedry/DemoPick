@@ -7,6 +7,7 @@ namespace DemoPick.Helpers
 {
     internal static class PosGuestInfoParser
     {
+        // Dien giai hoac xac dinh Parse Guest Info tu du lieu dau vao de cac buoc sau dung thong nhat.
         internal static void ParseGuestInfo(string guestNameRaw, out string fullName, out string phone)
         {
             fullName = string.Empty;
@@ -41,6 +42,7 @@ namespace DemoPick.Helpers
                 fullName = "Khach " + phone;
         }
 
+        // Ap dung hoac chuan hoa trang thai Normalize Phone de du lieu/giao dien nhat quan.
         private static string NormalizePhone(string input)
         {
             if (string.IsNullOrWhiteSpace(input)) return string.Empty;

@@ -7,6 +7,7 @@ namespace DemoPick.Helpers
 {
     internal static class InventoryTransactionFormatter
     {
+        // Thu thuc hien Try Extract Invoice Id, neu du lieu khong hop le thi dung va tra thong bao phu hop.
         internal static int TryExtractInvoiceId(string subDesc)
         {
             if (string.IsNullOrWhiteSpace(subDesc)) return 0;
@@ -40,6 +41,7 @@ namespace DemoPick.Helpers
             return 0;
         }
 
+        // Ho tro xu ly Map Event For Ui de cac noi khac dung lai cung mot quy tac.
         internal static string MapEventForUi(string eventDesc)
         {
             string e = (eventDesc ?? string.Empty).Trim();
@@ -49,6 +51,7 @@ namespace DemoPick.Helpers
             return e;
         }
 
+        // Ho tro xu ly Format Sub Desc For Ui de cac noi khac dung lai cung mot quy tac.
         internal static string FormatSubDescForUi(string eventDesc, string subDesc)
         {
             string e = (eventDesc ?? string.Empty).Trim();
@@ -64,6 +67,7 @@ namespace DemoPick.Helpers
             return sub;
         }
 
+        // Thu thuc hien Try Format Pos Checkout Sub Desc, neu du lieu khong hop le thi dung va tra thong bao phu hop.
         private static string TryFormatPosCheckoutSubDesc(string raw)
         {
             if (string.IsNullOrWhiteSpace(raw)) return string.Empty;
@@ -152,6 +156,7 @@ namespace DemoPick.Helpers
             return parts.Count == 0 ? raw : string.Join(" • ", parts);
         }
 
+        // Ho tro xu ly Looks Like Item Summary Token de cac noi khac dung lai cung mot quy tac.
         private static bool LooksLikeItemSummaryToken(string token)
         {
             if (string.IsNullOrWhiteSpace(token)) return false;
@@ -163,6 +168,7 @@ namespace DemoPick.Helpers
             return false;
         }
 
+        // Ap dung hoac chuan hoa trang thai Normalize Item Summary Token de du lieu/giao dien nhat quan.
         private static string NormalizeItemSummaryToken(string token)
         {
             if (string.IsNullOrWhiteSpace(token)) return string.Empty;
@@ -216,6 +222,7 @@ namespace DemoPick.Helpers
             return head;
         }
 
+        // Ap dung hoac chuan hoa trang thai Normalize Court For Ui de du lieu/giao dien nhat quan.
         private static string NormalizeCourtForUi(string court)
         {
             string c = (court ?? string.Empty).Trim();
@@ -229,6 +236,7 @@ namespace DemoPick.Helpers
             return "Sân " + c;
         }
 
+        // Dien giai hoac xac dinh Parse Key Value Pairs tu du lieu dau vao de cac buoc sau dung thong nhat.
         private static Dictionary<string, string> ParseKeyValuePairs(string raw)
         {
             var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -253,6 +261,7 @@ namespace DemoPick.Helpers
             return dict;
         }
 
+        // Thu thuc hien Try Get Int, neu du lieu khong hop le thi dung va tra thong bao phu hop.
         private static int TryGetInt(Dictionary<string, string> kv, string key)
         {
             if (kv == null || string.IsNullOrWhiteSpace(key)) return 0;
@@ -261,6 +270,7 @@ namespace DemoPick.Helpers
             return int.TryParse(raw.Trim(), out int val) ? val : 0;
         }
 
+        // Thu thuc hien Try Get String, neu du lieu khong hop le thi dung va tra thong bao phu hop.
         private static string TryGetString(Dictionary<string, string> kv, string key)
         {
             if (kv == null || string.IsNullOrWhiteSpace(key)) return string.Empty;
@@ -268,6 +278,7 @@ namespace DemoPick.Helpers
             return (raw ?? string.Empty).Trim();
         }
 
+        // Ho tro xu ly To Payment Method Display de cac noi khac dung lai cung mot quy tac.
         private static string ToPaymentMethodDisplay(string paymentMethod)
         {
             string s = (paymentMethod ?? string.Empty).Trim();

@@ -14,12 +14,14 @@ namespace DemoPick.Services
         // --- PENDING ORDER STATE MANAGEMENT ---
         public static Dictionary<string, List<CartLine>> PendingOrders { get; } = new Dictionary<string, List<CartLine>>(StringComparer.OrdinalIgnoreCase);
 
+        // Luu hoac ghi nhan Save Pending Order vao trang thai he thong/CSDL khi nghiep vu yeu cau.
         public static void SavePendingOrder(string courtName, List<CartLine> lines)
         {
             if (string.IsNullOrWhiteSpace(courtName)) return;
             PendingOrders[courtName] = lines ?? new List<CartLine>();
         }
 
+        // Lay du lieu/ket qua cho Get Pending Order tu tang xu ly phu hop.
         public static List<CartLine> GetPendingOrder(string courtName)
         {
             if (string.IsNullOrWhiteSpace(courtName)) return new List<CartLine>();
@@ -27,12 +29,13 @@ namespace DemoPick.Services
             return new List<CartLine>();
         }
 
+        // Xoa, huy hoac dat lai du lieu Clear Pending Order theo dung dieu kien nghiep vu.
         public static void ClearPendingOrder(string courtName)
         {
             if (string.IsNullOrWhiteSpace(courtName)) return;
             PendingOrders.Remove(courtName);
         }
-        // --------------------------------------
+        // Thuc hien thanh toan POS, ghi hoa don, chi tiet hoa don va cap nhat trang thai booking/kho.
 
         public int Checkout(
             int memberId,
@@ -221,6 +224,7 @@ namespace DemoPick.Services
             }
         }
 
+        // Kiem tra dieu kien Trigger Exists va tra ve ket qua dung/sai cho luong xu ly.
         private static bool TriggerExists(SqlConnection conn, SqlTransaction tran, string triggerName)
         {
             if (string.IsNullOrWhiteSpace(triggerName)) return false;

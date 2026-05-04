@@ -8,6 +8,7 @@ namespace DemoPick
 {
     public partial class FrmDatSanCoDinh
     {
+        // Ve lai phan giao dien tuy bien cho control lien quan.
         private void Frm_Paint(object sender, PaintEventArgs e)
         {
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
@@ -18,6 +19,7 @@ namespace DemoPick
             }
         }
 
+        // Xu ly logic man hinh Rounded Rect va cap nhat control lien quan.
         private GraphicsPath RoundedRect(Rectangle bounds, int radius)
         {
             int diameter = radius * 2;
@@ -42,6 +44,7 @@ namespace DemoPick
             return path;
         }
 
+        // Xu ly su kien tu control lien quan tren man hinh.
         private void Form_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)

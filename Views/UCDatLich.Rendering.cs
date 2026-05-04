@@ -35,6 +35,7 @@ namespace DemoPick
         private Brush _payStateDepositBrush;
         private Brush _payStateDefaultBrush;
 
+        // Dam bao dieu kien Ensure Cached Gdi Objects da san sang truoc khi chay buoc xu ly tiep theo.
         private void EnsureCachedGdiObjects()
         {
             bool isDark = false;
@@ -68,6 +69,7 @@ namespace DemoPick
             _payStateDefaultBrush = new SolidBrush(Color.FromArgb(107, 114, 128));
         }
 
+        // Xu ly logic man hinh Dispose Gdi Objects va cap nhat control lien quan.
         private void DisposeGdiObjects()
         {
             _gridPen?.Dispose();
@@ -93,6 +95,7 @@ namespace DemoPick
             _payStateDefaultBrush?.Dispose();
         }
 
+        // Dua du lieu Render Timeline Grid len giao dien hoac ve lai phan hien thi lien quan.
         private void RenderTimelineGrid(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
@@ -179,6 +182,7 @@ namespace DemoPick
             }
         }
 
+        // Dua du lieu Draw Booking len giao dien hoac ve lai phan hien thi lien quan.
         private RectangleF DrawBooking(Graphics g, float offsetX, float offsetY, float hourWidth, float rowHeight, int courtIndex, float startHour, float durationHours, string title, Color color, DateTime startTime, DateTime endTime, bool selected, bool pendingSoon, string note, bool showNote, string paymentState, string bookingStatus)
         {
             float gridStartHour = GridStartHour;
@@ -262,6 +266,7 @@ namespace DemoPick
             return rect;
         }
 
+        // Nap du lieu cho Get Payment State Label roi cap nhat lai trang thai hien thi tren man hinh.
         private static string GetPaymentStateLabel(string paymentState, string bookingStatus)
         {
             if (string.Equals(bookingStatus, AppConstants.BookingStatus.Paid, StringComparison.OrdinalIgnoreCase))
@@ -273,6 +278,7 @@ namespace DemoPick
             return "Thu tại sân";
         }
 
+        // Nap du lieu cho Get Payment State Brush roi cap nhat lai trang thai hien thi tren man hinh.
         private Brush GetPaymentStateBrush(string paymentState, string bookingStatus)
         {
             if (string.Equals(bookingStatus, AppConstants.BookingStatus.Paid, StringComparison.OrdinalIgnoreCase))
@@ -284,6 +290,7 @@ namespace DemoPick
             return _payStateDefaultBrush;
         }
 
+        // Kiem tra dieu kien Is Pending Soon va tra ve ket qua dung/sai cho luong xu ly.
         private bool IsPendingSoon(DemoPick.Models.BookingModel booking)
         {
             if (booking == null) return false;
@@ -295,6 +302,7 @@ namespace DemoPick
             return (booking.StartTime - now).TotalMinutes <= PendingBlinkWindowMinutes;
         }
 
+        // Nap du lieu cho Get Rounded Rect roi cap nhat lai trang thai hien thi tren man hinh.
         private GraphicsPath GetRoundedRect(RectangleF bounds, int radius)
         {
             int diameter = radius * 2;

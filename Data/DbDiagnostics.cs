@@ -9,10 +9,10 @@ namespace DemoPick.Data
 {
     internal static class DbDiagnostics
     {
+        // Tao thong bao loi khoi tao CSDL than thien de hien thi cho nguoi dung.
         internal static string BuildDbInitErrorMessage(Exception ex)
         {
 #if !DEBUG
-            // SECURITY: Do not leak connection details / raw exception messages in Release.
             return BuildSafeDbInitErrorMessage(ex);
 #else
             var b = Db.CreateBuilder();
@@ -71,6 +71,7 @@ namespace DemoPick.Data
         }
 
 #if !DEBUG
+        // Tao hoac tinh ra du lieu Build Safe Db Init Error Message tu cac thong tin dau vao hien co.
         private static string BuildSafeDbInitErrorMessage(Exception ex)
         {
             var sb = new StringBuilder();
@@ -93,6 +94,7 @@ namespace DemoPick.Data
         }
 #endif
 
+        // Tao hoac tinh ra du lieu Build Technical Details tu cac thong tin dau vao hien co.
         private static string BuildTechnicalDetails(Exception ex)
         {
             var sb = new StringBuilder();
@@ -123,6 +125,7 @@ namespace DemoPick.Data
             return sb.ToString().Trim();
         }
 
+        // Thu thuc hien Try Get Sql Exception, neu du lieu khong hop le thi dung va tra thong bao phu hop.
         private static bool TryGetSqlException(Exception ex, out SqlException sqlEx)
         {
             sqlEx = null;
@@ -141,6 +144,7 @@ namespace DemoPick.Data
             return false;
         }
 
+        // Thu thuc hien Try Get Migration Checksum Mismatch, neu du lieu khong hop le thi dung va tra thong bao phu hop.
         private static bool TryGetMigrationChecksumMismatch(Exception ex, out string migrationId)
         {
             migrationId = null;
@@ -159,6 +163,7 @@ namespace DemoPick.Data
             return false;
         }
 
+        // Tao hoac tinh ra du lieu Build Tips tu cac thong tin dau vao hien co.
         private static string[] BuildTips(SqlException ex, SqlConnectionStringBuilder b)
         {
             // Common SQL Server issues
@@ -206,6 +211,7 @@ namespace DemoPick.Data
             }
         }
 
+        // Xu ly thao tac du lieu Safe lien quan toi CSDL hoac cau hinh he thong.
         private static string Safe(string s)
         {
             return string.IsNullOrWhiteSpace(s) ? "(empty)" : s;

@@ -32,6 +32,7 @@ namespace DemoPick
         private static readonly Font _checkoutCourtInfoFont = new Font("Segoe UI", 9F, FontStyle.Italic);
         private static readonly Font _checkoutEmptyStateFont = new Font("Segoe UI", 11F, FontStyle.Italic);
 
+        // Xoa, huy hoac dat lai du lieu Clear And Dispose Child Controls theo dung dieu kien nghiep vu.
         private static void ClearAndDisposeChildControls(Control parent)
         {
             if (parent == null) return;
@@ -48,6 +49,7 @@ namespace DemoPick
             }
         }
 
+        // Nap du lieu cho Load Courts roi cap nhat lai trang thai hien thi tren man hinh.
         private void LoadCourts()
         {
             try
@@ -130,6 +132,7 @@ namespace DemoPick
             }
         }
 
+        // Xu ly logic man hinh Add Checkout Court Panel va cap nhat control lien quan.
         private void AddCheckoutCourtPanel(CheckoutCourtRow row, List<DemoPick.Models.BookingModel> unpaidBookings, DateTime now)
         {
             if (row == null || row.Court == null) return;
@@ -268,6 +271,7 @@ namespace DemoPick
             flpCourts.Controls.Add(pnlCtx);
         }
 
+        // Thu thuc hien Try Receive Court, neu du lieu khong hop le thi dung va tra thong bao phu hop.
         private void TryReceiveCourt(CheckoutCourtRow row, List<DemoPick.Models.BookingModel> unpaidBookings, DateTime now)
         {
             if (row == null || row.Court == null || row.Booking == null)
@@ -312,6 +316,7 @@ namespace DemoPick
             }
         }
 
+        // Kiem tra dieu kien Has Overdue Unpaid Booking On Same Court va tra ve ket qua dung/sai cho luong xu ly.
         private static bool HasOverdueUnpaidBookingOnSameCourt(List<DemoPick.Models.BookingModel> bookings, int courtId, int exceptBookingId, DateTime now)
         {
             if (bookings == null || bookings.Count == 0) return false;
@@ -331,6 +336,7 @@ namespace DemoPick
             return false;
         }
 
+        // Kiem tra dieu kien Should Ignore For Checkout va tra ve ket qua dung/sai cho luong xu ly.
         private static bool ShouldIgnoreForCheckout(string status)
         {
             return string.Equals(status, AppConstants.BookingStatus.Paid, StringComparison.OrdinalIgnoreCase)
@@ -338,6 +344,7 @@ namespace DemoPick
                 || string.Equals(status, AppConstants.BookingStatus.Maintenance, StringComparison.OrdinalIgnoreCase);
         }
 
+        // Dien giai hoac xac dinh Resolve Booking State tu du lieu dau vao de cac buoc sau dung thong nhat.
         private static BookingDisplayState ResolveBookingState(DemoPick.Models.BookingModel booking, DateTime now)
         {
             if (booking == null) return BookingDisplayState.OrderOnly;
@@ -355,6 +362,7 @@ namespace DemoPick
             return BookingDisplayState.Active;
         }
 
+        // Nap du lieu cho Get State Text roi cap nhat lai trang thai hien thi tren man hinh.
         private static string GetStateText(CheckoutCourtRow row)
         {
             switch (row.State)
@@ -373,6 +381,7 @@ namespace DemoPick
             }
         }
 
+        // Nap du lieu cho Get State Color roi cap nhat lai trang thai hien thi tren man hinh.
         private static Color GetStateColor(BookingDisplayState state)
         {
             switch (state)
@@ -389,6 +398,7 @@ namespace DemoPick
             }
         }
 
+        // Xu ly logic man hinh Select Court To Checkout va cap nhat control lien quan.
         private void SelectCourtToCheckout(DemoPick.Models.CourtModel court, DemoPick.Models.BookingModel booking)
         {
             string courtName = court.Name;
@@ -412,6 +422,7 @@ namespace DemoPick
             ReloadPaymentHistory();
         }
 
+        // Cap nhat lai du lieu/trang thai Update Payment State Hint tren man hinh hien tai.
         private void UpdatePaymentStateHint()
         {
             if (lblPaymentStateHint == null) return;
@@ -442,6 +453,7 @@ namespace DemoPick
             lblPaymentStateHint.ForeColor = Color.FromArgb(37, 99, 235);
         }
 
+        // Xoa, huy hoac dat lai du lieu Reset Checkout Pane theo dung dieu kien nghiep vu.
         private void ResetCheckoutPane()
         {
             _cartTotal = 0;

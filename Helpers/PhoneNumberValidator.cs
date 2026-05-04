@@ -6,6 +6,7 @@ namespace DemoPick.Helpers
 {
     internal static class PhoneNumberValidator
     {
+        // Ap dung hoac chuan hoa trang thai Normalize Digits de du lieu/giao dien nhat quan.
         internal static string NormalizeDigits(string input)
         {
             if (string.IsNullOrWhiteSpace(input)) return string.Empty;
@@ -19,6 +20,7 @@ namespace DemoPick.Helpers
             return sb.ToString();
         }
 
+        // Kiem tra dieu kien Is Valid Ten Digits va tra ve ket qua dung/sai cho luong xu ly.
         internal static bool IsValidTenDigits(string input)
         {
             string digits = NormalizeDigits(input);

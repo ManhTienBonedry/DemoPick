@@ -32,6 +32,7 @@ namespace DemoPick.Data
             }
         }
 
+        // Thu thuc hien Try Protect Connection Strings Section If Enabled, neu du lieu khong hop le thi dung va tra thong bao phu hop.
         internal static void TryProtectConnectionStringsSectionIfEnabled()
         {
             if (_protectAttempted) return;
@@ -60,6 +61,7 @@ namespace DemoPick.Data
             }
         }
 
+        // Kiem tra dieu kien Is Protection Enabled va tra ve ket qua dung/sai cho luong xu ly.
         private static bool IsProtectionEnabled()
         {
             try
@@ -79,6 +81,7 @@ namespace DemoPick.Data
             }
         }
 
+        // Kiem tra dieu kien Is Truthy va tra ve ket qua dung/sai cho luong xu ly.
         private static bool IsTruthy(string v)
         {
             if (string.IsNullOrWhiteSpace(v)) return false;
@@ -86,11 +89,13 @@ namespace DemoPick.Data
             return v == "1" || v.Equals("true", StringComparison.OrdinalIgnoreCase) || v.Equals("yes", StringComparison.OrdinalIgnoreCase);
         }
 
+        // Tao hoac tinh ra du lieu Create Connection tu cac thong tin dau vao hien co.
         internal static SqlConnection CreateConnection()
         {
             return new SqlConnection(ConnectionString);
         }
 
+        // Tao hoac tinh ra du lieu Create Builder tu cac thong tin dau vao hien co.
         internal static SqlConnectionStringBuilder CreateBuilder()
         {
             return new SqlConnectionStringBuilder(ConnectionString);

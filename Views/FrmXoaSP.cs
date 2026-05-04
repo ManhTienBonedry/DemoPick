@@ -14,6 +14,7 @@ namespace DemoPick
         private readonly InventoryService _inventoryService;
         private bool _hasDeleted;
 
+        // Khoi tao man hinh/control FrmXoaSP va chuan bi trang thai ban dau can dung.
         public FrmXoaSP()
         {
             InitializeComponent();
@@ -21,6 +22,7 @@ namespace DemoPick
             SetupForm();
         }
 
+        // Thiet lap Setup Form va gan cac cau hinh/su kien can dung ban dau.
         private void SetupForm()
         {
             _lstProducts.SelectedIndexChanged += (s, e) => UpdateDeleteButtonState();
@@ -47,6 +49,7 @@ namespace DemoPick
             UpdateDeleteButtonState();
         }
 
+        // Cap nhat bo cuc khi kich thuoc man hinh/control thay doi.
         private void PnlBottom_Resize(object sender, EventArgs e)
         {
             if (_pnlBottom == null || _btnClose == null || _btnDelete == null)
@@ -61,11 +64,13 @@ namespace DemoPick
             _btnDelete.Top = 10;
         }
 
+        // Cap nhat lai du lieu/trang thai Update Delete Button State tren man hinh hien tai.
         private void UpdateDeleteButtonState()
         {
             _btnDelete.Enabled = _lstProducts.SelectedItems.Count > 0;
         }
 
+        // Nap du lieu cho Load Products roi cap nhat lai trang thai hien thi tren man hinh.
         private async Task LoadProductsAsync()
         {
             try
@@ -104,12 +109,14 @@ namespace DemoPick
             }
         }
 
+        // Nap du lieu cho Get Selected Product roi cap nhat lai trang thai hien thi tren man hinh.
         private ProductDeleteListItemModel GetSelectedProduct()
         {
             if (_lstProducts.SelectedItems.Count <= 0) return null;
             return _lstProducts.SelectedItems[0].Tag as ProductDeleteListItemModel;
         }
 
+        // Xoa, huy hoac dat lai du lieu Delete Selected theo dung dieu kien nghiep vu.
         private async Task DeleteSelectedAsync()
         {
             var p = GetSelectedProduct();

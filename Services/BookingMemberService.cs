@@ -7,6 +7,7 @@ namespace DemoPick.Services
 {
     internal static class BookingMemberService
     {
+        // Lay du lieu/ket qua cho Get Or Create Member Id tu tang xu ly phu hop.
         internal static int? GetOrCreateMemberId(string fullName, string phone)
         {
             try

@@ -15,6 +15,7 @@ namespace DemoPick
         private readonly int _invoiceId;
         private readonly string _courtName;
 
+        // Thu thuc hien Try Get External Image Uri From Resources, neu du lieu khong hop le thi dung va tra thong bao phu hop.
         private static string TryGetExternalImageUriFromResources(string fileStem)
         {
             try
@@ -46,6 +47,7 @@ namespace DemoPick
             }
         }
 
+        // Khoi tao man hinh/control FrmInvoicePreview va chuan bi trang thai ban dau can dung.
         public FrmInvoicePreview(int invoiceId, string courtName)
         {
             _invoiceId = invoiceId;
@@ -60,6 +62,7 @@ namespace DemoPick
             Load += (s, e) => LoadReport();
         }
 
+        // Nap du lieu cho Load Report roi cap nhat lai trang thai hien thi tren man hinh.
         private void LoadReport()
         {
             try
@@ -139,6 +142,7 @@ namespace DemoPick
             }
         }
 
+        // Xuat du lieu Export ra dinh dang/tap tin nguoi dung chon.
         private void Export(string renderFormat, string fileExt, string filter)
         {
             try

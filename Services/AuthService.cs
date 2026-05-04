@@ -12,6 +12,7 @@ namespace DemoPick.Services
         private const int MaxFailedLoginAttempts = 5;
         private const int LockoutMinutes = 5;
 
+        // Thu dang nhap bang tai khoan/mat khau, kiem tra khoa tai khoan va tra loi ro rang neu that bai.
         internal static bool TryLogin(string identifier, string password, out AuthUser user, out string error)
         {
             user = null;
@@ -192,6 +193,7 @@ namespace DemoPick.Services
             return true;
         }
 
+        // Luu hoac ghi nhan Upgrade Legacy Password Hash vao trang thai he thong/CSDL khi nghiep vu yeu cau.
         private static void UpgradeLegacyPasswordHash(int accountId, string rawPassword)
         {
             byte[] newSalt = AuthPasswordCrypto.GenerateSalt(16);
@@ -204,16 +206,19 @@ namespace DemoPick.Services
                 new SqlParameter("@Id", accountId));
         }
 
+        // Luu hoac ghi nhan Record Failed Login Attempt vao trang thai he thong/CSDL khi nghiep vu yeu cau.
         private static void RecordFailedLoginAttempt(int accountId)
         {
             AuthLoginAttemptTracker.RecordFailedLoginAttempt(accountId, MaxFailedLoginAttempts, LockoutMinutes);
         }
 
+        // Xoa, huy hoac dat lai du lieu Reset Failed Login theo dung dieu kien nghiep vu.
         private static void ResetFailedLogin(int accountId)
         {
             AuthLoginAttemptTracker.ResetFailedLogin(accountId);
         }
 
+        // Thu dang ky tai khoan moi sau khi kiem tra du lieu dau vao va trung tai khoan.
         internal static bool TryRegister(string fullName, string email, string phone, string password, string confirmPassword, out string error)
         {
             error = null;
@@ -288,6 +293,7 @@ namespace DemoPick.Services
             }
         }
 
+        // Tao tai khoan admin mac dinh khi he thong chua co tai khoan nhan vien nao.
         internal static bool TrySeedAdminIfEmpty(out string seededUsername, out string seededPassword)
         {
             seededUsername = null;
@@ -317,6 +323,7 @@ namespace DemoPick.Services
             return true;
         }
 
+        // Thu doi mat khau cho tai khoan hien tai sau khi xac thuc mat khau cu.
         internal static bool TryChangePassword(int accountId, string oldPassword, string newPassword, string confirmNewPassword, out string error)
         {
             error = null;

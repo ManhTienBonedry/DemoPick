@@ -9,6 +9,7 @@ namespace DemoPick.Helpers
         internal const decimal SilverThreshold = 2000000m;
         internal const decimal GoldThreshold = 5000000m;
 
+        // Ap dung hoac chuan hoa trang thai Normalize Tier de du lieu/giao dien nhat quan.
         internal static string NormalizeTier(string rawTier)
         {
             string tier = (rawTier ?? string.Empty).Trim();
@@ -28,6 +29,7 @@ namespace DemoPick.Helpers
             return tier;
         }
 
+        // Lay du lieu/ket qua cho Get Discount Percent tu tang xu ly phu hop.
         internal static decimal GetDiscountPercent(string rawTier)
         {
             switch (NormalizeTier(rawTier))
@@ -41,6 +43,7 @@ namespace DemoPick.Helpers
             }
         }
 
+        // Tao hoac tinh ra du lieu Build Upgrade Hint tu cac thong tin dau vao hien co.
         internal static string BuildUpgradeHint(decimal totalSpent)
         {
             if (totalSpent >= GoldThreshold)

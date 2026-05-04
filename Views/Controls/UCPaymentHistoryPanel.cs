@@ -25,6 +25,7 @@ namespace DemoPick
         public event EventHandler SearchRequested;
         public event EventHandler OpenRequested;
 
+        // Khoi tao man hinh/control UCPaymentHistoryPanel va chuan bi trang thai ban dau can dung.
         public UCPaymentHistoryPanel()
         {
             InitializeComponent();
@@ -55,6 +56,7 @@ namespace DemoPick
             }
         }
 
+        // Ap dung hoac chuan hoa trang thai Set Shift Summary de du lieu/giao dien nhat quan.
         public void SetShiftSummary(string summaryText)
         {
             EnsureSummaryLabel();
@@ -66,6 +68,7 @@ namespace DemoPick
             _summaryLabel.Text = summaryText ?? string.Empty;
         }
 
+        // Dua du lieu Bind Rows len giao dien hoac ve lai phan hien thi lien quan.
         public void BindRows(IReadOnlyList<HistoryRow> rows)
         {
             if (gridHistory == null)
@@ -118,6 +121,7 @@ namespace DemoPick
             return selected != null;
         }
 
+        // Dam bao dieu kien Ensure Summary Label da san sang truoc khi chay buoc xu ly tiep theo.
         private void EnsureSummaryLabel()
         {
             if (_summaryLabel != null)
@@ -148,6 +152,7 @@ namespace DemoPick
             Size = new Size(280, 296);
         }
 
+        // Xu ly logic man hinh Raise Search Requested va cap nhat control lien quan.
         private void RaiseSearchRequested()
         {
             var handler = SearchRequested;
@@ -157,6 +162,7 @@ namespace DemoPick
             }
         }
 
+        // Xu ly logic man hinh Raise Open Requested va cap nhat control lien quan.
         private void RaiseOpenRequested()
         {
             var handler = OpenRequested;
@@ -166,6 +172,7 @@ namespace DemoPick
             }
         }
 
+        // Xu ly phim bam de kich hoat thao tac nhanh hoac dieu huong tren man hinh.
         private void TxtSearch_KeyDown(object sender, KeyEventArgs e)
         {
             if (e == null || e.KeyCode != Keys.Enter)
@@ -178,16 +185,19 @@ namespace DemoPick
             RaiseSearchRequested();
         }
 
+        // Xu ly su kien nguoi dung bam vao control lien quan va goi luong nghiep vu phu hop.
         private void BtnSearch_Click(object sender, EventArgs e)
         {
             RaiseSearchRequested();
         }
 
+        // Xu ly su kien nguoi dung bam vao control lien quan va goi luong nghiep vu phu hop.
         private void BtnOpen_Click(object sender, EventArgs e)
         {
             RaiseOpenRequested();
         }
 
+        // Xu ly logic man hinh Grid History_Double Click va cap nhat control lien quan.
         private void GridHistory_DoubleClick(object sender, EventArgs e)
         {
             RaiseOpenRequested();

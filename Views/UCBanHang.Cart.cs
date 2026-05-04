@@ -15,6 +15,7 @@ namespace DemoPick
             public decimal UnitPrice { get; }
             public string Category { get; }
 
+            // Khoi tao man hinh/control CartItemTag va chuan bi trang thai ban dau can dung.
             public CartItemTag(int productId, decimal unitPrice, string category)
             {
                 ProductId = productId;
@@ -23,6 +24,7 @@ namespace DemoPick
             }
         }
 
+        // Dieu huong hoac hien thi Show Select Court Hint If Needed theo trang thai hien tai cua ung dung.
         private void ShowSelectCourtHintIfNeeded()
         {
             if (_shownSelectCourtHint) return;
@@ -40,6 +42,7 @@ namespace DemoPick
             }
         }
 
+        // Dam bao dieu kien Ensure Court Selected For Add da san sang truoc khi chay buoc xu ly tiep theo.
         private bool EnsureCourtSelectedForAdd()
         {
             if (!string.IsNullOrWhiteSpace(_selectedCourtName)) return true;
@@ -49,6 +52,7 @@ namespace DemoPick
             return false;
         }
 
+        // Xu ly su kien nguoi dung bam vao control lien quan va goi luong nghiep vu phu hop.
         private void BtnClearOrder_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(_selectedCourtName))
@@ -61,11 +65,13 @@ namespace DemoPick
             new UIPage().ShowSuccessTip($"Đã xóa đơn chờ của {_selectedCourtName}.");
         }
 
+        // Xu ly su kien nguoi dung bam vao control lien quan va goi luong nghiep vu phu hop.
         private void BtnSaveOrder_Click(object sender, EventArgs e)
         {
             SavePendingOrderFromCart(showSuccessTip: true);
         }
 
+        // Luu hoac ghi nhan Save Pending Order From Cart vao trang thai he thong/CSDL khi nghiep vu yeu cau.
         private bool SavePendingOrderFromCart(bool showSuccessTip)
         {
             if (string.IsNullOrWhiteSpace(_selectedCourtName))
@@ -122,6 +128,7 @@ namespace DemoPick
             }
         }
 
+        // Thiet lap Setup Cart Columns va gan cac cau hinh/su kien can dung ban dau.
         private void SetupCartColumns()
         {
             lstCart.Columns.Add("Sản phẩm", 140);
@@ -129,11 +136,13 @@ namespace DemoPick
             lstCart.Columns.Add("Thành tiền", 110);
         }
 
+        // Xu ly logic man hinh Add To Cart va cap nhat control lien quan.
         private void AddToCart(string prodName, decimal unitPrice)
         {
             AddToCart(0, prodName, unitPrice, category: null);
         }
 
+        // Xu ly logic man hinh Add To Cart va cap nhat control lien quan.
         private void AddToCart(int productId, string prodName, decimal unitPrice, string category)
         {
             if (!EnsureCourtSelectedForAdd()) return;

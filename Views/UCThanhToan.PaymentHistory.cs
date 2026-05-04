@@ -12,6 +12,7 @@ namespace DemoPick
     {
         private List<InvoiceService.InvoiceHistoryItem> _historyItems = new List<InvoiceService.InvoiceHistoryItem>();
 
+        // Thiet lap Initialize Payment History Panel va gan cac cau hinh/su kien can dung ban dau.
         private void InitializePaymentHistoryPanel()
         {
             if (ucPaymentHistoryPanel == null)
@@ -41,16 +42,19 @@ namespace DemoPick
             ucPaymentHistoryPanel.BringToFront();
         }
 
+        // Xu ly su kien tu control lien quan tren man hinh.
         private void UcPaymentHistoryPanel_SearchRequested(object sender, EventArgs e)
         {
             ReloadPaymentHistory();
         }
 
+        // Xu ly su kien tu control lien quan tren man hinh.
         private void UcPaymentHistoryPanel_OpenRequested(object sender, EventArgs e)
         {
             OpenSelectedHistoryInvoice();
         }
 
+        // Nap du lieu cho Reload Payment History roi cap nhat lai trang thai hien thi tren man hinh.
         private void ReloadPaymentHistory()
         {
             if (ucPaymentHistoryPanel == null)
@@ -96,6 +100,7 @@ namespace DemoPick
             }
         }
 
+        // Tao hoac tinh ra du lieu Build Shift Summary Text tu cac thong tin dau vao hien co.
         private static string BuildShiftSummaryText(InvoiceService.ShiftReconciliationSummary shift)
         {
             if (shift == null)
@@ -123,6 +128,7 @@ namespace DemoPick
                 shift.PosOnlyInvoices);
         }
 
+        // Thu thuc hien Try Get Selected History Item, neu du lieu khong hop le thi dung va tra thong bao phu hop.
         private bool TryGetSelectedHistoryItem(out InvoiceService.InvoiceHistoryItem selected)
         {
             selected = null;
@@ -134,6 +140,7 @@ namespace DemoPick
             return ucPaymentHistoryPanel.TryGetSelectedTag<InvoiceService.InvoiceHistoryItem>(out selected);
         }
 
+        // Dieu huong hoac hien thi Open Selected History Invoice theo trang thai hien tai cua ung dung.
         private void OpenSelectedHistoryInvoice()
         {
             if (!TryGetSelectedHistoryItem(out var selected))

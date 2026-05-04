@@ -8,6 +8,7 @@ namespace DemoPick
 {
     public partial class FrmDatSanCoDinh
     {
+        // Nap du lieu va chuan bi trang thai khi man hinh/control vua duoc mo.
         private void FrmDatSanCoDinh_Load(object sender, EventArgs e)
         {
             try
@@ -59,6 +60,7 @@ namespace DemoPick
             RefreshConflictHintUi();
         }
 
+        // Cap nhat trang thai khi checkbox/toggle thay doi.
         private void RbMode_CheckedChanged(object sender, EventArgs e)
         {
             // Only handle when a radio becomes checked (avoid double-fire)

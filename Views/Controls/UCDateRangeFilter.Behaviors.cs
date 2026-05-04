@@ -9,6 +9,7 @@ namespace DemoPick
 {
     public partial class UCDateRangeFilter
     {
+        // Thiet lap Attach Picker Change Detection va gan cac cau hinh/su kien can dung ban dau.
         private void AttachPickerChangeDetection(CuoreUI.Controls.cuiCalendarDatePicker picker, bool isFrom)
         {
             if (picker == null) return;
@@ -36,6 +37,7 @@ namespace DemoPick
             TryAttachEventHandler(picker, "SelectedDateChanged", handler);
         }
 
+        // Nap du lieu cho Read Picker Date roi cap nhat lai trang thai hien thi tren man hinh.
         private static DateTime ReadPickerDate(CuoreUI.Controls.cuiCalendarDatePicker picker, DateTime fallback)
         {
             try
@@ -67,6 +69,7 @@ namespace DemoPick
             return fallback.Date;
         }
 
+        // Xu ly logic man hinh Start Watchdog va cap nhat control lien quan.
         private void StartWatchdog(bool isFrom)
         {
             try
@@ -100,6 +103,7 @@ namespace DemoPick
             }
         }
 
+        // Xu ly logic man hinh Watchdog Tick va cap nhat control lien quan.
         private void WatchdogTick(bool isFrom)
         {
             // Stop after ~3 seconds to avoid any lingering timers.
@@ -125,6 +129,7 @@ namespace DemoPick
             }
         }
 
+        // Thu thuc hien Try Attach Event Handler, neu du lieu khong hop le thi dung va tra thong bao phu hop.
         private static void TryAttachEventHandler(object instance, string eventName, EventHandler handler)
         {
             try
@@ -148,6 +153,7 @@ namespace DemoPick
             }
         }
 
+        // Thiet lap Attach Single Popup Behavior va gan cac cau hinh/su kien can dung ban dau.
         private static void AttachSinglePopupBehavior(Control picker)
         {
             if (picker == null) return;
@@ -160,6 +166,7 @@ namespace DemoPick
             };
         }
 
+        // Xu ly logic man hinh Close Open Cuore Date Picker Popups va cap nhat control lien quan.
         private static void CloseOpenCuoreDatePickerPopups()
         {
             try
@@ -190,6 +197,7 @@ namespace DemoPick
             }
         }
 
+        // Ap dung hoac chuan hoa trang thai Apply Picker Visual de du lieu/giao dien nhat quan.
         private static void ApplyPickerVisual(CuoreUI.Controls.cuiCalendarDatePicker picker)
         {
             if (picker == null) return;
@@ -220,6 +228,7 @@ namespace DemoPick
             }
         }
 
+        // Xu ly logic man hinh Picker_Size Changed_Apply Region va cap nhat control lien quan.
         private static void Picker_SizeChanged_ApplyRegion(object sender, EventArgs e)
         {
             if (sender is CuoreUI.Controls.cuiCalendarDatePicker picker)
@@ -228,6 +237,7 @@ namespace DemoPick
             }
         }
 
+        // Ap dung hoac chuan hoa trang thai Apply Rounded Region de du lieu/giao dien nhat quan.
         private static void ApplyRoundedRegion(Control c, int radius)
         {
             if (c == null) return;
@@ -265,6 +275,7 @@ namespace DemoPick
             }
         }
 
+        // Xu ly logic man hinh On Picker Changed va cap nhat control lien quan.
         private void OnPickerChanged(bool isFrom)
         {
             if (_suppressEvents) return;
@@ -307,6 +318,7 @@ namespace DemoPick
             }
         }
 
+        // Ap dung hoac chuan hoa trang thai Set Picker Date de du lieu/giao dien nhat quan.
         private void SetPickerDate(CuoreUI.Controls.cuiCalendarDatePicker picker, DateTime date)
         {
             if (picker == null) return;
@@ -326,6 +338,7 @@ namespace DemoPick
             }
         }
 
+        // Thiet lap Attach Read Only Date Picker Behavior va gan cac cau hinh/su kien can dung ban dau.
         private static void AttachReadOnlyDatePickerBehavior(Control picker)
         {
             if (picker == null) return;
@@ -341,6 +354,7 @@ namespace DemoPick
             };
         }
 
+        // Ap dung hoac chuan hoa trang thai Apply Mode Layout de du lieu/giao dien nhat quan.
         private void ApplyModeLayout()
         {
             bool isRange = _mode == DateFilterMode.Range;

@@ -20,6 +20,7 @@ namespace DemoPick
             "Khác"
         };
 
+        // Khoi tao man hinh/control FrmThemSP va chuan bi trang thai ban dau can dung.
         public FrmThemSP()
         {
             InitializeComponent();
@@ -28,6 +29,7 @@ namespace DemoPick
             SetupForm();
         }
 
+        // Thiet lap Setup Form va gan cac cau hinh/su kien can dung ban dau.
         private void SetupForm()
         {
             btnDong.Click += (s, e) => this.Close();
@@ -46,6 +48,7 @@ namespace DemoPick
             }
         }
 
+        // Tao hoac tinh ra du lieu Generate Internal Sku tu cac thong tin dau vao hien co.
         private static string GenerateInternalSku()
         {
             // Not a "scan code" for now; just a unique internal identifier.
@@ -54,6 +57,7 @@ namespace DemoPick
             return $"PD-{ts}-{rand}";
         }
 
+        // Nap du lieu cho Load Categories roi cap nhat lai trang thai hien thi tren man hinh.
         private async System.Threading.Tasks.Task LoadCategoriesAsync()
         {
             cboLoai.Items.Clear();
@@ -90,6 +94,7 @@ namespace DemoPick
             }
         }
 
+        // Xu ly su kien nguoi dung bam vao control lien quan va goi luong nghiep vu phu hop.
         private async void BtnLuu_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtTen.Text) || string.IsNullOrWhiteSpace(txtGia.Text))

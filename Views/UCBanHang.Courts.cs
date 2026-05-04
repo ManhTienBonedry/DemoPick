@@ -10,6 +10,7 @@ namespace DemoPick
 {
     public partial class UCBanHang
     {
+        // Nap du lieu cho Load Courts roi cap nhat lai trang thai hien thi tren man hinh.
         private void LoadCourts()
         {
             try
@@ -75,6 +76,7 @@ namespace DemoPick
             }
         }
 
+        // Nap du lieu cho Load Pending Order For Court roi cap nhat lai trang thai hien thi tren man hinh.
         private void LoadPendingOrderForCourt(string courtName)
         {
             lstCart.Items.Clear();

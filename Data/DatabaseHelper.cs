@@ -12,12 +12,13 @@ namespace DemoPick.Data
         private static readonly object _logThrottleLock = new object();
         private static readonly Dictionary<string, DateTime> _lastLogUtcByKey = new Dictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
 
+        // Lay hoac nap du lieu cho Get Connection tu CSDL/nguon cau hinh.
         public static SqlConnection GetConnection()
         {
             return Db.CreateConnection();
         }
 
-        // Option 1: Execute and get DataTable (SELECT)
+        // Thuc thi Execute Query, thuong la cau lenh hoac script thao tac voi CSDL.
         public static DataTable ExecuteQuery(string query, params SqlParameter[] parameters)
         {
             using (var conn = GetConnection())
@@ -33,7 +34,7 @@ namespace DemoPick.Data
             }
         }
 
-        // Overload: Execute and get DataTable (SELECT) within an existing transaction
+        // Thuc thi Execute Query, thuong la cau lenh hoac script thao tac voi CSDL.
         public static DataTable ExecuteQuery(SqlConnection conn, SqlTransaction tran, string query, params SqlParameter[] parameters)
         {
             using (var cmd = new SqlCommand(query, conn, tran))
@@ -48,7 +49,7 @@ namespace DemoPick.Data
             }
         }
 
-        // Option 2: Execute non-query (INSERT, UPDATE, DELETE)
+        // Thuc thi Execute Non Query, thuong la cau lenh hoac script thao tac voi CSDL.
         public static int ExecuteNonQuery(string query, params SqlParameter[] parameters)
         {
             using (var conn = GetConnection())
@@ -62,7 +63,7 @@ namespace DemoPick.Data
             }
         }
 
-        // Overload: Execute non-query within an existing transaction
+        // Thuc thi Execute Non Query, thuong la cau lenh hoac script thao tac voi CSDL.
         public static int ExecuteNonQuery(SqlConnection conn, SqlTransaction tran, string query, params SqlParameter[] parameters)
         {
             using (var cmd = new SqlCommand(query, conn, tran))
@@ -73,7 +74,7 @@ namespace DemoPick.Data
             }
         }
 
-        // Option 3: Execute scalar (Get single value like SCOPE_IDENTITY)
+        // Thuc thi Execute Scalar, thuong la cau lenh hoac script thao tac voi CSDL.
         public static object ExecuteScalar(string query, params SqlParameter[] parameters)
         {
             using (var conn = GetConnection())
@@ -87,7 +88,7 @@ namespace DemoPick.Data
             }
         }
 
-        // Overload: Execute scalar within an existing transaction
+        // Thuc thi Execute Scalar, thuong la cau lenh hoac script thao tac voi CSDL.
         public static object ExecuteScalar(SqlConnection conn, SqlTransaction tran, string query, params SqlParameter[] parameters)
         {
             using (var cmd = new SqlCommand(query, conn, tran))
@@ -98,7 +99,7 @@ namespace DemoPick.Data
             }
         }
 
-        // Best-effort logging to SystemLogs. Never throws.
+        // Ghi log theo kieu best-effort, neu ghi log loi thi khong lam dung luong chinh.
         public static void TryLog(string eventDesc, string subDesc)
         {
             try
@@ -115,6 +116,7 @@ namespace DemoPick.Data
             }
         }
 
+        // Ghi log theo kieu best-effort, neu ghi log loi thi khong lam dung luong chinh.
         public static void TryLog(string eventDesc, Exception ex, string context = null)
         {
             string sub = ex == null ? (context ?? "") : $"{context}\n{ex.GetType().Name}: {ex.Message}";
@@ -122,7 +124,7 @@ namespace DemoPick.Data
         }
 
         // Best-effort throttled logging to SystemLogs. Never throws.
-        // Logs at most once per throttleKey per minSeconds.
+        // Ghi log co gioi han tan suat de tranh spam nhieu ban ghi loi trung nhau.
         public static void TryLogThrottled(string throttleKey, string eventDesc, Exception ex, string context = null, int minSeconds = 60)
         {
             try

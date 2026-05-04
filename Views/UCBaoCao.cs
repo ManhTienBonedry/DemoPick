@@ -32,6 +32,7 @@ namespace DemoPick
         private static readonly Color KpiNegativeColor = Color.FromArgb(239, 68, 68);
         private static readonly Color KpiNeutralColor = Color.FromArgb(107, 114, 128);
 
+        // Khoi tao man hinh/control UCBaoCao va chuan bi trang thai ban dau can dung.
         public UCBaoCao()
         {
             InitializeComponent();
@@ -113,6 +114,7 @@ namespace DemoPick
             _ = ReloadAsync();
         }
 
+        // Thiet lap Setup Top Courts Table va gan cac cau hinh/su kien can dung ban dau.
         private void SetupTopCourtsTable()
         {
             try
@@ -135,6 +137,7 @@ namespace DemoPick
             }
         }
 
+        // Dieu huong hoac hien thi Navigate To Dat Lich theo trang thai hien tai cua ung dung.
         private void NavigateToDatLich()
         {
             var main = FindForm() as FrmChinh;
@@ -156,6 +159,7 @@ namespace DemoPick
             }
         }
 
+        // Thiet lap Setup Chart Style va gan cac cau hinh/su kien can dung ban dau.
         private void SetupChartStyle()
         {
             try
@@ -197,6 +201,7 @@ namespace DemoPick
             }
         }
 
+        // Ap dung hoac chuan hoa trang thai Apply Filter de du lieu/giao dien nhat quan.
         private async Task ApplyFilterAsync()
         {
             if (DateFilter != null && !DateFilter.ValidateRange(out var err))
@@ -208,16 +213,19 @@ namespace DemoPick
             await ReloadAsync(GetFilterFromDate(), GetFilterToDate());
         }
 
+        // Cap nhat lai du lieu/trang thai Refresh On Activated tren man hinh hien tai.
         public void RefreshOnActivated()
         {
             _ = ReloadAsync();
         }
 
+        // Nap du lieu cho Reload roi cap nhat lai trang thai hien thi tren man hinh.
         private async Task ReloadAsync()
         {
             await ReloadAsync(GetFilterFromDate(), GetFilterToDate());
         }
 
+        // Nap du lieu cho Reload roi cap nhat lai trang thai hien thi tren man hinh.
         private async Task ReloadAsync(DateTime fromDateInclusive, DateTime toDateInclusive)
         {
             DateTime fromStart = fromDateInclusive.Date;
@@ -257,6 +265,7 @@ namespace DemoPick
             }
         }
 
+        // Dua du lieu Bind Top Courts len giao dien hoac ve lai phan hien thi lien quan.
         private void BindTopCourts(IReadOnlyCollection<TopCourtModel> topCourts)
         {
             lblTopCourtsTitle.Text = "Top sân theo khung giờ";
@@ -292,6 +301,7 @@ namespace DemoPick
             }
         }
 
+        // Dua du lieu Bind Revenue Card len giao dien hoac ve lai phan hien thi lien quan.
         private void BindRevenueCard(ReportKpiModel kpi)
         {
             decimal currRev = kpi?.CurrRev ?? 0m;
@@ -302,6 +312,7 @@ namespace DemoPick
             ApplyBadgePercent(lblC1Badge, currRev, prevRev);
         }
 
+        // Dua du lieu Bind Operations len giao dien hoac ve lai phan hien thi lien quan.
         private void BindOperations(IReadOnlyCollection<ReportHeatmapPointModel> heatmap, ReportBookingOpsModel ops)
         {
             var points = heatmap ?? Array.Empty<ReportHeatmapPointModel>();
@@ -326,6 +337,7 @@ namespace DemoPick
             BindHeatmap(points);
         }
 
+        // Dua du lieu Bind Heatmap len giao dien hoac ve lai phan hien thi lien quan.
         private void BindHeatmap(IReadOnlyCollection<ReportHeatmapPointModel> heatmap)
         {
             lblTrendTitle.Text = "Mật độ đặt sân theo giờ";
@@ -349,6 +361,7 @@ namespace DemoPick
             }
         }
 
+        // Dua du lieu Bind Outcome Pie len giao dien hoac ve lai phan hien thi lien quan.
         private void BindOutcomePie(ReportBookingOpsModel ops, IReadOnlyCollection<NamedRevenueModel> pie)
         {
             lblPieTitle.Text = "Tỷ lệ hủy / đổi ca";
@@ -377,6 +390,7 @@ namespace DemoPick
             AddPiePoint(series, "Đổi ca", shifted, Color.FromArgb(245, 158, 11));
         }
 
+        // Xu ly logic man hinh Add Pie Point va cap nhat control lien quan.
         private static void AddPiePoint(Series series, string label, int value, Color color)
         {
             if (series == null || value <= 0)
@@ -389,16 +403,19 @@ namespace DemoPick
             series.Points[pointIndex].Label = value.ToString(CultureInfo.CurrentCulture);
         }
 
+        // Nap du lieu cho Get Filter From Date roi cap nhat lai trang thai hien thi tren man hinh.
         private DateTime GetFilterFromDate()
         {
             return dateFilter == null ? DateTime.Today.AddDays(-6) : dateFilter.FromDate.Date;
         }
 
+        // Nap du lieu cho Get Filter To Date roi cap nhat lai trang thai hien thi tren man hinh.
         private DateTime GetFilterToDate()
         {
             return dateFilter == null ? DateTime.Today : dateFilter.ToDate.Date;
         }
 
+        // Tao hoac tinh ra du lieu Build Heat Color tu cac thong tin dau vao hien co.
         private static Color BuildHeatColor(int value, int maxValue)
         {
             if (value <= 0 || maxValue <= 0)
@@ -413,6 +430,7 @@ namespace DemoPick
             return Color.FromArgb(Math.Max(34, red), Math.Max(120, green), Math.Max(55, blue));
         }
 
+        // Ap dung hoac chuan hoa trang thai Apply Badge Percent de du lieu/giao dien nhat quan.
         private static void ApplyBadgePercent(Label badgeLabel, decimal currentValue, decimal previousValue)
         {
             if (badgeLabel == null)
@@ -433,6 +451,7 @@ namespace DemoPick
             SetBadge(badgeLabel, changePercent);
         }
 
+        // Ap dung hoac chuan hoa trang thai Set Badge de du lieu/giao dien nhat quan.
         private static void SetBadge(Label badgeLabel, decimal signedValue)
         {
             const string upArrow = "↗";

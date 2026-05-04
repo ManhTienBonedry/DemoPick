@@ -9,6 +9,7 @@ namespace DemoPick.Helpers
 {
     internal static class PosCheckoutLogFormatter
     {
+        // Kiem tra dieu kien Is Test Mode va tra ve ket qua dung/sai cho luong xu ly.
         internal static bool IsTestMode()
         {
             try
@@ -24,6 +25,7 @@ namespace DemoPick.Helpers
             }
         }
 
+        // Tao hoac tinh ra du lieu Build Pos Checkout Log Sub Desc tu cac thong tin dau vao hien co.
         internal static string BuildPosCheckoutLogSubDesc(
             int invoiceId,
             string courtName,
@@ -60,6 +62,7 @@ namespace DemoPick.Helpers
             return parts.Count == 0 ? string.Empty : string.Join(" • ", parts);
         }
 
+        // Ho tro xu ly To Payment Method Display de cac noi khac dung lai cung mot quy tac.
         private static string ToPaymentMethodDisplay(string paymentMethod)
         {
             string s = (paymentMethod ?? string.Empty).Trim();
@@ -71,6 +74,7 @@ namespace DemoPick.Helpers
             return s;
         }
 
+        // Tao hoac tinh ra du lieu Build Pos Product Summary tu cac thong tin dau vao hien co.
         private static string BuildPosProductSummary(IReadOnlyList<CartLine> lines)
         {
             if (lines == null || lines.Count == 0) return string.Empty;
@@ -122,6 +126,7 @@ namespace DemoPick.Helpers
             return sb.ToString();
         }
 
+        // Ho tro xu ly Truncate For Ui de cac noi khac dung lai cung mot quy tac.
         private static string TruncateForUi(string text, int maxLen)
         {
             if (string.IsNullOrEmpty(text)) return string.Empty;

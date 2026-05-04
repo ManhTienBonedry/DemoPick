@@ -8,6 +8,7 @@ namespace DemoPick.Services
 {
     internal static class PosBookingPaymentStateService
     {
+        // Thu thuc hien Try Set Specific Booking Paid, neu du lieu khong hop le thi dung va tra thong bao phu hop.
         internal static int TrySetSpecificBookingPaid(SqlConnection conn, SqlTransaction tran, int bookingId)
         {
             if (bookingId <= 0)
@@ -78,6 +79,7 @@ WHERE BookingID = @BookingID
             return affected > 0 ? bookingId : 0;
         }
 
+        // Thu thuc hien Try Close Active Booking By Court Name, neu du lieu khong hop le thi dung va tra thong bao phu hop.
         internal static int TryCloseActiveBookingByCourtName(SqlConnection conn, SqlTransaction tran, string courtName)
         {
             string trimmed = (courtName ?? string.Empty).Trim();
@@ -124,6 +126,7 @@ WHERE BookingID = @BookingID
             return affected > 0 ? bookingId : 0;
         }
 
+        // Thu thuc hien Try Mark Most Recent Ended Booking Paid By Court Name, neu du lieu khong hop le thi dung va tra thong bao phu hop.
         internal static int TryMarkMostRecentEndedBookingPaidByCourtName(SqlConnection conn, SqlTransaction tran, string courtName)
         {
             string trimmed = (courtName ?? string.Empty).Trim();

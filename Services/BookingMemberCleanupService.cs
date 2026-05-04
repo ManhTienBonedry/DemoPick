@@ -7,6 +7,7 @@ namespace DemoPick.Services
 {
     internal static class BookingMemberCleanupService
     {
+        // Thu thuc hien Try Cleanup Orphan Walkin Member, neu du lieu khong hop le thi dung va tra thong bao phu hop.
         internal static void TryCleanupOrphanWalkinMember(int memberId)
         {
             if (memberId <= 0) return;

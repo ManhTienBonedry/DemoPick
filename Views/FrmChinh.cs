@@ -61,6 +61,7 @@ namespace DemoPick
         private static readonly Color HeaderGreen = Color.FromArgb(16, 94, 53);
         private static readonly Color HeaderGreenDark = Color.FromArgb(10, 67, 39);
 
+        // Khoi tao man hinh/control FrmChinh va chuan bi trang thai ban dau can dung.
         public FrmChinh()
         {
             InitializeComponent();
@@ -146,6 +147,7 @@ namespace DemoPick
 
         }
 
+        // Thiet lap Init Modules va gan cac cau hinh/su kien can dung ban dau.
         private void InitModules()
         {
             tongQuan = new UCTongQuan() { Dock = DockStyle.Fill };
@@ -220,6 +222,7 @@ namespace DemoPick
             }
         }
         
+        // Dua du lieu Bind Click len giao dien hoac ve lai phan hien thi lien quan.
         private void BindClick(Sunny.UI.UIPanel p, UserControl uc, string title, string subtitle)
         {
             System.EventHandler h = (s, e) => {
@@ -248,6 +251,7 @@ namespace DemoPick
             }
         }
 
+        // Dieu huong hoac hien thi Switch Module theo trang thai hien tai cua ung dung.
         public void SwitchModule(UserControl uc, Sunny.UI.UIPanel activeBtn, string title, string subtitle)
         {
             bool isSameModule = ReferenceEquals(_activeModule, uc);
@@ -275,6 +279,7 @@ namespace DemoPick
             ApplyNavStyles();
         }
 
+        // Ap dung hoac chuan hoa trang thai Apply Nav Styles de du lieu/giao dien nhat quan.
         private void ApplyNavStyles()
         {
             foreach (var btn in menuButtons)
@@ -295,6 +300,7 @@ namespace DemoPick
             }
         }
 
+        // Xu ly logic man hinh Queue Module Refresh va cap nhat control lien quan.
         private void QueueModuleRefresh(UserControl module, bool isSameModule)
         {
             if (module == null) return;
@@ -324,12 +330,14 @@ namespace DemoPick
             _moduleRefreshDebounceTimer.Start();
         }
 
+        // Xu ly logic man hinh Trigger Module Refresh va cap nhat control lien quan.
         private void TriggerModuleRefresh(UserControl module)
         {
             RefreshModuleData(module);
             _lastModuleRefreshAtUtc = DateTime.UtcNow;
         }
 
+        // Cap nhat lai du lieu/trang thai Refresh Module Data tren man hinh hien tai.
         private static void RefreshModuleData(UserControl uc)
         {
             if (uc == null) return;
@@ -351,6 +359,7 @@ namespace DemoPick
             }
         }
 
+        // Kiem tra Check Upcoming Bookings de phat hien du lieu khong hop le hoac tinh huong can canh bao.
         private void CheckUpcomingBookings()
         {
             if (this.InvokeRequired)
@@ -404,6 +413,7 @@ namespace DemoPick
             }
         }
 
+        // Nap du lieu cho Load Bookings For Reminder Window roi cap nhat lai trang thai hien thi tren man hinh.
         private List<DemoPick.Models.BookingModel> LoadBookingsForReminderWindow(DateTime now)
         {
             var map = new Dictionary<int, DemoPick.Models.BookingModel>();
@@ -424,11 +434,13 @@ namespace DemoPick
             return new List<DemoPick.Models.BookingModel>(map.Values);
         }
 
+        // Dieu huong hoac hien thi Navigate To Dat Lich theo trang thai hien tai cua ung dung.
         public void NavigateToDatLich()
         {
             SwitchModule(datLich, btnNavDatLich, "Quản lý Sơ đồ && Đặt lịch", "");
         }
 
+        // Ap dung hoac chuan hoa trang thai Set Label Style de du lieu/giao dien nhat quan.
         private void SetLabelStyle(Sunny.UI.UIPanel p, bool active)
         {
             foreach(Control c in p.Controls)
@@ -444,6 +456,7 @@ namespace DemoPick
 
 
 
+        // Ap dung hoac chuan hoa trang thai Apply Shell Theme de du lieu/giao dien nhat quan.
         private void ApplyShellTheme()
         {
             Color headerColor = HeaderGreen;
@@ -482,6 +495,7 @@ namespace DemoPick
             Invalidate(true);
         }
 
+        // Xu ly logic man hinh Enumerate Modules va cap nhat control lien quan.
         private IEnumerable<UserControl> EnumerateModules()
         {
             yield return tongQuan;
@@ -494,6 +508,7 @@ namespace DemoPick
             yield return auditLog;
         }
 
+        // Ap dung hoac chuan hoa trang thai Apply Current User UI de du lieu/giao dien nhat quan.
         private void ApplyCurrentUserUI()
         {
             var user = AppSession.CurrentUser;
@@ -516,6 +531,7 @@ namespace DemoPick
             }
         }
 
+        // Ap dung hoac chuan hoa trang thai Apply Role Permissions de du lieu/giao dien nhat quan.
         private void ApplyRolePermissions()
         {
             bool isAdmin = AppSession.IsInRole(AppConstants.Roles.Admin);
@@ -533,6 +549,7 @@ namespace DemoPick
             }
         }
 
+        // Ap dung hoac chuan hoa trang thai Set Menu Enabled de du lieu/giao dien nhat quan.
         private void SetMenuEnabled(Sunny.UI.UIPanel panel, bool enabled)
         {
             if (panel == null) return;
@@ -555,6 +572,7 @@ namespace DemoPick
             }
         }
 
+        // Ve lai phan giao dien tuy bien cho control lien quan.
         private void pnlAdminAvatar_Paint(object sender, PaintEventArgs e)
         {
             if (sender is Panel p)
@@ -577,6 +595,7 @@ namespace DemoPick
             }
         }
 
+        // Xu ly su kien nguoi dung bam vao control lien quan va goi luong nghiep vu phu hop.
         private void UserMenu_Click(object sender, EventArgs e)
         {
             var frm = new FrmUserMenu();

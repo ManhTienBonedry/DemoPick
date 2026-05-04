@@ -20,6 +20,7 @@ namespace DemoPick
         private decimal _lastDiscountAmount = 0m;
         private decimal _lastFinalTotal = 0m;
 
+        // Khoi tao man hinh/control UCThanhToan va chuan bi trang thai ban dau can dung.
         public UCThanhToan()
         {
             InitializeComponent();
@@ -39,6 +40,7 @@ namespace DemoPick
             ReloadPaymentHistory();
         }
 
+        // Cap nhat lai du lieu/trang thai Refresh On Activated tren man hinh hien tai.
         public void RefreshOnActivated()
         {
             LoadCourts();
@@ -47,6 +49,7 @@ namespace DemoPick
             ReloadPaymentHistory();
         }
 
+        // Nap du lieu va chuan bi trang thai khi man hinh/control vua duoc mo.
         private void ucPaymentHistoryPanel_Load(object sender, EventArgs e)
         {
 

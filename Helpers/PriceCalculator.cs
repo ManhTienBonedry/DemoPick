@@ -56,6 +56,7 @@ namespace DemoPick.Helpers
             new RateBlock { StartTime = new TimeSpan(21, 0, 0), EndTime = new TimeSpan(23, 0, 0), RateWeekday = 180000, RateWeekend = 180000, FixedDiscountAmount = 30000, Name = "Ca Tối (21h-23h)" }
         };
 
+        // Ho tro xu ly Guess Service Unit de cac noi khac dung lai cung mot quy tac.
         public static string GuessServiceUnit(string serviceName)
         {
             string name = (serviceName ?? string.Empty).Trim();
@@ -72,6 +73,7 @@ namespace DemoPick.Helpers
             return AppConstants.Units.Piece;
         }
 
+        // Lay du lieu/ket qua cho Get Court Rate Multiplier tu tang xu ly phu hop.
         public static decimal GetCourtRateMultiplier(string courtType, string courtName)
         {
             string t = (courtType ?? string.Empty).Trim();
@@ -84,12 +86,14 @@ namespace DemoPick.Helpers
             return 1m;
         }
 
+        // Ho tro xu ly Contains de cac noi khac dung lai cung mot quy tac.
         private static bool Contains(string haystack, string needle)
         {
             if (string.IsNullOrEmpty(haystack) || string.IsNullOrEmpty(needle)) return false;
             return haystack.IndexOf(needle, StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
+        // Tinh tong tien san va dich vu theo khung gio, loai khach va he so gia san.
         public static PriceBreakdown CalculateTotal(DateTime start, DateTime end, bool isFixedCustomer, List<ServiceCharge> services = null, decimal courtRateMultiplier = 1m)
         {
             var breakdown = new PriceBreakdown();
